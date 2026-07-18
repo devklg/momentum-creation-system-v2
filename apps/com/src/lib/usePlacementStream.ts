@@ -1,62 +1,60 @@
-/**
- * usePlacementStream — React hook around the live placement SSE stream
- * (Chat #114 dashboard port).
- *
- * Behavior:
- *   - Opens an EventSource against /api/p/:token/stream on mount.
- *   - On `snapshot` event, hydrates globalMaxPosition + recent ticker.
- *   - On `placement` event, increments the global max + prepends the
- *     entry to the ticker, capping the ticker length.
- *   - On error (server closed, network dropped), EventSource auto-
- *     reconnects with exponential backoff per the spec; on each
- *     reconnect we receive a fresh `snapshot` and the client state
- *     converges to truth.
- *   - On unmount, closes the EventSource (server sees `close` and
- *     unsubscribes from the in-process emitter).
- *
- * Compliance: this hook never receives names beyond first name + last
- * initial; never receives emails/phones; never receives anything that
- * would let it identify a real person. The server enforces this; the
- * hook just renders what it gets.
- */
-
-import { useEffect, useRef, useState } from 'react';
-import type {
-  McsHoldingTankSnapshot,
-  McsPlacementEvent,
-  McsPlacementTickerEntry,
+import { useEffect, useState } from 'react';
+import {
+  MCS_KONGA_CONTRACT_VERSION,
+  type McsHoldingTankSnapshot,
+  type McsJoinEvent,
+  type McsKongaContractVersion,
+  type McsKongaHoldingTankSnapshot,
+  type McsKongaPlacementEvent,
+  type McsKongaPlacementTickerEntry,
+  type McsPlacementEvent,
+  type McsWebinarEvent,
 } from '@momentum/shared';
 
-/** Max ticker entries to retain in memory. Locked-spec 4.4: 20–40 visible. */
 const MAX_TICKER_ENTRIES = 80;
 
 export interface PlacementStreamState {
-  /** True before the first snapshot lands. */
   connecting: boolean;
-  /** True once at least one snapshot has been received. */
   connected: boolean;
-  /** Highest position number observed across the whole team. */
-  globalMaxPosition: number;
-  /** Most-recent placements newest first (capped at MAX_TICKER_ENTRIES). */
-  ticker: McsPlacementTickerEntry[];
-  /** True if the EventSource is in an errored state right now. */
   errored: boolean;
+  contractVersion: McsKongaContractVersion | null;
+  globalMaxPosition: number;
+  ticker: McsKongaPlacementTickerEntry[];
+  placementsThisWeek: number | null;
+  geoSpreadCount: number | null;
+  sinceLastVisit: number | null;
+  nextWebinar: McsWebinarEvent | null;
+  pageVisitId: string | null;
+  latestArrival: McsKongaPlacementEvent | null;
+  latestJoin: McsJoinEvent | null;
 }
 
 const INITIAL: PlacementStreamState = {
   connecting: true,
   connected: false,
+  errored: false,
+  contractVersion: null,
   globalMaxPosition: 0,
   ticker: [],
-  errored: false,
+  placementsThisWeek: null,
+  geoSpreadCount: null,
+  sinceLastVisit: null,
+  nextWebinar: null,
+  pageVisitId: null,
+  latestArrival: null,
+  latestJoin: null,
 };
+
+function legacyEntry(entry: McsPlacementEvent): McsKongaPlacementTickerEntry {
+  return { ...entry, addedBy: null };
+}
 
 export function usePlacementStream(
   token: string | undefined,
   apiBase: '/api/p' | '/api/rvm' = '/api/p',
+  pageVisitId?: string,
 ): PlacementStreamState {
   const [state, setState] = useState<PlacementStreamState>(INITIAL);
-  const sourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -64,69 +62,117 @@ export function usePlacementStream(
       return;
     }
 
-    const url = `${apiBase}/${encodeURIComponent(token)}/stream`;
-    const es = new EventSource(url);
-    sourceRef.current = es;
+    const visitQuery = pageVisitId
+      ? `?pageVisitId=${encodeURIComponent(pageVisitId)}`
+      : '';
+    const es = new EventSource(
+      `${apiBase}/${encodeURIComponent(token)}/stream${visitQuery}`,
+    );
 
-    const onSnapshot = (evt: MessageEvent<string>) => {
+    const onSnapshot = (message: MessageEvent<string>) => {
       try {
-        const payload = JSON.parse(evt.data) as McsHoldingTankSnapshot;
-        setState({
+        const payload = JSON.parse(message.data) as
+          | McsKongaHoldingTankSnapshot
+          | McsHoldingTankSnapshot;
+        if ('contractVersion' in payload && payload.contractVersion === MCS_KONGA_CONTRACT_VERSION) {
+          setState((previous) => ({
+            ...previous,
+            connecting: false,
+            connected: true,
+            errored: false,
+            contractVersion: payload.contractVersion,
+            globalMaxPosition: payload.globalMaxPosition,
+            ticker: payload.recent.slice(0, MAX_TICKER_ENTRIES),
+            placementsThisWeek: payload.placementsThisWeek,
+            geoSpreadCount: payload.geoSpreadCount,
+            sinceLastVisit: payload.sinceLastVisit,
+            nextWebinar: payload.nextWebinar,
+            pageVisitId: payload.pageVisitId,
+          }));
+          return;
+        }
+
+        setState((previous) => ({
+          ...previous,
           connecting: false,
           connected: true,
-          globalMaxPosition: payload.globalMaxPosition,
-          ticker: payload.recent.slice(0, MAX_TICKER_ENTRIES),
           errored: false,
-        });
+          contractVersion: null,
+          globalMaxPosition: payload.globalMaxPosition,
+          ticker: payload.recent.map((entry) => ({ ...entry, addedBy: null })).slice(0, MAX_TICKER_ENTRIES),
+        }));
       } catch {
-        // Malformed snapshot; leave state alone, next reconnect retries.
+        // A reconnect supplies another authoritative snapshot.
       }
     };
 
-    const onPlacement = (evt: MessageEvent<string>) => {
+    const onPlacement = (message: MessageEvent<string>) => {
       try {
-        const event = JSON.parse(evt.data) as McsPlacementEvent;
-        setState((prev) => {
-          // De-dup by positionNumber in case a server reconnect causes a
-          // brief replay (rare; defensive).
-          if (prev.ticker[0]?.positionNumber === event.positionNumber) {
-            return prev;
+        const payload = JSON.parse(message.data) as McsKongaPlacementEvent | McsPlacementEvent;
+        const isKonga = 'contractVersion' in payload
+          && payload.contractVersion === MCS_KONGA_CONTRACT_VERSION;
+        const entry: McsKongaPlacementTickerEntry = isKonga
+          ? payload as McsKongaPlacementEvent
+          : legacyEntry(payload as McsPlacementEvent);
+        setState((previous) => {
+          if (previous.ticker.some((item) => item.positionNumber === entry.positionNumber)) {
+            return previous;
           }
-          const nextTicker = [event, ...prev.ticker].slice(0, MAX_TICKER_ENTRIES);
-          const nextGlobalMax = Math.max(prev.globalMaxPosition, event.positionNumber);
           return {
-            ...prev,
+            ...previous,
+            connecting: false,
             connected: true,
-            globalMaxPosition: nextGlobalMax,
-            ticker: nextTicker,
             errored: false,
+            contractVersion: isKonga
+              ? MCS_KONGA_CONTRACT_VERSION
+              : previous.contractVersion,
+            globalMaxPosition: Math.max(previous.globalMaxPosition, entry.positionNumber),
+            ticker: [entry, ...previous.ticker].slice(0, MAX_TICKER_ENTRIES),
+            placementsThisWeek:
+              previous.placementsThisWeek === null
+                ? null
+                : previous.placementsThisWeek + 1,
+            latestArrival: isKonga
+              ? payload as McsKongaPlacementEvent
+              : previous.latestArrival,
           };
         });
       } catch {
-        // ignore malformed event
+        // Ignore malformed public events; the next snapshot repairs state.
       }
     };
 
-    const onError = () => {
-      // EventSource transitions through CONNECTING → OPEN → CLOSED; on
-      // transient errors it retries automatically. Reflect the flag
-      // so the UI can render a subtle 'reconnecting' affordance if it
-      // wants (the dashboard does not, by design — silent failure).
-      setState((prev) => ({ ...prev, errored: true }));
+    const onJoin = (message: MessageEvent<string>) => {
+      try {
+        const payload = JSON.parse(message.data) as McsJoinEvent;
+        if (payload.contractVersion !== MCS_KONGA_CONTRACT_VERSION) return;
+        setState((previous) => ({
+          ...previous,
+          connected: true,
+          errored: false,
+          contractVersion: payload.contractVersion,
+          latestJoin: payload,
+        }));
+      } catch {
+        // Ignore malformed public events; the next snapshot repairs state.
+      }
     };
+
+    const onError = () => setState((previous) => ({ ...previous, errored: true }));
 
     es.addEventListener('snapshot', onSnapshot as EventListener);
     es.addEventListener('placement', onPlacement as EventListener);
+    es.addEventListener('join', onJoin as EventListener);
     es.addEventListener('error', onError);
 
     return () => {
       es.removeEventListener('snapshot', onSnapshot as EventListener);
       es.removeEventListener('placement', onPlacement as EventListener);
+      es.removeEventListener('join', onJoin as EventListener);
       es.removeEventListener('error', onError);
       es.close();
-      sourceRef.current = null;
     };
-  }, [token, apiBase]);
+  }, [apiBase, pageVisitId, token]);
 
   return state;
 }

@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-18T02:53:22.571Z",
+  "generatedAt": "2026-07-18T03:08:28.906Z",
   "scope": "apps/com/src visible strings plus shared compliance constants",
   "summary": {
-    "filesScanned": 38,
-    "visibleStringsScanned": 483,
+    "filesScanned": 39,
+    "visibleStringsScanned": 584,
     "blockingViolations": 0,
-    "allowedSignals": 71,
+    "allowedSignals": 88,
     "status": "pass",
     "allowedSignalsByRule": {
-      "glp_three_product_context": 14,
+      "glp_three_product_context": 16,
       "public_market_or_cost_context": 7,
       "team_goal_context": 5,
-      "pmv_language_context": 18,
-      "placement_demo_context": 25,
+      "pmv_language_context": 29,
+      "placement_demo_context": 29,
       "canonical_disclaimer": 2
     }
   },
@@ -91,6 +91,22 @@
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
       "line": 29,
       "text": "GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 118,
+      "text": "Does GLP-THREE actually work?"
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 122,
+      "text": "GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible."
     },
     {
       "ruleId": "glp_three_product_context",
@@ -353,8 +369,96 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 257,
-      "text": "Team momentum tape"
+      "line": 104,
+      "text": "people arrived"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 122,
+      "text": "GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 147,
+      "text": "Plainly: you&rsquo;re being offered the chance to build a business of your own. As a builder, you&rsquo;d earn from real work: sharing the product with people who want it, and helping people who want to build do the same — with this system working alongside you. It is not a job, an investment, or a lottery ticket. It is a business, with no guarantees and results that follow effort."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 176,
+      "text": "You are not being asked to evaluate a business without the people and support around it."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 180,
+      "text": "People Momentum Volume Checks"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 181,
+      "text": "Checks"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 181,
+      "text": "Momentum"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 181,
+      "text": "People"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 181,
+      "text": "Volume"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 242,
+      "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 250,
+      "text": "Building alone is why most people quit. So nobody here builds alone."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 258,
+      "text": "Built by magnificent people. Driven by purpose."
     },
     {
       "ruleId": "pmv_language_context",
@@ -435,6 +539,38 @@
       "file": "apps/com/src/routes/legal/legal-documents.ts",
       "line": 37,
       "text": "Service activity: video viewing progress, page visits, position and activity in the live team display, and callback requests you submit."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "line": 129,
+      "text": "Vertical upward live placement line"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "line": 150,
+      "text": "· placed"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "line": 150,
+      "text": "Position"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "line": 155,
+      "text": "Connecting to the real placement stream."
     },
     {
       "ruleId": "placement_demo_context",
@@ -521,16 +657,48 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 206,
-      "text": "Live position center"
+      "line": 89,
+      "text": "The presentation told you something unusual: while you watched, you were placed in our team&rsquo;s line so we could show you something real. This is it. Every circle is a real person and every data-bearing movement is a real event. Nothing on this screen is a simulation."
     },
     {
       "ruleId": "placement_demo_context",
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 217,
-      "text": "Your video is complete, your position is live, and the team is still moving beneath you. The next step is simple: talk with"
+      "line": 96,
+      "text": "Position"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 155,
+      "text": "Whether it becomes a new financial future depends on the same thing every real business depends on — the work you put in. The line shows team activity; it promises neither placement nor results."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 172,
+      "text": "The working method is visible here: share, real response, live placement, and human follow-up."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 197,
+      "text": "Completing the presentation created the pinned position you see. It represents a real placement in this shared line."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 222,
+      "text": "added since your placement"
     },
     {
       "ruleId": "placement_demo_context",
@@ -538,47 +706,15 @@
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "line": 232,
-      "text": "Your position"
+      "text": ". The recording remains a content resource; completing it does not create a placement or promise an outcome."
     },
     {
       "ruleId": "placement_demo_context",
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 235,
-      "text": "Placed"
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 240,
-      "text": "Beneath you · live"
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 243,
-      "text": "New placements joining the team after your position as Team Magnificent grows."
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 264,
-      "text": "Connecting to the live position stream."
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 265,
-      "text": "The next team placement will appear here."
+      "line": 242,
+      "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
       "ruleId": "placement_demo_context",
@@ -648,73 +784,73 @@
   "scannedStrings": [
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 130,
+      "lineNumber": 140,
       "kind": "literal:Accept",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 193,
+      "lineNumber": 203,
       "kind": "literal:Content-Type",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 193,
+      "lineNumber": 203,
       "kind": "literal:Accept",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 284,
+      "lineNumber": 294,
       "kind": "literal:Content-Type",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 284,
+      "lineNumber": 294,
       "kind": "literal:Accept",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 373,
+      "lineNumber": 383,
       "kind": "literal:Content-Type",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 373,
+      "lineNumber": 383,
       "kind": "literal:Accept",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 459,
+      "lineNumber": 469,
       "kind": "literal:Accept",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 528,
+      "lineNumber": 538,
       "kind": "literal:Content-Type",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 528,
+      "lineNumber": 538,
       "kind": "literal:Accept",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 563,
+      "lineNumber": 573,
       "kind": "literal:Content-Type",
       "text": "application/json"
     },
     {
       "file": "apps/com/src/lib/api.ts",
-      "lineNumber": 563,
+      "lineNumber": 573,
       "kind": "literal:Accept",
       "text": "application/json"
     },
@@ -1308,201 +1444,429 @@
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 109,
+      "lineNumber": 113,
       "kind": "jsx_text",
       "text": "Team Magnificent"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 111,
+      "lineNumber": 115,
       "kind": "jsx_text",
       "text": "Loading…"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 143,
+      "lineNumber": 147,
       "kind": "jsx_text",
       "text": "This link isn’t valid."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 146,
+      "lineNumber": 150,
       "kind": "jsx_text",
       "text": "Double-check the link, or ask the person who invited you for a fresh one."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 182,
+      "lineNumber": 186,
       "kind": "literal",
       "text": "the person who invited you"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 186,
+      "lineNumber": 190,
       "kind": "literal",
       "text": "Hi, the link you sent me expired. Could you send a fresh one?"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 205,
+      "lineNumber": 209,
       "kind": "jsx_text",
       "text": "This invitation has expired."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 208,
+      "lineNumber": 212,
       "kind": "jsx_text",
       "text": "Ask"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 208,
+      "lineNumber": 212,
       "kind": "jsx_text",
       "text": "for a fresh link."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 217,
+      "lineNumber": 221,
       "kind": "jsx_text",
       "text": "☎"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 227,
+      "lineNumber": 231,
       "kind": "literal",
       "text": "Copied — paste into your SMS app"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 243,
+      "lineNumber": 247,
       "kind": "literal",
       "text": "your sponsor"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 250,
+      "lineNumber": 254,
       "kind": "jsx_text",
       "text": "Welcome to Team Magnificent."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 253,
+      "lineNumber": 257,
       "kind": "jsx_text",
       "text": "will reach out to set up your access code for the team site."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 253,
+      "lineNumber": 257,
       "kind": "jsx_text",
       "text": "You’re in. Your sponsor"
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 273,
+      "lineNumber": 277,
       "kind": "jsx_text",
       "text": "Something didn’t load."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 276,
+      "lineNumber": 280,
       "kind": "jsx_text",
       "text": "Check your connection and try again."
     },
     {
       "file": "apps/com/src/routes/p-token.tsx",
-      "lineNumber": 284,
+      "lineNumber": 288,
       "kind": "jsx_text",
       "text": "Try again"
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 74,
+      "lineNumber": 78,
       "kind": "jsx_text",
       "text": "Team Magnificent"
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 76,
+      "lineNumber": 80,
       "kind": "jsx_text",
       "text": "Loading…"
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 101,
+      "lineNumber": 105,
       "kind": "jsx_text",
       "text": "This link is not valid."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 104,
+      "lineNumber": 108,
       "kind": "jsx_text",
       "text": "Check the link, or ask the person who shared it for a fresh one."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 117,
+      "lineNumber": 121,
       "kind": "literal",
       "text": "the person who shared it"
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 124,
+      "lineNumber": 128,
       "kind": "jsx_text",
       "text": "This link has expired."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 127,
+      "lineNumber": 131,
       "kind": "jsx_text",
       "text": "Ask"
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 127,
+      "lineNumber": 131,
       "kind": "jsx_text",
       "text": "for a fresh link."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 134,
+      "lineNumber": 138,
       "kind": "literal",
       "text": "your sponsor"
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 141,
+      "lineNumber": 145,
       "kind": "jsx_text",
       "text": "Welcome to Team Magnificent."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 144,
+      "lineNumber": 148,
       "kind": "jsx_text",
       "text": "will reach out to set up your access code for the team site."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 144,
+      "lineNumber": 148,
       "kind": "jsx_text",
       "text": "You are in. Your sponsor"
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 158,
+      "lineNumber": 162,
       "kind": "jsx_text",
       "text": "Something did not load."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 161,
+      "lineNumber": 165,
       "kind": "jsx_text",
       "text": "Check your connection and try again."
     },
     {
       "file": "apps/com/src/routes/rvm-token.tsx",
-      "lineNumber": 169,
+      "lineNumber": 173,
       "kind": "jsx_text",
       "text": "Try again"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 91,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Live Team Magnificent Konga Line"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 95,
+      "kind": "literal",
+      "text": "Connecting to live events"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 95,
+      "kind": "literal",
+      "text": "Live events connected"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 95,
+      "kind": "literal",
+      "text": "Reconnecting to live events"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 98,
+      "kind": "literal",
+      "text": "Mute sound"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 98,
+      "kind": "literal",
+      "text": "Turn sound on"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 102,
+      "kind": "jsx_text",
+      "text": "Sound is on and activates safely after your first interaction."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 107,
+      "kind": "jsx_text",
+      "text": "Destination dock"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 108,
+      "kind": "jsx_text",
+      "text": "The next Team Magnificent live conversation"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 109,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 109,
+      "kind": "jsx_text",
+      "text": "Hosted by"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 109,
+      "kind": "literal",
+      "text": "the Team Magnificent hosts"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 116,
+      "kind": "jsx_text",
+      "text": "Joined"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 117,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 124,
+      "kind": "literal",
+      "text": "Line head"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 124,
+      "kind": "literal",
+      "text": "Your line starts with"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 126,
+      "kind": "literal",
+      "text": "invited you into this view."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 126,
+      "kind": "literal",
+      "text": "Your team view."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 129,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Vertical upward live placement line"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 139,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 141,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 141,
+      "kind": "jsx_text",
+      "text": "added by"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 148,
+      "kind": "jsx_text",
+      "text": "Pinned in your view"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 149,
+      "kind": "jsx_text",
+      "text": "YOU ·"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 150,
+      "kind": "jsx_text",
+      "text": "· placed"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 150,
+      "kind": "jsx_text",
+      "text": "Position"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 155,
+      "kind": "literal",
+      "text": "Connecting to the real placement stream."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 155,
+      "kind": "literal",
+      "text": "No newer real placements are available on this connection yet."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 159,
+      "kind": "jsx_text",
+      "text": "Open arrival space"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 160,
+      "kind": "jsx_text",
+      "text": "Open arrival space"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 163,
+      "kind": "jsx_text",
+      "text": "Real arrivals enter here"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 164,
+      "kind": "jsx_text",
+      "text": "No samples. No simulated activity."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 186,
+      "kind": "jsx_text",
+      "text": "Schedule not available"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 187,
+      "kind": "jsx_text",
+      "text": "The next real event will appear when it is published."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 211,
+      "kind": "literal",
+      "text": "Happening now"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 228,
+      "kind": "literal",
+      "text": "time unavailable"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 234,
+      "kind": "literal",
+      "text": "your inviter"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
+      "lineNumber": 236,
+      "kind": "literal",
+      "text": "your inviter"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",
@@ -2316,189 +2680,567 @@
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 203,
+      "lineNumber": 49,
+      "kind": "literal",
+      "text": "your inviter"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 71,
       "kind": "jsx_attribute:aria-label",
-      "text": "Team Magnificent"
+      "text": "Dashboard controls"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 206,
+      "lineNumber": 72,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Team Magnificent Konga Line"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 73,
       "kind": "jsx_text",
-      "text": "Live position center"
+      "text": "TM · KONGA LINE"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 212,
+      "lineNumber": 77,
       "kind": "jsx_text",
-      "text": "Invited by"
+      "text": "Rewatch presentation"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 214,
-      "kind": "jsx_text",
-      "text": ", this is where you are."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 217,
-      "kind": "jsx_text",
-      "text": "Your video is complete, your position is live, and the team is still moving beneath you. The next step is simple: talk with"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 219,
-      "kind": "jsx_text",
-      "text": "when you are ready."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 223,
+      "lineNumber": 79,
       "kind": "jsx_text",
       "text": "Talk with"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 226,
+      "lineNumber": 86,
       "kind": "jsx_text",
-      "text": "Watch live motion"
+      "text": "As promised — the team, forming"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 87,
+      "kind": "jsx_text",
+      "text": "This is what"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 87,
+      "kind": "jsx_text",
+      "text": "wanted you to see. Live."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 89,
+      "kind": "jsx_text",
+      "text": "The presentation told you something unusual: while you watched, you were placed in our team&rsquo;s line so we could show you something real. This is it. Every circle is a real person and every data-bearing movement is a real event. Nothing on this screen is a simulation."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 96,
+      "kind": "jsx_text",
+      "text": "Position"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 98,
+      "kind": "jsx_text",
+      "text": "is yours while you decide."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 103,
+      "kind": "jsx_text",
+      "text": "Welcome back — the line kept moving."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 104,
+      "kind": "literal",
+      "text": "people arrived"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 104,
+      "kind": "literal",
+      "text": "person arrived"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 104,
+      "kind": "jsx_text",
+      "text": "since your last visit."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 109,
+      "kind": "jsx_text",
+      "text": "This invitation is using the compatible live view. New visit and weekly telemetry will appear when the versioned stream is available."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 118,
+      "kind": "jsx_attribute:title",
+      "text": "Does GLP-THREE actually work?"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 122,
+      "kind": "jsx_text",
+      "text": "GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 127,
+      "kind": "jsx_text",
+      "text": "The presentation is the approved product explanation. Rewatch it as often as you need, then ask"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 128,
+      "kind": "jsx_text",
+      "text": "about their own experience and sources. This dashboard adds no unsourced efficacy, market, price, side-effect, or launch-date claim."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 134,
+      "kind": "jsx_text",
+      "text": "Rewatch Dr. Dan&rsquo;s presentation"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 143,
+      "kind": "jsx_attribute:title",
+      "text": "What exactly is the opportunity here?"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 147,
+      "kind": "jsx_text",
+      "text": "Plainly: you&rsquo;re being offered the chance to build a business of your own. As a builder, you&rsquo;d earn from real work: sharing the product with people who want it, and helping people who want to build do the same — with this system working alongside you. It is not a job, an investment, or a lottery ticket. It is a business, with no guarantees and results that follow effort."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 155,
+      "kind": "jsx_text",
+      "text": "Whether it becomes a new financial future depends on the same thing every real business depends on — the work you put in. The line shows team activity; it promises neither placement nor results."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 159,
+      "kind": "jsx_text",
+      "text": "Three of these you have already seen. Two you can only see here."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 160,
+      "kind": "jsx_attribute:aria-label",
+      "text": "Five reasons to examine"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 161,
+      "kind": "jsx_attribute:title",
+      "text": "Product"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 162,
+      "kind": "jsx_text",
+      "text": "Rewatch the presentation, then ask"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 162,
+      "kind": "jsx_text",
+      "text": "what they use and what they have personally observed."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 165,
+      "kind": "jsx_attribute:title",
+      "text": "Timing"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 166,
+      "kind": "jsx_text",
+      "text": "Ask why"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 166,
+      "kind": "jsx_text",
+      "text": "chose to share this with you now."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 168,
+      "kind": "jsx_attribute:title",
+      "text": "Market"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 169,
+      "kind": "jsx_text",
+      "text": "Bring the category questions and source questions to the conversation."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 171,
+      "kind": "jsx_attribute:title",
+      "text": "Method"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 172,
+      "kind": "jsx_text",
+      "text": "The working method is visible here: share, real response, live placement, and human follow-up."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 175,
+      "kind": "jsx_attribute:title",
+      "text": "Team & training"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 176,
+      "kind": "jsx_text",
+      "text": "You are not being asked to evaluate a business without the people and support around it."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 180,
+      "kind": "jsx_attribute:aria-label",
+      "text": "People Momentum Volume Checks"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 181,
+      "kind": "jsx_text",
+      "text": "Checks"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 181,
+      "kind": "jsx_text",
+      "text": "Momentum"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 181,
+      "kind": "jsx_text",
+      "text": "People"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 181,
+      "kind": "jsx_text",
+      "text": "Volume"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 187,
+      "kind": "jsx_attribute:title",
+      "text": "Three steps — and two already happened."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 190,
+      "kind": "jsx_text",
+      "text": "01"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 191,
+      "kind": "jsx_text",
+      "text": "Shared"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 192,
+      "kind": "jsx_text",
+      "text": "shared a private presentation with you. That invitation fixed the person connected to your experience."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 195,
+      "kind": "jsx_text",
+      "text": "02"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 196,
+      "kind": "jsx_text",
+      "text": "Watched"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 197,
+      "kind": "jsx_text",
+      "text": "Completing the presentation created the pinned position you see. It represents a real placement in this shared line."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 200,
+      "kind": "jsx_text",
+      "text": "03"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 201,
+      "kind": "jsx_text",
+      "text": "Deciding"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 202,
+      "kind": "jsx_text",
+      "text": "When a person decides to build, a verified join exits at the front in gold. The system never invents that moment."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 208,
+      "kind": "jsx_attribute:title",
+      "text": "What am I watching?"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 210,
+      "kind": "jsx_text",
+      "text": "Each circle is a real person added by someone on the team. New arrivals enter at the bottom. Verified joins leave at the destination above. The marker that stays fixed is you."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 222,
+      "kind": "jsx_attribute:label",
+      "text": "added since your placement"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 223,
+      "kind": "jsx_attribute:label",
+      "text": "placements this week"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 224,
+      "kind": "jsx_attribute:label",
+      "text": "cities & states represented"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 227,
+      "kind": "jsx_text",
+      "text": "Every value above comes from the live Konga contract. Empty means the system did not supply a trustworthy number."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 232,
       "kind": "jsx_text",
-      "text": "Your position"
+      "text": ". The recording remains a content resource; completing it does not create a placement or promise an outcome."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 233,
+      "lineNumber": 232,
       "kind": "jsx_text",
-      "text": "#"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 235,
-      "kind": "jsx_text",
-      "text": "Placed"
+      "text": "Last live conversation: recording dated"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 240,
+      "kind": "jsx_attribute:title",
+      "text": "Could someone like me actually do this?"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 242,
       "kind": "jsx_text",
-      "text": "Beneath you · live"
+      "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 243,
+      "lineNumber": 250,
+      "kind": "jsx_attribute:title",
+      "text": "Building alone is why most people quit. So nobody here builds alone."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 254,
       "kind": "jsx_text",
-      "text": "New placements joining the team after your position as Team Magnificent grows."
+      "text": "Team Magnificent pairs you with the person who shared this with you — someone who was once exactly where you are — plus a team already in motion. The line on this page is their daily work, made visible."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 249,
+      "lineNumber": 258,
       "kind": "jsx_text",
-      "text": "Next live decision point"
+      "text": "Built by magnificent people. Driven by purpose."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 255,
-      "kind": "jsx_attribute:aria-label",
-      "text": "Recent team placements"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 257,
+      "lineNumber": 269,
       "kind": "jsx_text",
-      "text": "Team momentum tape"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 264,
-      "kind": "literal",
-      "text": "Connecting to the live position stream."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 265,
-      "kind": "literal",
-      "text": "The next team placement will appear here."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 270,
-      "kind": "jsx_text",
-      "text": "#"
+      "text": "Team Magnificent"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 272,
-      "kind": "jsx_text",
-      "text": "."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 283,
       "kind": "jsx_attribute:aria-label",
-      "text": "Compact live team stats"
+      "text": "Legal links"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 284,
-      "kind": "jsx_attribute:label",
-      "text": "BAs active · 24h"
+      "lineNumber": 273,
+      "kind": "jsx_text",
+      "text": "Privacy Policy"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 285,
-      "kind": "jsx_attribute:label",
-      "text": "Invites today"
+      "lineNumber": 274,
+      "kind": "jsx_text",
+      "text": "•"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 286,
-      "kind": "jsx_attribute:label",
-      "text": "Placements · 24h"
+      "lineNumber": 275,
+      "kind": "jsx_text",
+      "text": "Terms of Service"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 302,
+      "kind": "jsx_text",
+      "text": "Request a call from"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 308,
       "kind": "jsx_text",
-      "text": "Next Team Magnificent live · check back soon"
+      "text": "—"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 317,
-      "kind": "jsx_text",
-      "text": "Next Team Magnificent live · check back soon"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 331,
-      "kind": "jsx_attribute:label",
-      "text": "days"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 332,
-      "kind": "jsx_attribute:label",
-      "text": "hrs"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 333,
-      "kind": "jsx_attribute:label",
-      "text": "min"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 334,
-      "kind": "jsx_attribute:label",
-      "text": "sec"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 361,
+      "lineNumber": 339,
       "kind": "literal",
-      "text": "just now"
+      "text": "This invitation has expired. Ask your inviter for a fresh one."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 340,
+      "kind": "literal",
+      "text": "Your request did not land. Please try again."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 346,
+      "kind": "jsx_attribute:title",
+      "text": "The next step is a conversation — not a commitment."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 348,
+      "kind": "jsx_text",
+      "text": "— the person who thought of you. Ask the money question. Ask the time question. Ask what a bad week looks like. This starts a real conversation with a real person."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 348,
+      "kind": "jsx_text",
+      "text": "Talk to"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 355,
+      "kind": "jsx_text",
+      "text": "Request received"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 356,
+      "kind": "jsx_text",
+      "text": "will reach out."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 357,
+      "kind": "jsx_text",
+      "text": "Keep an eye on the number where you received this invitation."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 362,
+      "kind": "jsx_text",
+      "text": "What would you like to talk about?"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 364,
+      "kind": "jsx_text",
+      "text": "I&rsquo;m interested — help me understand more."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 367,
+      "kind": "jsx_text",
+      "text": "I have specific questions."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 370,
+      "kind": "jsx_text",
+      "text": "I&rsquo;m ready to discuss joining Team Magnificent."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 377,
+      "kind": "jsx_text",
+      "text": "/ Team Magnificent may call or text you about your request. Message &amp; data rates may apply. Message frequency varies. Reply STOP to end texts, HELP for help. Review the"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 377,
+      "kind": "jsx_text",
+      "text": "By sharing your number, you agree that"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 380,
+      "kind": "jsx_text",
+      "text": "."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 380,
+      "kind": "jsx_text",
+      "text": "and"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 380,
+      "kind": "jsx_text",
+      "text": "Privacy Policy"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 380,
+      "kind": "jsx_text",
+      "text": "Terms of Service"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 386,
+      "kind": "literal",
+      "text": "Request a call from"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 386,
+      "kind": "literal",
+      "text": "Sending…"
     },
     {
       "file": "apps/com/src/routes/tm-video-presentation/presentationCopy.ts",
