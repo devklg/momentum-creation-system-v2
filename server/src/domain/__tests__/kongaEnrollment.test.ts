@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   attestKongaEnrollment,
@@ -161,6 +162,36 @@ describe('truthful Konga join boundary', () => {
     expect(publish.mock.invocationCallOrder[0]).toBeGreaterThan(
       strictVerify.mock.invocationCallOrder.at(-1)!,
     );
+  });
+
+  it('writes enrollment graph link by tokenHash and never passes raw token to Neo4j params', async () => {
+    const fixture = persistenceFixture();
+    const publish = vi.fn();
+    const strictWrite = vi.fn(async (write: Record<string, unknown>) => {
+      neoPayload = write;
+      return { mongo: write, neo4jCount: 1, chromaId: write.id };
+    }) as never;
+    let neoPayload: Record<string, unknown> | null = null;
+    const expectedTokenHash = createHash('sha256').update(token.token).digest('hex');
+
+    await attestKongaEnrollment(input, {
+      persistence: fixture.call as never,
+      strictWrite,
+      strictVerify: vi.fn(async () => ({ mongo: {}, neo4jCount: 1, chromaId: 'x' })),
+      publish,
+    });
+
+    expect(strictWrite).toHaveBeenCalledTimes(1);
+    expect(neoPayload).not.toBeNull();
+    const neoPayloadJson = neoPayload as { neo4j?: { cypher: string; params: Record<string, unknown> } } | null;
+    if (!neoPayloadJson) throw new Error('strictWrite payload missing');
+    const neoQuery = neoPayloadJson.neo4j?.cypher ?? '';
+    const neoParams = neoPayloadJson.neo4j?.params ?? {};
+    expect(neoQuery).toContain('TmagInviteToken {tokenHash:');
+    expect(neoParams).toMatchObject({ tokenHash: expectedTokenHash });
+    expect(neoParams).not.toMatchObject({ token: token.token });
+    expect(JSON.stringify(neoParams)).not.toContain(token.token);
+    expect(publish).toHaveBeenCalledTimes(1);
   });
 
   it('emits no join when one required persistence leg fails', async () => {

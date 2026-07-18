@@ -298,13 +298,15 @@ export async function attestKongaEnrollment(
         id: attestationId,
         mongoCollection: ATTESTATION_COLLECTION,
         mongoDoc: { ...attestation },
+        // IMPORTANT: all graph writes must use tokenHash only.
+        // Preserve Mongo token operations as raw tokens per write audit and backfill compatibility.
         neo4j: {
           cypher:
             'MATCH (s:TeamMagnificentMember {tmagId:$sponsorTmagId}) ' +
             'MATCH (e:TeamMagnificentMember {tmagId:$enrolleeTmagId, sponsorTmagId:$sponsorTmagId}) ' +
             'MATCH (p:TmagProspect {prospectId:$prospectId})-' +
             '[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
-            'MATCH (t:TmagInviteToken {token:$token})-[:FOR_PROSPECT]->(p) ' +
+            'MATCH (t:TmagInviteToken {tokenHash:$tokenHash})-[:FOR_PROSPECT]->(p) ' +
             'MERGE (a:TmagKongaEnrollmentAttestation {attestationId:$id}) ' +
             'SET a += $props ' +
             'MERGE (s)-[en:ENROLLED {attestationId:$id}]->(e) ' +
@@ -316,7 +318,7 @@ export async function attestKongaEnrollment(
             enrolleeTmagId: input.enrolleeTmagId,
             prospectId: input.prospectId,
             placementId: placement.placementId,
-            token: token.token,
+            tokenHash: sha(token.token),
             joinedAt,
             props: attestation,
             enrollmentProps: {

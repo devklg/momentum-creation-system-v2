@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 
 const MONGO_DB = 'momentum';
@@ -67,6 +68,10 @@ interface ReconciliationSpec {
   chroma?: (doc: MongoDoc, id: string) => ChromaCheck | null;
 }
 
+function tokenHashFromToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
+
 export interface CrossStoreReconciliationOptions {
   limitPerSpec?: number;
   specKeys?: string[];
@@ -81,34 +86,35 @@ function stringField(doc: MongoDoc, field: string): string | null {
 
 function prospectInviteGraph(doc: MongoDoc, _id: string): Neo4jCheck | null {
   const sponsorTmagId = stringField(doc, 'sponsorTmagId');
-  const token = stringField(doc, 'token');
-  if (!sponsorTmagId || !token) return null;
+  const rawToken = stringField(doc, 'token');
+  if (!sponsorTmagId || !rawToken) return null;
   return {
     query:
       'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-' +
-      '[:INVITED {token: $token}]->(p:TmagProspect {prospectId: $id}) ' +
+      '[:INVITED {tokenHash: $tokenHash}]->(p:TmagProspect {prospectId: $id}) ' +
       'RETURN count(p) AS n',
-    params: { sponsorTmagId, token },
+    params: { sponsorTmagId, tokenHash: tokenHashFromToken(rawToken) },
   };
 }
 
 function inviteTokenGraph(doc: MongoDoc, _id: string): Neo4jCheck | null {
   const prospectId = stringField(doc, 'prospectId');
   const leadId = stringField(doc, 'leadId');
+  const tokenHash = tokenHashFromToken(_id);
   if (leadId) {
     return {
       query:
-        'MATCH (t:TmagInviteToken {token: $id})-[:FOR_VM_LEAD]->' +
+        'MATCH (t:TmagInviteToken {tokenHash: $tokenHash})-[:FOR_VM_LEAD]->' +
         '(l:TmagVmBulkLead {leadId: $leadId}) RETURN count(t) AS n',
-      params: { leadId },
+      params: { leadId, tokenHash },
     };
   }
   if (prospectId) {
     return {
       query:
-        'MATCH (t:TmagInviteToken {token: $id})-[:FOR_PROSPECT]->' +
+        'MATCH (t:TmagInviteToken {tokenHash: $tokenHash})-[:FOR_PROSPECT]->' +
         '(p:TmagProspect {prospectId: $prospectId}) RETURN count(t) AS n',
-      params: { prospectId },
+      params: { prospectId, tokenHash },
     };
   }
   return null;
@@ -226,10 +232,12 @@ async function checkNeo4j(
   persistence: Persistence,
 ): Promise<ReconciliationLegResult> {
   if (!check) return { status: 'not_applicable', detail: 'no graph check configured' };
+  const hasId = check.query.includes('$id');
+  const params = hasId ? { id, ...(check.params ?? {}) } : { ...(check.params ?? {}) };
   try {
     const result = await persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
       query: check.query,
-      params: { id, ...(check.params ?? {}) },
+      params,
     });
     const count = extractCount(result);
     return count > 0
