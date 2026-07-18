@@ -565,6 +565,32 @@ async function loadVerifiedAttemptPlacement(
       },
       persistence,
     );
+    const placementOwner = ownershipFromPlacement(fencedPlacement);
+    if (placementOwner) {
+      const claim = await readClaim(persistence, claimDocumentId(placement.prospectId));
+      if (claim) {
+        return null;
+      }
+      const prospectResult = await persistence<{ documents?: Array<Record<string, unknown>> }>(
+        'mongodb',
+        'query',
+        {
+          database: MONGO_DB,
+          collection: PROSPECTS_COLLECTION,
+          filter: {
+            prospectId: placement.prospectId,
+            sponsorTmagId: placement.sponsorTmagId,
+            state: 'video_complete',
+            positionNumber: placement.positionNumber,
+            placedAt: placement.placedAt,
+          },
+          limit: 1,
+        },
+      );
+      if (!prospectResult.documents?.[0]) {
+        return null;
+      }
+    }
     return placement;
   } catch {
     return null;
@@ -1065,13 +1091,10 @@ export async function placeKongaProspect(
     if (sameAttempt.prospectId !== input.prospectId || sameAttempt.sponsorTmagId !== input.sponsorTmagId) {
       throw new Error('konga_attempt_identity_conflict');
     }
-    try {
-      await ensurePlacementReadback(sameAttempt, strictVerify, persistence);
-      return resultOf(sameAttempt, true);
-    } catch {
-      await repairPlacementProjection(persistence, sameAttempt);
-      await ensurePlacementReadback(sameAttempt, strictVerify, persistence);
-      return resultOf(sameAttempt, true);
+    const verifiedSameAttempt = await sameAttemptPlacementVerification(identity);
+    if (verifiedSameAttempt) {
+      await ensurePlacementReadback(verifiedSameAttempt, strictVerify, persistence);
+      return resultOf(verifiedSameAttempt, true);
     }
   }
 
