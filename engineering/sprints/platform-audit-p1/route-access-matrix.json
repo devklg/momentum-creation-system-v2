@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T03:17:17.522Z",
+  "generatedAt": "2026-07-18T04:06:57.880Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/api-route-map.json",
     "server/src/middleware/requireAuth.ts",
@@ -22,7 +22,7 @@
     "/api/resources/:resourceVersionId/document"
   ],
   "summary": {
-    "routes": 262,
+    "routes": 265,
     "byAccessClass": {
       "raw_body_webhook": 1,
       "admin": 113,
@@ -30,7 +30,7 @@
       "auth_bootstrap": 3,
       "auth_session": 2,
       "ba_auth_pre_steve": 22,
-      "ba_auth_steve_gated": 66,
+      "ba_auth_steve_gated": 69,
       "steve_worker_secret": 2,
       "admin_or_health_secret": 1,
       "internal_runtime_admin_or_secret": 5,
@@ -44,23 +44,23 @@
       "founder_admin": 119,
       "anonymous": 5,
       "system": 10,
-      "brand_ambassador": 115,
+      "brand_ambassador": 118,
       "prospect": 19
     },
     "byEntitlement": {
       "machine_credential": 12,
       "admin_allowlist": 119,
       "none": 5,
-      "registered_ba": 115,
+      "registered_ba": 118,
       "valid_prospect_identity": 19,
       "vm_dialer": 25
     },
     "guardCoverage": {
-      "requireAuth": 114,
+      "requireAuth": 117,
       "requireAdmin": 113,
       "requireAdminOrHealthSecret": 1,
       "requireRuntimeInternal": 5,
-      "requireSteveComplete": 98,
+      "requireSteveComplete": 101,
       "requireVmDialerAccess": 25,
       "rateLimited": 3,
       "rawBodyParser": 1,
@@ -9327,10 +9327,175 @@
       "findings": []
     },
     {
+      "id": "GET /api/cockpit/konga",
+      "method": "GET",
+      "fullPath": "/api/cockpit/konga",
+      "routeSource": "server/src/routes/cockpit.ts:74",
+      "mountPath": "/api/cockpit",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/cockpit/konga/leaderboard",
+      "method": "GET",
+      "fullPath": "/api/cockpit/konga/leaderboard",
+      "routeSource": "server/src/routes/cockpit.ts:87",
+      "mountPath": "/api/cockpit",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
+      "id": "GET /api/cockpit/konga/stream",
+      "method": "GET",
+      "fullPath": "/api/cockpit/konga/stream",
+      "routeSource": "server/src/routes/cockpit.ts:108",
+      "mountPath": "/api/cockpit",
+      "mountPhase": "ba_facing_gated",
+      "routeAccessProfile": "ba_auth_steve_gated",
+      "accessClass": "ba_auth_steve_gated",
+      "accessCategory": "ba_auth_steve_gated",
+      "permissions": {
+        "roles": [
+          "brand_ambassador"
+        ],
+        "entitlements": [
+          "registered_ba"
+        ],
+        "gates": [
+          "ba_session",
+          "requireSteveComplete"
+        ]
+      },
+      "expected": {
+        "authGate": "ba_session",
+        "adminGate": "none",
+        "steveGate": "requireSteveComplete",
+        "vmEntitlementGate": "none",
+        "secretGate": "none",
+        "rateLimit": "none"
+      },
+      "declared": {
+        "middleware": [
+          "requireAuth",
+          "requireSteveComplete"
+        ],
+        "requireAuth": true,
+        "requireAdmin": false,
+        "requireAdminOrHealthSecret": false,
+        "requireRuntimeInternal": false,
+        "requireSteveComplete": true,
+        "requireVmDialerAccess": false,
+        "hasRateLimit": false,
+        "hasRawBodyParser": false,
+        "customGuards": []
+      },
+      "effectiveSteveException": "none",
+      "steveWhitelistMatch": false,
+      "tokenIdentity": "none",
+      "machineSecret": "none",
+      "rawBody": false,
+      "rateLimit": false,
+      "bodyLimit": "global_256kb_json",
+      "notes": [],
+      "findings": []
+    },
+    {
       "id": "GET /api/cockpit/launch",
       "method": "GET",
       "fullPath": "/api/cockpit/launch",
-      "routeSource": "server/src/routes/cockpit.ts:44",
+      "routeSource": "server/src/routes/cockpit.ts:193",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9384,7 +9549,7 @@
       "id": "GET /api/cockpit/invites",
       "method": "GET",
       "fullPath": "/api/cockpit/invites",
-      "routeSource": "server/src/routes/cockpit.ts:62",
+      "routeSource": "server/src/routes/cockpit.ts:211",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9439,7 +9604,7 @@
       "id": "GET /api/cockpit/summary",
       "method": "GET",
       "fullPath": "/api/cockpit/summary",
-      "routeSource": "server/src/routes/cockpit.ts:79",
+      "routeSource": "server/src/routes/cockpit.ts:228",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9494,7 +9659,7 @@
       "id": "GET /api/cockpit/pmv",
       "method": "GET",
       "fullPath": "/api/cockpit/pmv",
-      "routeSource": "server/src/routes/cockpit.ts:99",
+      "routeSource": "server/src/routes/cockpit.ts:248",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9549,7 +9714,7 @@
       "id": "GET /api/cockpit/todays-actions",
       "method": "GET",
       "fullPath": "/api/cockpit/todays-actions",
-      "routeSource": "server/src/routes/cockpit.ts:118",
+      "routeSource": "server/src/routes/cockpit.ts:267",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9604,7 +9769,7 @@
       "id": "GET /api/cockpit/follow-up-queue",
       "method": "GET",
       "fullPath": "/api/cockpit/follow-up-queue",
-      "routeSource": "server/src/routes/cockpit.ts:142",
+      "routeSource": "server/src/routes/cockpit.ts:291",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9659,7 +9824,7 @@
       "id": "GET /api/cockpit/team-calendar",
       "method": "GET",
       "fullPath": "/api/cockpit/team-calendar",
-      "routeSource": "server/src/routes/cockpit.ts:165",
+      "routeSource": "server/src/routes/cockpit.ts:314",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",
@@ -9714,7 +9879,7 @@
       "id": "GET /api/cockpit/invites/print.pdf",
       "method": "GET",
       "fullPath": "/api/cockpit/invites/print.pdf",
-      "routeSource": "server/src/routes/cockpit.ts:191",
+      "routeSource": "server/src/routes/cockpit.ts:340",
       "mountPath": "/api/cockpit",
       "mountPhase": "ba_facing_gated",
       "routeAccessProfile": "ba_auth_steve_gated",

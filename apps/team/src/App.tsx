@@ -30,6 +30,7 @@ const PreviewPage = lazy(() => import('./routes/preview').then((module) => ({ de
 const ResourcesPage = lazy(() => import('./routes/resources').then((module) => ({ default: module.ResourcesPage })));
 const ResourceDetailPage = lazy(() => import('./routes/resource-detail').then((module) => ({ default: module.ResourceDetailPage })));
 const EventsPage = lazy(() => import('./routes/events').then((module) => ({ default: module.EventsPage })));
+const KongaPage = lazy(() => import('./routes/konga').then((module) => ({ default: module.KongaPage })));
 
 export function App() {
   return (
@@ -48,6 +49,7 @@ export function App() {
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/resources/:resourceVersionId" element={<ResourceDetailPage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/konga" element={<KongaPage />} />
           <Route path="/ivory" element={<IvoryPage />} />
           <Route path="/ivory/momentum" element={<IvoryMomentumPage />} />
           <Route path="/crm" element={<CrmPage />} />

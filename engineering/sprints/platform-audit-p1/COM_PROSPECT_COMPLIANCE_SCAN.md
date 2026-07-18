@@ -1,14 +1,14 @@
 # COM Prospect Compliance Scan
 
-Generated: 2026-07-18T03:17:27.603Z
+Generated: 2026-07-18T04:07:03.216Z
 
 ## Summary
 
 - Scope: `apps/com/src visible strings plus shared compliance constants`
 - Files scanned: 39
-- Visible strings scanned: 584
+- Visible strings scanned: 546
 - Blocking violations: 0
-- Allowed signals: 88
+- Allowed signals: 84
 - Status: pass
 
 ## Blocking Rules
@@ -30,7 +30,7 @@ Generated: 2026-07-18T03:17:27.603Z
 | `public_market_or_cost_context` | 7 | Public market figures and product-category cost context are allowed when not tied to earnings. |
 | `team_goal_context` | 5 | The 100,000 team goal is allowed; current team head count is not. |
 | `pmv_language_context` | 29 | Prospect-facing PMV language is People, Momentum, Volume, and Checks. |
-| `placement_demo_context` | 29 | Queue, placement, and beneath-you language is allowed only as team activity demonstration. |
+| `placement_demo_context` | 25 | Queue, placement, and beneath-you language is allowed only as team activity demonstration. |
 | `canonical_disclaimer` | 2 | The canonical .com disclaimer is allowed only through packages/shared/src/compliance.ts. |
 
 ## Violations
@@ -99,10 +99,6 @@ None.
 | `pmv_language_context` | `packages/shared/src/compliance.ts:14` | Compensation cycle math, volume math, or rank math |
 | `pmv_language_context` | `packages/shared/src/compliance.ts:22` | Queue positions and momentum displays demonstrate team activity in real time and |
 | `placement_demo_context` | `apps/com/src/routes/legal/legal-documents.ts:37` | Service activity: video viewing progress, page visits, position and activity in the live team display, and callback requests you submit. |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:129` | Vertical upward live placement line |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:150` | · placed |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:150` | Position |
-| `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx:155` | Connecting to the real placement stream. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx:46` | Live · holding tank |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx:63` | Your position |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/01-Arrival.tsx:72` | You&rsquo;ve been placed in the Team Magnificent holding tank — the live demonstration of how the team is forming around you, in real time. |
@@ -121,3 +117,7 @@ None.
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:222` | added since your placement |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:232` | . The recording remains a content resource; completing it does not create a placement or promise an outcome. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:242` | THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it. |
+| `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/presentationCopy.ts:43` | Here is something you may not have noticed. While you were watching, you were placed into our team's line. Not enrolled, not signed up - placed, so we could show you something real. |
+| `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:466` | When the video finishes, continue to your live team position. |
+| `placement_demo_context` | `packages/shared/src/compliance.ts:12` | Placement or queue-position-equals-leg-position promises |
+| `placement_demo_context` | `packages/shared/src/compliance.ts:22` | Queue positions and momentum displays demonstrate team activity in real time and |

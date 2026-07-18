@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-18T03:17:22.495Z
+- Generated: 2026-07-18T04:07:00.496Z
 - Mongo collections: 76
 - Neo4j labels: 90
 - Neo4j relationships: 71
 - Chroma collections: 59
 - Route modules: 49
-- Route handlers: 300
-- Shared exports: 1229
+- Route handlers: 303
+- Shared exports: 1234
 
 ## Mongo Collections
 
@@ -356,7 +356,7 @@
 | `(unmounted)` | `server/src/routes/admin/vm.ts` | GET /overview<br>GET user-agent<br>POST /campaigns/:vmCampaignId/live-approval<br>GET user-agent<br>POST /ownership-correction<br>GET user-agent | `McsAdminVmLiveApprovalPayload`, `McsAdminVmLiveApprovalResponse`, `McsAdminVmOwnershipCorrectionPayload`, `McsAdminVmOwnershipCorrectionResponse`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/agents.ts` | GET /recommendations<br>POST /events | `McsAgentEventResponse`, `McsAgentRecommendationsResponse`, `McsCreateAgentEventPayload` |
 | `(unmounted)` | `server/src/routes/auth.ts` | POST /verify-code<br>POST /register<br>POST /login<br>POST /logout<br>GET /me | none |
-| `(unmounted)` | `server/src/routes/cockpit.ts` | GET /launch<br>GET /invites<br>GET /summary<br>GET /pmv<br>GET /todays-actions<br>GET /follow-up-queue<br>GET /team-calendar<br>GET /invites/print.pdf | none |
+| `(unmounted)` | `server/src/routes/cockpit.ts` | GET /konga<br>GET /konga/leaderboard<br>GET /konga/stream<br>GET /launch<br>GET /invites<br>GET /summary<br>GET /pmv<br>GET /todays-actions<br>GET /follow-up-queue<br>GET /team-calendar<br>GET /invites/print.pdf | `McsJoinEvent`, `McsKongaPlacementEvent` |
 | `(unmounted)` | `server/src/routes/content-videos.ts` | GET /videos | `McsContentVideosResponse` |
 | `(unmounted)` | `server/src/routes/crm.ts` | GET /today<br>GET /:prospectId<br>POST /:prospectId/notes<br>POST /:prospectId/followup<br>DELETE /:prospectId/followup<br>POST /:prospectId/disposition<br>POST /:prospectId/reinvite<br>POST /:prospectId/reinvite-script<br>POST /<br>PUT /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/enrollment-attestation | `McsClearFollowUpResponse`, `McsCreateNotePayload`, `McsCreateNoteResponse`, `McsCrmBundleResponse`, `McsReinviteResponse`, `McsReinviteScriptResponse`, `McsReinviteTerminalError`, `McsReinviteUnsentError`, `McsSetDispositionPayload`, `McsSetDispositionResponse`, `McsSetFollowUpPayload`, `McsSetFollowUpResponse`, `McsTodaysActionsResponse` |
 | `(unmounted)` | `server/src/routes/crmHub.ts` | GET /prospects<br>GET /prospects/:prospectId<br>POST /prospects/:prospectId/close-as-ba | `McsCloseAsNewBaResponse`, `McsProspectCrmListResponse`, `McsProspectCrmRecordResponse` |
@@ -587,7 +587,12 @@
 | `McsKongaStreamEvent` | type | `packages/shared/src/konga-line.ts` |
 | `McsKongaStreamEventName` | type | `packages/shared/src/konga-line.ts` |
 | `McsKongaStreamRequest` | type | `packages/shared/src/konga-line.ts` |
+| `McsKongaTeamGenesisNode` | interface | `packages/shared/src/konga-line.ts` |
+| `McsKongaTeamLeaderboardResponse` | interface | `packages/shared/src/konga-line.ts` |
 | `McsKongaTeamLensResponse` | interface | `packages/shared/src/konga-line.ts` |
+| `McsKongaTeamPlacementSnapshot` | interface | `packages/shared/src/konga-line.ts` |
+| `McsKongaTeamSnapshotResponse` | interface | `packages/shared/src/konga-line.ts` |
+| `McsKongaTeamStreamEvent` | type | `packages/shared/src/konga-line.ts` |
 | `McsKongaVideoEventKind` | type | `packages/shared/src/konga-line.ts` |
 | `McsKongaVideoEventPayload` | type | `packages/shared/src/konga-line.ts` |
 | `McsKongaVideoEventResponse` | type | `packages/shared/src/konga-line.ts` |

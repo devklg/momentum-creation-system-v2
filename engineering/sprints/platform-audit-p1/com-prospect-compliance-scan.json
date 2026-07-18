@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-18T03:17:27.603Z",
+  "generatedAt": "2026-07-18T04:07:03.216Z",
   "scope": "apps/com/src visible strings plus shared compliance constants",
   "summary": {
     "filesScanned": 39,
-    "visibleStringsScanned": 584,
+    "visibleStringsScanned": 546,
     "blockingViolations": 0,
-    "allowedSignals": 88,
+    "allowedSignals": 84,
     "status": "pass",
     "allowedSignalsByRule": {
       "glp_three_product_context": 16,
       "public_market_or_cost_context": 7,
       "team_goal_context": 5,
       "pmv_language_context": 29,
-      "placement_demo_context": 29,
+      "placement_demo_context": 25,
       "canonical_disclaimer": 2
     }
   },
@@ -539,38 +539,6 @@
       "file": "apps/com/src/routes/legal/legal-documents.ts",
       "line": 37,
       "text": "Service activity: video viewing progress, page visits, position and activity in the live team display, and callback requests you submit."
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "line": 129,
-      "text": "Vertical upward live placement line"
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "line": 150,
-      "text": "· placed"
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "line": 150,
-      "text": "Position"
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "line": 155,
-      "text": "Connecting to the real placement stream."
     },
     {
       "ruleId": "placement_demo_context",
@@ -1639,234 +1607,6 @@
       "lineNumber": 173,
       "kind": "jsx_text",
       "text": "Try again"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 91,
-      "kind": "jsx_attribute:aria-label",
-      "text": "Live Team Magnificent Konga Line"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 95,
-      "kind": "literal",
-      "text": "Connecting to live events"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 95,
-      "kind": "literal",
-      "text": "Live events connected"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 95,
-      "kind": "literal",
-      "text": "Reconnecting to live events"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 98,
-      "kind": "literal",
-      "text": "Mute sound"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 98,
-      "kind": "literal",
-      "text": "Turn sound on"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 102,
-      "kind": "jsx_text",
-      "text": "Sound is on and activates safely after your first interaction."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 107,
-      "kind": "jsx_text",
-      "text": "Destination dock"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 108,
-      "kind": "jsx_text",
-      "text": "The next Team Magnificent live conversation"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 109,
-      "kind": "jsx_text",
-      "text": "."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 109,
-      "kind": "jsx_text",
-      "text": "Hosted by"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 109,
-      "kind": "literal",
-      "text": "the Team Magnificent hosts"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 116,
-      "kind": "jsx_text",
-      "text": "Joined"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 117,
-      "kind": "jsx_text",
-      "text": "."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 124,
-      "kind": "literal",
-      "text": "Line head"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 124,
-      "kind": "literal",
-      "text": "Your line starts with"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 126,
-      "kind": "literal",
-      "text": "invited you into this view."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 126,
-      "kind": "literal",
-      "text": "Your team view."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 129,
-      "kind": "jsx_attribute:aria-label",
-      "text": "Vertical upward live placement line"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 139,
-      "kind": "jsx_text",
-      "text": "."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 141,
-      "kind": "jsx_text",
-      "text": "."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 141,
-      "kind": "jsx_text",
-      "text": "added by"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 148,
-      "kind": "jsx_text",
-      "text": "Pinned in your view"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 149,
-      "kind": "jsx_text",
-      "text": "YOU ·"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 150,
-      "kind": "jsx_text",
-      "text": "· placed"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 150,
-      "kind": "jsx_text",
-      "text": "Position"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 155,
-      "kind": "literal",
-      "text": "Connecting to the real placement stream."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 155,
-      "kind": "literal",
-      "text": "No newer real placements are available on this connection yet."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 159,
-      "kind": "jsx_text",
-      "text": "Open arrival space"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 160,
-      "kind": "jsx_text",
-      "text": "Open arrival space"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 163,
-      "kind": "jsx_text",
-      "text": "Real arrivals enter here"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 164,
-      "kind": "jsx_text",
-      "text": "No samples. No simulated activity."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 186,
-      "kind": "jsx_text",
-      "text": "Schedule not available"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 187,
-      "kind": "jsx_text",
-      "text": "The next real event will appear when it is published."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 211,
-      "kind": "literal",
-      "text": "Happening now"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 228,
-      "kind": "literal",
-      "text": "time unavailable"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 234,
-      "kind": "literal",
-      "text": "your inviter"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/components/KongaLine.tsx",
-      "lineNumber": 236,
-      "kind": "literal",
-      "text": "your inviter"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/00-Ribbon.tsx",

@@ -1,3 +1,4 @@
+/* Shared Konga line presentation for the COM and Team lens adapters. */
 .konga-line-shell {
   position: relative;
   width: min(100%, 1120px);
@@ -312,6 +313,39 @@
   background: var(--konga-ground);
   box-shadow: 0 0 24px rgba(250, 204, 21, .22);
   text-align: center;
+}
+
+.konga-genesis {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  justify-self: center;
+  gap: .25rem;
+  width: min(92%, 35rem);
+  padding: 1rem 1.15rem;
+  border: 2px solid var(--konga-cyan);
+  border-radius: .85rem;
+  background: var(--konga-ground);
+  box-shadow: 0 0 24px var(--konga-glow-cyan);
+  text-align: center;
+}
+
+.konga-genesis .konga-mono {
+  color: var(--konga-cyan);
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.konga-genesis strong {
+  color: var(--konga-ink);
+  font: 900 clamp(1.05rem, 3vw, 1.5rem) 'Orbitron', system-ui, sans-serif;
+}
+
+.konga-genesis > span:not(.konga-mono),
+.konga-genesis time {
+  color: var(--konga-muted);
+  font-size: .72rem;
 }
 
 .konga-you strong {

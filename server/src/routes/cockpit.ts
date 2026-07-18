@@ -21,7 +21,8 @@
  * own prospects.
  */
 
-import { Router } from 'express';
+import { Router, type Response } from 'express';
+import type { McsJoinEvent, McsKongaPlacementEvent } from '@momentum/shared';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireSteveComplete } from '../middleware/requireSteveComplete.js';
 import {
@@ -34,8 +35,156 @@ import {
 } from '../domain/cockpit.js';
 import { buildCockpitProspectListPdf } from '../domain/cockpitPrint.js';
 import { getUnifiedFollowUpQueue } from '../domain/followUpQueue.js';
+import {
+  getKongaTeamLeaderboard,
+  getKongaTeamSnapshot,
+  KongaTeamError,
+} from '../domain/kongaTeam.js';
+import {
+  subscribeJoins,
+  subscribeKongaPlacements,
+} from '../services/poolEvents.js';
 
 export const cockpitRoutes: Router = Router();
+
+const KONGA_SSE_PING_INTERVAL_MS = 30_000;
+
+function kongaSseFrame(event: string, data: unknown, id?: string): string {
+  const lines: string[] = [];
+  if (id) lines.push(`id: ${id}`);
+  lines.push(`event: ${event}`);
+  lines.push(`data: ${JSON.stringify(data)}`);
+  lines.push('', '');
+  return lines.join('\n');
+}
+
+function sendKongaReadError(res: Response, error: unknown) {
+  if (error instanceof KongaTeamError && error.code === 'konga_team_member_not_found') {
+    return res.status(404).json({ ok: false, error: 'konga_team_member_not_found' });
+  }
+  // eslint-disable-next-line no-console
+  console.error('[GET /api/cockpit/konga] failed', error);
+  return res.status(500).json({ ok: false, error: 'server_error' });
+}
+
+/**
+ * Authenticated BA Konga snapshot. Leaderboard data is deliberately absent;
+ * it has its own members-only endpoint below.
+ */
+cockpitRoutes.get('/konga', requireAuth, requireSteveComplete, async (req, res) => {
+  const tmagId = req.session?.tmagId;
+  if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+  try {
+    const payload = await getKongaTeamSnapshot(tmagId);
+    res.set('Cache-Control', 'private, no-store');
+    return res.status(200).json(payload);
+  } catch (error) {
+    return sendKongaReadError(res, error);
+  }
+});
+
+/** Members-only lifetime count of provable holding-tank placement events. */
+cockpitRoutes.get(
+  '/konga/leaderboard',
+  requireAuth,
+  requireSteveComplete,
+  async (req, res) => {
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+    try {
+      const payload = await getKongaTeamLeaderboard(tmagId);
+      res.set('Cache-Control', 'private, no-store');
+      return res.status(200).json(payload);
+    } catch (error) {
+      return sendKongaReadError(res, error);
+    }
+  },
+);
+
+/**
+ * Authenticated `.team` live channel. In-process events are rehydrated from
+ * the persisted snapshot on every reconnect; no leaderboard is serialized.
+ */
+cockpitRoutes.get(
+  '/konga/stream',
+  requireAuth,
+  requireSteveComplete,
+  async (req, res) => {
+    const tmagId = req.session?.tmagId;
+    if (!tmagId) return res.status(401).json({ ok: false, error: 'Not authenticated.' });
+
+    let disconnected = false;
+    let heartbeat: ReturnType<typeof setInterval> | null = null;
+    let placementSub: ReturnType<typeof subscribeKongaPlacements> | null = null;
+    let joinSub: ReturnType<typeof subscribeJoins> | null = null;
+    const cleanupResources = () => {
+      if (heartbeat) {
+        clearInterval(heartbeat);
+        heartbeat = null;
+      }
+      if (placementSub) {
+        const subscription = placementSub;
+        placementSub = null;
+        subscription.unsubscribe();
+      }
+      if (joinSub) {
+        const subscription = joinSub;
+        joinSub = null;
+        subscription.unsubscribe();
+      }
+    };
+    const markDisconnected = () => {
+      disconnected = true;
+      cleanupResources();
+    };
+    // Install before the awaited snapshot so a disconnect cannot be missed.
+    req.on('close', markDisconnected);
+    req.on('aborted', markDisconnected);
+    res.on('close', markDisconnected);
+
+    let snapshot;
+    try {
+      snapshot = await getKongaTeamSnapshot(tmagId);
+    } catch (error) {
+      if (disconnected) return;
+      return sendKongaReadError(res, error);
+    }
+    if (disconnected) return;
+
+    res.status(200);
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'private, no-store, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders?.();
+    try {
+      res.write(kongaSseFrame('snapshot', snapshot));
+    } catch {
+      markDisconnected();
+      return;
+    }
+
+    placementSub = subscribeKongaPlacements((event: McsKongaPlacementEvent) => {
+      try { res.write(kongaSseFrame('placement', event, event.eventId)); } catch { markDisconnected(); }
+    });
+    if (disconnected) {
+      cleanupResources();
+      return;
+    }
+    joinSub = subscribeJoins((event: McsJoinEvent) => {
+      try { res.write(kongaSseFrame('join', event, event.eventId)); } catch { markDisconnected(); }
+    });
+    if (disconnected) {
+      cleanupResources();
+      return;
+    }
+    heartbeat = setInterval(() => {
+      try { res.write(kongaSseFrame('ping', { at: new Date().toISOString() })); } catch { markDisconnected(); }
+    }, KONGA_SSE_PING_INTERVAL_MS);
+    if (disconnected) cleanupResources();
+    return;
+  },
+);
 
 /**
  * GET /api/cockpit/launch — Launch Center projection for new BAs. Auth-only;
