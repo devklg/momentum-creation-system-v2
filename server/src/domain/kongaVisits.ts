@@ -312,6 +312,54 @@ async function findPendingMarkerForVisit(
   return null;
 }
 
+async function findAbortedMarkerForVisit(
+  observation: VisitObservationWithIds,
+  persistence: Persistence,
+): Promise<KongaPageVisitMarker | null> {
+  const markerRows = await persistence<{ documents?: KongaPageVisitMarker[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: MARKER_COLLECTION,
+    filter: {
+      tokenHash: observation.tokenHash,
+      pageVisitRecordId: observation.visitRecordId,
+      state: 'aborted',
+    },
+    sort: { version: -1 },
+    limit: 10,
+  });
+
+  for (const row of markerRows.documents ?? []) {
+    if (await isMarkerEventVerified(row, persistence)) {
+      return row;
+    }
+  }
+  return null;
+}
+
+async function findCommittedMarkerForVisit(
+  observation: VisitObservationWithIds,
+  persistence: Persistence,
+): Promise<KongaPageVisitMarker | null> {
+  const markerRows = await persistence<{ documents?: KongaPageVisitMarker[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: MARKER_COLLECTION,
+    filter: {
+      tokenHash: observation.tokenHash,
+      pageVisitRecordId: observation.visitRecordId,
+      state: 'committed',
+    },
+    sort: { version: -1 },
+    limit: 10,
+  });
+
+  for (const row of markerRows.documents ?? []) {
+    if (await isMarkerEventVerified(row, persistence)) {
+      return row;
+    }
+  }
+  return null;
+}
+
 function sameCommittedMarkerForVisit(
   marker: KongaPageVisitMarker,
   observation: VisitObservationWithIds,
@@ -337,10 +385,24 @@ async function ensureCommittedVisitMarker(
     return;
   }
 
+  const committedVisitMarker = await findCommittedMarkerForVisit(observation, persistence);
+  if (committedVisitMarker) {
+    return;
+  }
+
   const baseMarker =
     marker && marker.pageVisitRecordId === observation.visitRecordId && marker.state !== 'committed'
       ? marker
-      : await findPendingMarkerForVisit(observation, persistence);
+      : (await findPendingMarkerForVisit(observation, persistence)) ??
+        (await findAbortedMarkerForVisit(observation, persistence));
+
+  if (
+    !baseMarker &&
+    snapshot.committedVisitRecordId !== null &&
+    snapshot.committedVisitRecordId !== observation.visitRecordId
+  ) {
+    return;
+  }
 
   const repairMarker = baseMarker
     ? {

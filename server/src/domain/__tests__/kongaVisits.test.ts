@@ -674,6 +674,80 @@ describe('Konga reconnect-safe page visits', () => {
     expect(marker?.version).toBe(2);
   });
 
+  it('keeps a historical committed visit replay from changing baseline (A commit, B commit, retry A, C visit)', async () => {
+    const token = 'TOKEN-HISTORICAL-REPLAY';
+    const bVisitId = visitRecordId(token, 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+
+    const fixture = createFixture();
+
+    const visitA = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:10:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    const visitB = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        globalMaxPosition: 20,
+        now: new Date('2026-07-17T10:11:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    const replayA = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:12:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    expect(replayA).toMatchObject(visitA);
+    expect(visitB.previousGlobalPosition).toBe(10);
+    expect(latestMarkerForToken(token, fixture.state.markerRows)?.version).toBe(2);
+    expect(latestMarkerForToken(token, fixture.state.markerRows)?.state).toBe('committed');
+    expect(latestMarkerForToken(token, fixture.state.markerRows)?.pageVisitRecordId).toBe(bVisitId);
+
+    const visitC = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        globalMaxPosition: 30,
+        now: new Date('2026-07-17T10:13:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    expect(visitC.previousGlobalPosition).toBe(20);
+    expect(visitC.sinceLastVisit).toBe(10);
+    expect(visitC.pageVisitId).toBe('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+    expect(latestMarkerForToken(token, fixture.state.markerRows)?.pageVisitRecordId).toBe(
+      visitRecordId(token, 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'),
+    );
+    expect(latestMarkerForToken(token, fixture.state.markerRows)?.version).toBe(3);
+
+    const replayAAfterC = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:14:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    expect(replayAAfterC).toMatchObject(visitA);
+    expect(replayAAfterC).toMatchObject(replayA);
+  });
+
   it('keeps a later distinct visit from advancing from a pending/failing first attempt', async () => {
     const token = 'TOKEN-INTERLEAVE';
     const hash = tokenHash(token);
@@ -696,6 +770,9 @@ describe('Konga reconnect-safe page visits', () => {
     let entered = false;
     let pendingObserved = false;
     const pendingBarrier = makeDeferred();
+    let bObservedPending = false;
+    let markerQueryCount = 0;
+    const bQuerySeen = makeDeferred();
 
     const fixture = createFixture({
       seedVisits: [baseVisit],
@@ -709,6 +786,24 @@ describe('Konga reconnect-safe page visits', () => {
         }),
       ],
     });
+
+    const markerQueryBarrier: KongaFixture['persistence'] = fixture.persistence;
+    fixture.persistence = (async function <T>(tool: string, action: string, params: Record<string, unknown>): Promise<T> {
+      const result = await markerQueryBarrier(tool, action, params);
+      if (tool === 'mongodb' && action === 'query') {
+        const anyParams = params as Record<string, unknown>;
+        if (String(anyParams.collection) === 'tmag_konga_visit_markers' && !bObservedPending) {
+          const queryResult = result as { documents?: MarkerRow[] };
+          markerQueryCount += 1;
+          const sawPending = queryResult.documents?.some((row) => row.state === 'pending');
+          if (sawPending && markerQueryCount > 1) {
+            bObservedPending = true;
+            bQuerySeen.resolve();
+          }
+        }
+      }
+      return result as T;
+    }) as KongaFixture['persistence'];
 
     const strictWrite: StrictWrite = async (input, strictPersistence = fixture.persistence) => {
       const nextInput = input as { id: string; mongoDoc: AnyRec };
@@ -754,6 +849,7 @@ describe('Konga reconnect-safe page visits', () => {
       },
       { persistence: fixture.persistence, strictWrite },
     );
+    await bQuerySeen.promise;
     release.resolve();
 
     const winnerResult = await winner;
@@ -767,6 +863,7 @@ describe('Konga reconnect-safe page visits', () => {
     expect(latestMarkerForToken(token, fixture.state.markerRows)?.observedGlobalPosition).toBe(30);
     expect(winnerResult.pageVisitId).toBe('ffffffff-ffff-4fff-8fff-ffffffffffff');
     expect(entered).toBe(true);
+    expect(bObservedPending).toBe(true);
   });
 
   it('recovers from stale partial marker state without using it as baseline', async () => {
