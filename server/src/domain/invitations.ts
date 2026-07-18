@@ -234,11 +234,11 @@ export async function createInvitation(
     neo4j: {
       // BA INVITED prospect. sponsorTmagId stamped immutably here.
       cypher:
-        'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
+      'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
         'CREATE (p:TmagProspect {prospectId: $id, firstName: $firstName, lastInitial: $lastInitial, ' +
         '  city: $city, stateOrRegion: $stateOrRegion, country: $country, state: $state, ' +
         '  sponsorTmagId: $sponsorTmagId, relationshipReason: $relationshipReason, correlationId: $correlationId, createdAt: $createdAt}) ' +
-        'CREATE (b)-[:INVITED {token: $token, createdAt: $createdAt}]->(p)',
+        'CREATE (b)-[:INVITED {tokenHash: $tokenHash, invitationRecordId: $invitationRecordId, createdAt: $createdAt}]->(p)',
       params: {
         sponsorTmagId: input.sponsorTmagId,
         firstName: input.firstName,
@@ -248,16 +248,17 @@ export async function createInvitation(
         country: input.country,
         state: 'minted',
         relationshipReason,
-        token,
+        tokenHash,
+        invitationRecordId,
         createdAt,
         correlationId: correlation.correlationId,
       },
       verifyCypher:
         'MATCH (b:TeamMagnificentMember {tmagId: $sponsorTmagId})-' +
-        '[:INVITED {token: $token}]->(p:TmagProspect {prospectId: $id}) RETURN count(p) AS n',
+        '[:INVITED {tokenHash: $tokenHash}]->(p:TmagProspect {prospectId: $id}) RETURN count(p) AS n',
       verifyParams: {
         sponsorTmagId: input.sponsorTmagId,
-        token,
+        tokenHash,
       },
     },
     chroma: {

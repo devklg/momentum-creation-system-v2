@@ -9,12 +9,19 @@ const mocks = vi.hoisted(() => ({
   markLeadOwnerImported: vi.fn(),
   mintUniqueToken: vi.fn(),
   persistenceCall: vi.fn(),
+  writeCrmOwnershipGraphCritical: vi.fn(),
   writeOperational: vi.fn(),
   writeGraphCritical: vi.fn(),
   writeKnowledge: vi.fn(),
   writeProspectTokenGraphCritical: vi.fn(),
   writeVmLeadTokenGraphCritical: vi.fn(),
 }));
+
+function serializeNonMongoWrite(payload: Record<string, unknown>): string {
+  if (!payload) return '';
+  const { mongoDoc, token, ...nonMongo } = payload;
+  return JSON.stringify(nonMongo);
+}
 
 vi.mock('../../services/persistence/dispatch.js', () => ({
   persistenceCall: mocks.persistenceCall,
@@ -29,6 +36,10 @@ vi.mock('../../services/tieredWrite.js', () => ({
 vi.mock('../tokenLifecyclePersistence.js', () => ({
   writeProspectTokenGraphCritical: mocks.writeProspectTokenGraphCritical,
   writeVmLeadTokenGraphCritical: mocks.writeVmLeadTokenGraphCritical,
+}));
+
+vi.mock('../crmOwnershipPersistence.js', () => ({
+  writeCrmOwnershipGraphCritical: mocks.writeCrmOwnershipGraphCritical,
 }));
 
 vi.mock('../prospectAccount.js', async () => {
@@ -69,6 +80,7 @@ describe('invitation mint identity', () => {
     mocks.markLeadOwnerImported.mockReset();
     mocks.mintUniqueToken.mockReset();
     mocks.persistenceCall.mockReset();
+    mocks.writeCrmOwnershipGraphCritical.mockReset();
     mocks.writeOperational.mockReset();
     mocks.writeGraphCritical.mockReset();
     mocks.writeKnowledge.mockReset();
@@ -132,6 +144,8 @@ describe('invitation mint identity', () => {
     expect(graphWrite.chroma.document).not.toContain(result.token);
     expect(graphWrite.chroma.document).toContain(tokenHash);
     expect(graphWrite.chroma.metadata).not.toHaveProperty('token');
+    expect(serializeNonMongoWrite(graphWrite)).not.toContain('TOKEN-NEW');
+    expect(graphWrite.chroma.document).not.toContain('TOKEN-NEW');
   });
 
   it('reinvites with a fresh invitationRecordId when the token is expired', async () => {
@@ -247,6 +261,64 @@ describe('invitation mint identity', () => {
     expect(write.chroma?.metadata).not.toHaveProperty('token');
     expect(write.chroma?.document).toBeTypeOf('string');
     expect(write.chroma?.document).not.toContain('TOKEN-VM-LIVE');
+    expect(write.chroma?.document).toContain(tokenHash);
+    expect(write.tokenProps).not.toHaveProperty('token');
+    expect(serializeNonMongoWrite(write)).not.toContain('TOKEN-VM-LIVE');
+  });
+
+  it('writes CRM ownership for inactive RVM leads with tokenHash and no raw token', async () => {
+    const { processCrmCreation } = await import('../vmProviderQueue.js');
+
+    mocks.writeCrmOwnershipGraphCritical.mockResolvedValue({
+      mongo: { ok: true },
+    } as never);
+    mocks.persistenceCall.mockResolvedValue({ documents: [] });
+    mocks.persistenceCall.mockImplementation(async (_tool: string, action: string, params: Record<string, unknown>) => {
+      if (action === 'query') {
+        if (params.collection === 'tmag_vm_bulk_leads') {
+          return {
+            documents: [
+              {
+                leadId: 'lead-vm-1',
+                leadOwnerId: 'owner-1',
+                ownerTmagId: 'TMBA-OWNER',
+                sponsorTmagId: 'TMBA-SPONSOR',
+                vmCampaignId: 'campaign-1',
+                token: 'TOKEN-CRM',
+                status: 'token_created',
+                sourceLabel: 'manual_csv',
+                crmRecordId: null,
+              },
+            ],
+          };
+        }
+        if (params.collection === 'tmag_prospect_invite_tokens') {
+          return {
+            documents: [{ invitationRecordId: 'invite-lead-vm-1' }],
+          };
+        }
+      }
+      if (action === 'update') return { matchedCount: 1, modifiedCount: 1 };
+      return { ok: true };
+    });
+
+    await processCrmCreation({ jobId: 'vmjob_vm_fresh', payload: { leadId: 'lead-vm-1' } } as never);
+
+    const write = mocks.writeCrmOwnershipGraphCritical.mock.calls[0]?.[0] as {
+      mongoDoc: { token: string; crmRecordId: string; leadId: string; ownerTmagId: string };
+      crmProps: Record<string, unknown>;
+      chroma?: { metadata?: Record<string, unknown> };
+    };
+    const tokenHash = createHash('sha256').update('TOKEN-CRM').digest('hex');
+
+    expect(write.mongoDoc).not.toHaveProperty('token');
+    expect(write.crmProps.invitationRecordId).toBe('invite-lead-vm-1');
+    expect(write.crmProps.tokenHash).toBe(tokenHash);
+    expect(write.crmProps).not.toHaveProperty('token');
+    expect(write.chroma?.metadata?.invitationRecordId).toBe('invite-lead-vm-1');
+    expect(write.chroma?.metadata?.tokenHash).toBe(tokenHash);
+    expect(write.chroma?.metadata).not.toHaveProperty('token');
+    expect(serializeNonMongoWrite(write)).not.toContain('TOKEN-CRM');
   });
 
   it('writes invitationRecordId during bulk import with separate identity from the token', async () => {
@@ -303,18 +375,33 @@ describe('invitation mint identity', () => {
       mongoDoc: { invitationRecordId?: string };
       tokenProps: Record<string, unknown>;
     };
-    const graphWrite = mocks.writeGraphCritical.mock.calls[0]![0] as {
-      chroma: { collection: string; document: string; metadata: Record<string, unknown> };
-    };
+    const leadWrite = mocks.writeGraphCritical.mock.calls.find(
+      (call) => call[0].neo4j?.cypher?.includes('TmagVmBulkLead'),
+    )?.[0];
+    const tokenTimelineWrite = mocks.appendProspectTimelineEvent.mock.calls.find(
+      (call) => typeof call[0].metadata === 'object' && call[0].metadata !== null && 'tokenHash' in call[0].metadata,
+    )?.[0];
     const tokenHash = createHash('sha256').update(write.token).digest('hex');
 
     expect(write.token).toBe('TOKEN-BULK');
     expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
     expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
     expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
-    expect(graphWrite.chroma.metadata.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
-    expect(graphWrite.chroma.metadata.tokenHash).toBe(tokenHash);
-    expect(graphWrite.chroma.document).not.toContain('TOKEN-BULK');
-    expect(graphWrite.chroma.metadata).not.toHaveProperty('token');
+    expect(write.tokenProps).not.toHaveProperty('token');
+    expect(leadWrite?.neo4j).toBeDefined();
+    expect(leadWrite?.neo4j.params).toMatchObject({ invitationRecordId: write.mongoDoc.invitationRecordId });
+    expect(leadWrite?.chroma.metadata.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+    expect(leadWrite?.chroma.metadata.tokenHash).toBe(tokenHash);
+    expect(leadWrite?.chroma.document).not.toContain('TOKEN-BULK');
+    expect(leadWrite?.chroma.document).toContain(tokenHash);
+    expect(leadWrite?.chroma.metadata).not.toHaveProperty('token');
+    expect(serializeNonMongoWrite(leadWrite as Record<string, unknown>)).not.toContain('TOKEN-BULK');
+    expect(tokenTimelineWrite).toBeDefined();
+    expect(tokenTimelineWrite?.metadata).toMatchObject({
+      invitationRecordId: write.mongoDoc.invitationRecordId,
+      tokenHash,
+    });
+    expect(tokenTimelineWrite?.metadata).not.toHaveProperty('token');
+    expect(JSON.stringify(tokenTimelineWrite)).not.toContain('TOKEN-BULK');
   });
 });

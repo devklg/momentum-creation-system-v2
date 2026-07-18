@@ -248,7 +248,7 @@ async function createBulkLeadRecord(input: {
         'MATCH (lb:TmagVmLeadOwner {leadOwnerId: $leadOwnerId}) ' +
         'MATCH (vm:TmagVmCampaign {vmCampaignId: $vmCampaignId}) ' +
         'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
-        'CREATE (lead:TmagVmBulkLead {leadId: $id, token: $token, status: $status, ' +
+        'CREATE (lead:TmagVmBulkLead {leadId: $id, tokenHash: $tokenHash, invitationRecordId: $invitationRecordId, status: $status, ' +
         '  ownerTmagId: $ownerTmagId, sponsorTmagId: $sponsorTmagId, correlationId: $correlationId, createdAt: $createdAt}) ' +
         'CREATE (lb)-[:CONTAINS_LEAD]->(lead) ' +
         'CREATE (vm)-[:TARGETS_LEAD]->(lead) ' +
@@ -257,7 +257,8 @@ async function createBulkLeadRecord(input: {
         leadOwnerId: bulkLead.leadOwnerId,
         vmCampaignId: bulkLead.vmCampaignId,
         prospectId: bulkLead.prospectId,
-        token: bulkLead.token,
+        tokenHash,
+        invitationRecordId,
         status: bulkLead.status,
         ownerTmagId: bulkLead.ownerTmagId,
         sponsorTmagId: bulkLead.sponsorTmagId,
@@ -278,13 +279,14 @@ async function createBulkLeadRecord(input: {
     chroma: {
       collection: CHROMA_COLLECTION,
       document:
-        `Bulk RVM lead ${firstName} ${lastInitial}. imported with token ${token}; ` +
+        `Bulk RVM lead ${firstName} ${lastInitial}. imported with token ${tokenHash}; ` +
         `owner ${input.ownerTmagId}; campaign ${input.vmCampaignId}.`,
       metadata: {
         kind: 'bulk_lead_imported',
         leadId,
         prospectId,
-        token,
+        tokenHash,
+        invitationRecordId,
         ownerTmagId: input.ownerTmagId,
         leadOwnerId: input.leadOwnerId,
         vmCampaignId: input.vmCampaignId,
@@ -324,7 +326,7 @@ async function createBulkLeadRecord(input: {
     sponsorTmagId: input.sponsorTmagId,
     kind: 'token_created',
     note: 'RVM token created. CRM-visible; not placed in the holding tank.',
-    metadata: { leadId, token, correlationId: correlation.correlationId },
+    metadata: { leadId, tokenHash, invitationRecordId, correlationId: correlation.correlationId },
     createdAt: now,
   });
 
