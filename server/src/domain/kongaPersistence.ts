@@ -28,6 +28,7 @@ export interface KongaReadback {
 export async function tripleStackWriteWithReadback(
   input: TripleStackInput & {
     neo4jVerify: { cypher: string; params?: Record<string, unknown> };
+    chromaId?: string;
   },
   persistence: Persistence = persistenceCall,
   writer: Writer = tripleStackWrite,
@@ -51,7 +52,7 @@ export async function tripleStackWriteWithReadback(
     }),
     persistence<{ ids?: string[] }>('chromadb', 'get', {
       collection: input.chroma.collection,
-      ids: [input.id],
+      ids: [input.chromaId ?? input.id],
     }),
   ]);
 
@@ -61,11 +62,12 @@ export async function tripleStackWriteWithReadback(
   if (neo4jCount !== 1) {
     throw new Error(`konga_neo4j_readback_not_exact:${input.id}:${neo4jCount}`);
   }
-  if (!(chromaResult.ids ?? []).includes(input.id)) {
-    throw new Error(`konga_chroma_readback_missing:${input.id}`);
+  const chromaId = input.chromaId ?? input.id;
+  if (!(chromaResult.ids ?? []).includes(chromaId)) {
+    throw new Error(`konga_chroma_readback_missing:${chromaId}`);
   }
 
-  return { mongo, neo4jCount, chromaId: input.id };
+  return { mongo, neo4jCount, chromaId };
 }
 
 export async function verifyKongaThreeLegs(
@@ -75,6 +77,7 @@ export async function verifyKongaThreeLegs(
     neo4jVerify: { cypher: string; params?: Record<string, unknown> };
     chromaCollection: string;
     mongoDatabase?: string;
+    chromaId?: string;
   },
   persistence: Persistence = persistenceCall,
 ): Promise<KongaReadback> {
@@ -91,13 +94,14 @@ export async function verifyKongaThreeLegs(
     }),
     persistence<{ ids?: string[] }>('chromadb', 'get', {
       collection: input.chromaCollection,
-      ids: [input.id],
+      ids: [input.chromaId ?? input.id],
     }),
   ]);
   const mongo = mongoResult.documents?.[0];
   if (!mongo) throw new Error(`konga_mongo_readback_missing:${input.id}`);
   const neo4jCount = neoCount(neo4jResult);
   if (neo4jCount !== 1) throw new Error(`konga_neo4j_readback_not_exact:${input.id}:${neo4jCount}`);
-  if (!(chromaResult.ids ?? []).includes(input.id)) throw new Error(`konga_chroma_readback_missing:${input.id}`);
-  return { mongo, neo4jCount, chromaId: input.id };
+  const chromaId = input.chromaId ?? input.id;
+  if (!(chromaResult.ids ?? []).includes(chromaId)) throw new Error(`konga_chroma_readback_missing:${chromaId}`);
+  return { mongo, neo4jCount, chromaId };
 }

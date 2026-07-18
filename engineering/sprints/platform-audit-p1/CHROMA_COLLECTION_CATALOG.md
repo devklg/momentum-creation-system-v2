@@ -5,12 +5,12 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:58:43.957Z
-- Registered collections: 57
+- Generated: 2026-07-18T02:22:25.158Z
+- Registered collections: 58
 - Schema-catalog collections: 57
 - Collections with observed write/query usage: 33
 - Language-scoped collections: 10
-- Metadata contract rows: 57
+- Metadata contract rows: 58
 - Observed unregistered/dynamic targets: 10
 - Embedding model: all-MiniLM-L6-v2
 - Embedding dimension: 384
@@ -25,7 +25,7 @@
 | content_resources | 3 |
 | crm | 2 |
 | events | 4 |
-| general | 7 |
+| general | 8 |
 | holding_tank | 2 |
 | identity_access | 4 |
 | knowledge | 12 |
@@ -61,6 +61,7 @@
 | `mcs_knowledge_sources` | knowledge | not_language_scoped | Approved knowledge source retrieval and source lookup. | not observed | none observed | none observed | `domain`, `language` |
 | `mcs_konga_enrollment_attestations` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_konga_page_visits` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_placement_claims` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_konga_replay_completions` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_konga_replay_pointers` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_learning_candidates_review` | knowledge_review | metadata.language | Review-only learning candidates; never active retrieval knowledge. | `writeKnowledge` | `createdAt`, `domain`, `kind`, `language`, `status`, `tenantId` | none observed | `tenantId` |
@@ -109,10 +110,10 @@ entries need explicit contract handling in P1-43.
 | --- | --- | --- | ---: | --- |
 | `activeKnowledgeCollection(group[0]!.domain, group[0]!.language)` | expression | `get` | 1 | `server/src/domain/graphragReadiness.ts:145` |
 | `agentEventsCollection` | expression | `writeKnowledge` | 1 | `server/src/domain/agents/orchestrator.ts:299` |
-| `c.collection` | expression | `add` | 1 | `server/src/services/projectionOutbox.ts:174` |
-| `chroma.collection` | expression | `add` | 2 | `server/src/domain/steveVersioning.ts:266`<br>`server/src/services/tieredWrite.ts:303` |
+| `c.collection` | expression | `add` | 1 | `server/src/services/projectionOutbox.ts:178` |
+| `chroma.collection` | expression | `add` | 2 | `server/src/domain/steveVersioning.ts:266`<br>`server/src/services/tieredWrite.ts:304` |
 | `collection` | expression | `create_collection` | 1 | `server/src/runtime/knowledge-evolution/indexing/knowledgeEvolutionReindex.service.ts:63` |
-| `input.chroma.collection` | expression | `add` | 1 | `server/src/services/tripleStack.ts:72` |
+| `input.chroma.collection` | expression | `add` | 1 | `server/src/services/tripleStack.ts:74` |
 | `knowledgeChromaCollection(current.domain, current.language)` | expression | `writeKnowledge` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:383` |
 | `knowledgeChromaCollection(source.domain, source.language)` | expression | `add` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:1104` |
 | `mcs_questionnaires` | literal/constant | `writeKnowledge` | 1 | `server/src/domain/questionnaire.ts:203` |

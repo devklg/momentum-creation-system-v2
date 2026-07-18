@@ -53,6 +53,7 @@ export interface Neo4jProjectionPayload {
 
 export interface ChromaProjectionPayload {
   collection: string;
+  id?: string;
   document: string;
   metadata?: Record<string, unknown>;
 }
@@ -173,9 +174,10 @@ async function replay(record: OutboxRecord): Promise<void> {
   }
   const c = record.payload as ChromaProjectionPayload;
   await assertChromaCollectionExists(c.collection);
+  const chromaId = c.id ?? record.entityId;
   await persistenceCall('chromadb', 'add', {
     collection: c.collection,
-    ids: [record.entityId],
+    ids: [chromaId],
     documents: [c.document],
     metadatas: [c.metadata ?? {}],
   });
