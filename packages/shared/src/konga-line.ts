@@ -263,3 +263,70 @@ export interface McsKongaTeamLensResponse {
     entries: McsKongaInviterLeaderboardEntry[];
   };
 }
+
+/**
+ * Authenticated `.team` Konga contracts. Kept separate from the prospect
+ * token contracts so members-only state cannot be serialized by `/api/p` or
+ * `/api/rvm` accidentally.
+ */
+export interface McsKongaTeamGenesisNode {
+  prospectId: string;
+  firstName: string;
+  lastInitial: string;
+  city: string;
+  stateOrRegion: string;
+  invitedAt: McsIsoTimestamp;
+  /** A confirmed invitation is genesis, not a holding-tank placement. */
+  positionNumber: null;
+  sourceAuthority: 'invitation_activity.invitation_sent';
+}
+
+export interface McsKongaTeamPlacementSnapshot {
+  globalMaxPosition: number;
+  recent: McsKongaPlacementTickerEntry[];
+  placementsThisWeek: number;
+  geoSpreadCount: number;
+}
+
+export interface McsKongaTeamSnapshotResponse {
+  ok: true;
+  contractVersion: McsKongaContractVersion;
+  lens: { head: 'self' };
+  head: McsKongaAddedBy;
+  hasFirstInvite: boolean;
+  genesis: McsKongaTeamGenesisNode | null;
+  launchProgress: McsKongaLaunchProgress;
+  placementSnapshot: McsKongaTeamPlacementSnapshot;
+}
+
+export interface McsKongaTeamLeaderboardResponse {
+  ok: true;
+  contractVersion: McsKongaContractVersion;
+  visibility: 'members_only';
+  /** ACR-0034 does not authorize an arbitrary period; adds are lifetime. */
+  period: 'lifetime';
+  sourceAuthority: 'tmag_prospect_htank_placements';
+  entries: McsKongaInviterLeaderboardEntry[];
+}
+
+export type McsKongaTeamStreamEvent =
+  | {
+      event: 'snapshot';
+      id: null;
+      data: McsKongaTeamSnapshotResponse;
+    }
+  | {
+      event: 'placement';
+      id: string;
+      data: McsKongaPlacementEvent;
+    }
+  | {
+      event: 'join';
+      id: string;
+      data: McsJoinEvent;
+    }
+  | {
+      event: 'ping';
+      id: null;
+      data: { at: McsIsoTimestamp };
+    };
