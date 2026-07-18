@@ -286,26 +286,87 @@ async function markFailedAttempt(
   }
 }
 
-async function commitMarker(
+type VisitObservationWithIds = KongaPageVisitObservation & { tokenHash: string; visitRecordId: string };
+
+async function findPendingMarkerForVisit(
+  observation: VisitObservationWithIds,
+  persistence: Persistence,
+): Promise<KongaPageVisitMarker | null> {
+  const markerRows = await persistence<{ documents?: KongaPageVisitMarker[] }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: MARKER_COLLECTION,
+    filter: {
+      tokenHash: observation.tokenHash,
+      pageVisitRecordId: observation.visitRecordId,
+      state: 'pending',
+    },
+    sort: { version: -1 },
+    limit: 10,
+  });
+
+  for (const row of markerRows.documents ?? []) {
+    if (await isMarkerEventVerified(row, persistence)) {
+      return row;
+    }
+  }
+  return null;
+}
+
+function sameCommittedMarkerForVisit(
   marker: KongaPageVisitMarker,
+  observation: VisitObservationWithIds,
+): boolean {
+  return (
+    marker.state === 'committed' &&
+    marker.pageVisitRecordId === observation.visitRecordId &&
+    marker.observedGlobalPosition === observation.observedGlobalPosition &&
+    marker.previousGlobalPosition === observation.previousGlobalPosition &&
+    marker.observedAt === observation.observedAt
+  );
+}
+
+async function ensureCommittedVisitMarker(
   observation: KongaPageVisitObservation & { tokenHash: string; visitRecordId: string },
+  marker: KongaPageVisitMarker | null,
   persistence: Persistence,
   strictVerify: typeof verifyKongaThreeLegs,
   strictWrite: typeof tripleStackWriteWithReadback = tripleStackWriteWithReadback,
 ): Promise<void> {
-  const committed = {
-    ...marker,
-    _id: markerEventId(marker.markerKey, marker.version, 'committed'),
-    markerId: markerEventId(marker.markerKey, marker.version, 'committed'),
-    state: 'committed' as const,
-    observedGlobalPosition: observation.observedGlobalPosition,
-    pageVisitRecordId: observation.visitRecordId,
-    previousVisitRecordId: marker.previousVisitRecordId,
-    observedAt: observation.observedAt,
-  };
+  const snapshot = await readMarkerSnapshot(observation.tokenHash, persistence, strictVerify);
+  if (snapshot.latestValidEvent && sameCommittedMarkerForVisit(snapshot.latestValidEvent, observation)) {
+    return;
+  }
+
+  const baseMarker =
+    marker && marker.pageVisitRecordId === observation.visitRecordId && marker.state !== 'committed'
+      ? marker
+      : await findPendingMarkerForVisit(observation, persistence);
+
+  const repairMarker = baseMarker
+    ? {
+        ...baseMarker,
+        _id: markerEventId(baseMarker.markerKey, baseMarker.version, 'committed'),
+        markerId: markerEventId(baseMarker.markerKey, baseMarker.version, 'committed'),
+        state: 'committed' as const,
+        observedGlobalPosition: observation.observedGlobalPosition,
+        pageVisitRecordId: observation.visitRecordId,
+        previousVisitRecordId: baseMarker.previousVisitRecordId,
+        observedAt: observation.observedAt,
+      }
+    : makeMarkerEvent(
+        markerKey(observation.tokenHash),
+        snapshot.latestEventVersion + 1,
+        'committed',
+        observation.tokenHash,
+        observation.observedAt,
+        observation.observedGlobalPosition,
+        snapshot.committedGlobalPosition,
+        snapshot.committedVisitRecordId,
+        observation.visitRecordId,
+      );
 
   try {
-    await writeMarker(committed, persistence, strictWrite);
+    await writeMarker(repairMarker, persistence, strictWrite);
     return;
   } catch (error) {
     if (!isDuplicateMarkerWriteError(error)) {
@@ -313,7 +374,7 @@ async function commitMarker(
     }
   }
 
-  await strictVerify(markerVerify(committed._id), persistence);
+  await strictVerify(markerVerify(repairMarker._id), persistence);
 }
 
 async function claimVisitMarker(
@@ -438,6 +499,21 @@ export async function observeKongaPageVisit(
   const existing = exact.documents?.[0];
   if (existing) {
     await strictVerify(verify(ids.id), persistence);
+    await ensureCommittedVisitMarker(
+      {
+        pageVisitId: existing.pageVisitId,
+        observedGlobalPosition: existing.observedGlobalPosition,
+        previousGlobalPosition: existing.previousGlobalPosition,
+        sinceLastVisit: existing.sinceLastVisit,
+        observedAt: existing.observedAt,
+        tokenHash: ids.tokenHash,
+        visitRecordId: ids.id,
+      },
+      null,
+      persistence,
+      strictVerify,
+      strictWrite,
+    );
     return existing;
   }
 
@@ -456,11 +532,28 @@ export async function observeKongaPageVisit(
   );
 
   if (claim.mode === 'reuse' && claim.observation) {
-    return claim.observation;
+    const replayed = {
+      pageVisitId: claim.observation.pageVisitId,
+      observedGlobalPosition: claim.observation.observedGlobalPosition,
+      previousGlobalPosition: claim.observation.previousGlobalPosition,
+      sinceLastVisit: claim.observation.sinceLastVisit,
+      observedAt: claim.observation.observedAt,
+      tokenHash: ids.tokenHash,
+      visitRecordId: ids.id,
+    };
+    if (claim.marker) {
+      await ensureCommittedVisitMarker(replayed, claim.marker, persistence, strictVerify, strictWrite);
+    }
+    return {
+      pageVisitId: claim.observation.pageVisitId,
+      observedGlobalPosition: claim.observation.observedGlobalPosition,
+      previousGlobalPosition: claim.observation.previousGlobalPosition,
+      sinceLastVisit: claim.observation.sinceLastVisit,
+      observedAt: claim.observation.observedAt,
+    };
   }
 
   const previousGlobalPosition = claim.previousGlobalPosition;
-  const previousVisitRecordId = claim.previousVisitRecordId;
   const marker = claim.marker;
   const observation: KongaPageVisitObservation & { tokenHash: string; visitRecordId: string } = {
     visitRecordId: ids.id,
@@ -509,6 +602,18 @@ export async function observeKongaPageVisit(
   } catch (error) {
     const winner = await readVerifiedVisitByRecordId(ids.tokenHash, ids.id, persistence, strictVerify).catch(() => null);
     if (winner) {
+      const replayed = {
+        pageVisitId: winner.pageVisitId,
+        observedGlobalPosition: winner.observedGlobalPosition,
+        previousGlobalPosition: winner.previousGlobalPosition,
+        sinceLastVisit: winner.sinceLastVisit,
+        observedAt: winner.observedAt,
+        tokenHash: ids.tokenHash,
+        visitRecordId: ids.id,
+      };
+      if (marker) {
+        await ensureCommittedVisitMarker(replayed, marker, persistence, strictVerify, strictWrite);
+      }
       return winner;
     }
 
@@ -519,7 +624,7 @@ export async function observeKongaPageVisit(
   }
 
   if (marker) {
-    await commitMarker(marker, observation, persistence, strictVerify, strictWrite);
+    await ensureCommittedVisitMarker(observation, marker, persistence, strictVerify, strictWrite);
   }
 
   return {

@@ -451,39 +451,45 @@ describe('Konga reconnect-safe page visits', () => {
     });
 
     let pendingSeen = false;
-    const barrier = makeDeferred();
+    const pendingBarrier = makeDeferred();
+    const releaseBarrier = makeDeferred();
     const originalStrictWrite: StrictWrite = fixture.strictWrite;
     fixture.strictWrite = async (input, strictPersistence = fixture.persistence, writer) => {
       const nextInput = input as { id: string };
       if (nextInput.id.endsWith(':pending')) {
-        pendingSeen = true;
-        barrier.resolve();
+        if (!pendingSeen) {
+          pendingSeen = true;
+          pendingBarrier.resolve();
+        }
+        const result = await originalStrictWrite(input, strictPersistence, writer);
+        await releaseBarrier.promise;
+        return result;
       }
       return originalStrictWrite(input, strictPersistence, writer);
     };
 
     const pageVisitId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-    const [first, second] = await Promise.all([
-      observeKongaPageVisit(
-        {
-          token,
-          pageVisitId,
-          globalMaxPosition: 19,
-          now: new Date('2026-07-17T10:02:00.000Z'),
-        },
-        { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
-      ),
-      observeKongaPageVisit(
-        {
-          token,
-          pageVisitId,
-          globalMaxPosition: 19,
-          now: new Date('2026-07-17T10:03:00.000Z'),
-        },
-        { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
-      ),
-    ]);
-    await barrier.promise;
+    const firstResult = observeKongaPageVisit(
+      {
+        token,
+        pageVisitId,
+        globalMaxPosition: 19,
+        now: new Date('2026-07-17T10:02:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+    const secondResult = observeKongaPageVisit(
+      {
+        token,
+        pageVisitId,
+        globalMaxPosition: 19,
+        now: new Date('2026-07-17T10:03:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+    await pendingBarrier.promise;
+    releaseBarrier.resolve();
+    const [first, second] = await Promise.all([firstResult, secondResult]);
     expect(pendingSeen).toBe(true);
 
     expect(first.previousGlobalPosition).toBe(4);
@@ -492,9 +498,7 @@ describe('Konga reconnect-safe page visits', () => {
     expect(latestMarkerForToken(token, fixture.state.markerRows)?.version).toBe(2);
     expect(latestMarkerForToken(token, fixture.state.markerRows)?.state).toBe('committed');
     expect(first.observedGlobalPosition).toBe(19);
-    expect(first.observedAt).toBe(second.observedAt);
-    expect(first.previousGlobalPosition).toBe(second.previousGlobalPosition);
-    expect(first.sinceLastVisit).toBe(second.sinceLastVisit);
+    expect(first).toEqual(second);
   });
 
   it('serializes two concurrent distinct pageVisitIds into monotonic claim order', async () => {
@@ -609,6 +613,67 @@ describe('Konga reconnect-safe page visits', () => {
     expect(latestMarkerForToken(token, fixture.state.markerRows)?.observedGlobalPosition).toBe(24);
   });
 
+  it('repairs a failed committed marker on same-id retry before returning', async () => {
+    const token = 'TOKEN-COMMIT-MARKER-RETRY';
+    const hash = tokenHash(token);
+    const pageVisitId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+    const pageVisitRecordId = visitRecordId(token, pageVisitId);
+    const fixture = createFixture({
+      seedMarkers: [
+        markerEvent(hash, 1, 'committed', {
+          previousGlobalPosition: null,
+          observedGlobalPosition: 11,
+          previousVisitRecordId: null,
+          pageVisitRecordId: null,
+          observedAt: '2026-07-10T09:00:00.000Z',
+        }),
+      ],
+    });
+
+    let failCommitted = true;
+    const strictWrite: StrictWrite = async (input, strictPersistence = fixture.persistence) => {
+      const nextInput = input as { id: string };
+      if (nextInput.id.endsWith(':committed') && failCommitted) {
+        failCommitted = false;
+        throw new Error('konga_neo4j_readback_not_exact');
+      }
+      return writeDirectToStores(input, strictPersistence) as ReturnType<StrictWrite>;
+    };
+
+    await expect(
+      observeKongaPageVisit(
+        {
+          token,
+          pageVisitId,
+          globalMaxPosition: 28,
+          now: new Date('2026-07-17T10:25:00.000Z'),
+        },
+        { persistence: fixture.persistence, strictWrite },
+      ),
+    ).rejects.toThrow('konga_neo4j_readback_not_exact');
+
+    const replay = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId,
+        globalMaxPosition: 28,
+        now: new Date('2026-07-17T10:26:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite },
+    );
+
+    expect(replay.observedGlobalPosition).toBe(28);
+    expect(replay.observedAt).toBe('2026-07-17T10:25:00.000Z');
+    expect(replay.previousGlobalPosition).toBe(11);
+    expect(replay.sinceLastVisit).toBe(17);
+
+    const marker = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(marker).not.toBeNull();
+    expect(marker?.state).toBe('committed');
+    expect(marker?.pageVisitRecordId).toBe(pageVisitRecordId);
+    expect(marker?.version).toBe(2);
+  });
+
   it('keeps a later distinct visit from advancing from a pending/failing first attempt', async () => {
     const token = 'TOKEN-INTERLEAVE';
     const hash = tokenHash(token);
@@ -629,6 +694,8 @@ describe('Konga reconnect-safe page visits', () => {
     const gate = makeDeferred();
     const release = makeDeferred();
     let entered = false;
+    let pendingObserved = false;
+    const pendingBarrier = makeDeferred();
 
     const fixture = createFixture({
       seedVisits: [baseVisit],
@@ -645,6 +712,10 @@ describe('Konga reconnect-safe page visits', () => {
 
     const strictWrite: StrictWrite = async (input, strictPersistence = fixture.persistence) => {
       const nextInput = input as { id: string; mongoDoc: AnyRec };
+      if (nextInput.id.endsWith(':pending') && !pendingObserved) {
+        pendingObserved = true;
+        pendingBarrier.resolve();
+      }
       if (nextInput.id === failVisitId) {
         entered = true;
         gate.resolve();
@@ -673,6 +744,7 @@ describe('Konga reconnect-safe page visits', () => {
       (error: unknown) => ({ ok: false as const, error }),
     );
     await gate.promise;
+    await pendingBarrier.promise;
     const winner = observeKongaPageVisit(
       {
         token,
@@ -938,13 +1010,21 @@ describe('Konga reconnect-safe page visits', () => {
 
   it('readKongaPageVisit requires exact three-legs readback', async () => {
     const token = 'TOKEN-READBACK-STRICT';
+    const pageVisitId = '11111111-1111-4111-8111-111111111111';
+    const orphanVisitId = visitRecordId(token, pageVisitId);
     const fixture = createFixture({
-      seedVisits: [
+      seedVisits: [],
+    });
+
+    await fixture.persistence('mongodb', 'insert', {
+      database: 'momentum',
+      collection: 'tmag_konga_page_visits',
+      documents: [
         {
-          _id: visitRecordId(token, 'mongo-only'),
-          pageVisitId: 'mongo-only',
+          _id: orphanVisitId,
+          pageVisitId,
           tokenHash: tokenHash(token),
-          visitRecordId: visitRecordId(token, 'mongo-only'),
+          visitRecordId: orphanVisitId,
           observedGlobalPosition: 80,
           previousGlobalPosition: null,
           sinceLastVisit: null,
@@ -953,11 +1033,11 @@ describe('Konga reconnect-safe page visits', () => {
       ],
     });
 
-    const missing = await readKongaPageVisit(
+    const missing = readKongaPageVisit(
       token,
-      '11111111-1111-4111-8111-111111111111',
+      pageVisitId,
       fixture.persistence,
     );
-    expect(missing).toBeNull();
+    await expect(missing).rejects.toThrow('konga_neo4j_readback_not_exact');
   });
 });
