@@ -135,11 +135,21 @@ export async function incrementPoolCounter(): Promise<number> {
  * inside placeProspect.
  */
 export async function findPlacementByProspectId(prospectId: string): Promise<McsPoolPlacement | null> {
+  const liveResult = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: PLACEMENTS_COLLECTION,
+    filter: { prospectId, flushedAt: null },
+    sort: { placedAt: -1 },
+    limit: 1,
+  });
+  if (liveResult.documents[0]) return liveResult.documents[0]!;
+
   const result = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId },
     limit: 1,
+    sort: { placedAt: -1 },
   });
   return result.documents[0] ?? null;
 }
@@ -405,6 +415,7 @@ export interface AgedPlacement {
   positionNumber: number;
   sponsorTmagId: string;
   placedAt: string;
+  placementId?: string;
   /** Whole weeks the prospect has been in the tank (floor). */
   weeksInTank: number;
 }
@@ -419,20 +430,28 @@ export async function listProspectsAgedBeyond(
   nowMs: number = Date.now(),
 ): Promise<AgedPlacement[]> {
   const cutoff = windowCutoffIso(weeks, nowMs);
-  const result = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ results: McsPoolPlacement[] }>('mongodb', 'aggregate', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
-    filter: {
-      flushedAt: null,
-      placedAt: { $lt: cutoff },
-    },
-    sort: { placedAt: -1 },
-    limit: 50_000,
+    pipeline: [
+      { $match: { flushedAt: null, placedAt: { $lt: cutoff } } },
+      { $sort: { prospectId: 1, placedAt: -1 } },
+      {
+        $group: {
+          _id: '$prospectId',
+          placement: { $first: '$$ROOT' },
+        },
+      },
+      { $replaceRoot: { newRoot: '$placement' } },
+      { $sort: { placedAt: -1 } },
+      { $limit: 50_000 },
+    ],
   });
-  return (result.documents ?? []).map<AgedPlacement>((p) => ({
+  return (result.results ?? []).map<AgedPlacement>((p) => ({
     prospectId: p.prospectId,
     positionNumber: p.positionNumber,
     sponsorTmagId: p.sponsorTmagId,
+    placementId: (p as McsPoolPlacement & { placementId?: string }).placementId,
     placedAt: p.placedAt,
     weeksInTank: Math.floor((nowMs - new Date(p.placedAt).getTime()) / ONE_WEEK_MS),
   }));
@@ -481,6 +500,7 @@ export async function flushExpiredPlacements(
       // 1. Placement row — flush stamp. Position untouched.
       await updatePoolPlacementOperational({
         prospectId: c.prospectId,
+        placementId: c.placementId,
         patch: { flushedAt, flushReason: 'expired' },
         relationshipPatch: { flushedAt, flushReason: 'expired' },
       });

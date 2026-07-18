@@ -1046,6 +1046,7 @@ export async function executeMoveIntervention(input: {
   if (ctx.placement) {
     await updatePoolPlacementOperational({
       prospectId: input.prospectId,
+      placementId: (ctx.placement as { placementId?: string }).placementId,
       patch: { sponsorTmagId: input.body.toTmagId, updatedAt: now },
       relationshipPatch: { sponsorTmagId: input.body.toTmagId },
     });
@@ -1132,6 +1133,7 @@ export async function executeReassignSponsorIntervention(input: {
   if (ctx.placement) {
     await updatePoolPlacementOperational({
       prospectId: input.prospectId,
+      placementId: (ctx.placement as { placementId?: string }).placementId,
       patch: { sponsorTmagId: input.body.newSponsorTmagId, updatedAt: now },
       relationshipPatch: { sponsorTmagId: input.body.newSponsorTmagId },
     });
@@ -1217,6 +1219,7 @@ export async function executeManualFlushIntervention(input: {
   const now = new Date().toISOString();
   await updatePoolPlacementOperational({
     prospectId: input.prospectId,
+    placementId: ctx.placement ? (ctx.placement as { placementId?: string }).placementId : undefined,
     patch: {
       flushedAt: now,
       flushReason: 'archived',
@@ -1309,6 +1312,7 @@ export async function executeForceEnrollIntervention(input: {
   if (ctx.placement) {
     await updatePoolPlacementOperational({
       prospectId: input.prospectId,
+      placementId: (ctx.placement as { placementId?: string }).placementId,
       patch: {
         flushedAt: now,
         flushReason: 'enrolled',
