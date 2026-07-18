@@ -59,6 +59,7 @@ type JsonRecord = Record<string, unknown>;
 
 interface ClaimState {
   _id: string;
+  claimEventId?: string;
   prospectId: string;
   placementAttemptId: string;
   placementId: string;
@@ -176,6 +177,10 @@ function claimId(prospectId: string): string {
   return `konga_claim_${prospectId}`;
 }
 
+function buildClaimEventId(claim: { _id: string; ownerAttempt: string; fence: number }): string {
+  return `${claim._id}|${claim.ownerAttempt}|${claim.fence}`;
+}
+
 function chromaMapFor(
   collections: Map<string, Map<string, { document: string; metadata: JsonRecord | null }>>,
   collection: string,
@@ -233,8 +238,11 @@ function createFixture(overrides: {
   }
 
   for (const doc of overrides.initialClaims ?? []) {
-    claims.set(doc._id, { ...doc });
-    claimNeo.set(doc._id, {
+    const claimEventId = doc.claimEventId ?? buildClaimEventId(doc);
+    const claimRecord = { ...doc, claimEventId };
+    claims.set(doc._id, claimRecord);
+    claimNeo.set(claimEventId, {
+      claimEventId,
       claimId: doc._id,
       prospectId: doc.prospectId,
       ownerAttempt: doc.ownerAttempt,
@@ -245,11 +253,12 @@ function createFixture(overrides: {
       heartbeatAt: doc.heartbeatAt,
       expiresAt: doc.expiresAt,
     });
-    claimChroma.set(doc._id, {
-      document: `Konga placement claim ${doc.prospectId} ${doc.ownerAttempt}`,
+    claimChroma.set(claimEventId, {
+      document: `Konga placement claim ${doc.prospectId} ${doc.ownerAttempt} attempt ${doc.placementAttemptId} fence ${doc.fence}`,
       metadata: {
         kind: 'konga_placement_claim',
         claimId: doc._id,
+        claimEventId,
         prospectId: doc.prospectId,
         placementAttemptId: doc.placementAttemptId,
         placementId: doc.placementId,
@@ -303,7 +312,20 @@ function createFixture(overrides: {
           if (collection === PLACEMENT_COLLECTION && placements.has(id)) {
             throw new Error('duplicate key');
           }
-          if (collection === CLAIM_COLLECTION) claims.set(id, { ...doc });
+          if (collection === CLAIM_COLLECTION) {
+            const claimRecord = doc as unknown as ClaimState;
+            const fenceValue = Number(claimRecord.fence);
+            const parsedFence = Number.isFinite(fenceValue) ? Math.trunc(fenceValue) : 0;
+            const claimEventId = String(
+              claimRecord.claimEventId ??
+                buildClaimEventId({
+                  _id: String(claimRecord._id),
+                  ownerAttempt: String(claimRecord.ownerAttempt),
+                  fence: parsedFence,
+                }),
+            );
+            claims.set(id, { ...claimRecord, claimEventId });
+          }
           if (collection === PLACEMENT_COLLECTION) placements.set(id, { ...doc });
         }
         return { insertedCount: docs.length, insertedIds: {} };
@@ -343,9 +365,20 @@ function createFixture(overrides: {
         if (collection === CLAIM_COLLECTION) {
           for (const [id, doc] of claims.entries()) {
             if (filterMatches(doc, filter)) {
+              const claimRecord = doc as unknown as ClaimState;
+              const claimEventId = String(
+                claimRecord.claimEventId ??
+                  buildClaimEventId({
+                    _id: String(claimRecord._id),
+                    ownerAttempt: String(claimRecord.ownerAttempt),
+                    fence: Number.isFinite(Number(claimRecord.fence))
+                      ? Math.trunc(Number(claimRecord.fence))
+                      : 0,
+                  }),
+              );
               claims.delete(id);
-              claimNeo.delete(id);
-              claimChroma.delete(id);
+              claimNeo.delete(claimEventId);
+              claimChroma.delete(claimEventId);
               deleted += 1;
             }
           }
@@ -369,12 +402,15 @@ function createFixture(overrides: {
       const qparams = (params.params as JsonRecord) ?? {};
 
       if (query.includes('TmagKongaPlacementClaim')) {
-        const claimRecordId = String((qparams.id ?? qparams.claimId) ?? '');
+        const claimRecordId = String((qparams.claimEventId ?? qparams.id ?? qparams.claimId) ?? '');
+        const ownerAttemptParam = qparams.ownerAttempt;
+        const fenceParam = qparams.fence;
 
         if (query.includes('MERGE (c:TmagKongaPlacementClaim')) {
           const properties = (qparams.properties as JsonRecord) ?? {};
           claimNeo.set(claimRecordId, {
-            claimId: claimRecordId,
+            claimEventId: claimRecordId,
+            claimId: properties.claimId ?? claimRecordId,
             ...properties,
           });
           return { records: [{ n: 1 }], summary: { counters: {} } };
@@ -384,9 +420,10 @@ function createFixture(overrides: {
           const row = claimNeo.get(claimRecordId);
           const match =
             !!row &&
-            row.claimId === claimRecordId &&
+            row.claimEventId === claimRecordId &&
             row.prospectId === qparams.prospectId &&
-            (qparams.ownerAttempt === undefined || row.ownerAttempt === qparams.ownerAttempt);
+            (ownerAttemptParam === undefined || row.ownerAttempt === ownerAttemptParam) &&
+            (fenceParam === undefined || row.fence === fenceParam);
           const ownerAttempt = row?.ownerAttempt;
           const fence = row?.fence;
           return {
@@ -402,10 +439,10 @@ function createFixture(overrides: {
         if (query.includes('DETACH DELETE c')) {
           for (const [id, row] of claimNeo.entries()) {
             if (id !== claimRecordId) continue;
-            if (qparams.ownerAttempt !== undefined && row.ownerAttempt !== qparams.ownerAttempt) {
+            if (ownerAttemptParam !== undefined && row.ownerAttempt !== ownerAttemptParam) {
               continue;
             }
-            if (qparams.fence !== undefined && row.fence !== qparams.fence) {
+            if (fenceParam !== undefined && row.fence !== fenceParam) {
               continue;
             }
             claimNeo.delete(id);
@@ -833,64 +870,58 @@ describe('Konga placement permanence', () => {
 
   it('reclaims expired claims and prevents stale owner mutation of stale lease attempts', async () => {
     const now = new Date('2026-07-17T20:00:00.000Z');
-    vi.useFakeTimers();
-    vi.setSystemTime(now);
+    const stale: ClaimState = {
+      _id: claimId(input.prospectId),
+      prospectId: input.prospectId,
+      placementAttemptId: 'stale-attempt',
+      placementId: 'stale-placement',
+      ownerAttempt: 'stale-owner',
+      fence: 1,
+      createdAt: new Date(now.getTime() - 120_000).toISOString(),
+      heartbeatAt: new Date(now.getTime() - 120_000).toISOString(),
+      expiresAt: new Date(now.getTime() - 60_000).toISOString(),
+    };
+    const fixture = createFixture({ initialClaims: [stale] });
 
-    try {
-      const stale: ClaimState = {
+    const strictWrite = fixture.strictWrite({
+      id: 'stale-placement-result',
+      mongoCollection: PLACEMENT_COLLECTION,
+      mongoDoc: {},
+      neo4j: { cypher: 'MERGE' },
+      chroma: {
+        collection: CHROMA_COLLECTION,
+        document: 'placement',
+      },
+      neo4jVerify: {
+        cypher:
+          'MATCH (:TmagProspect)-[r:IN_HOLDING_TANK {placementId:$id}]->(:TmagPool {id:$poolId}) RETURN count(r) AS n',
+      },
+    });
+
+    const result = await placeKongaProspect(input, {
+      persistence: fixture.persistence as never,
+      strictWrite,
+      strictVerify: fixture.strictVerify as never,
+      clock: () => now,
+      increment: vi.fn(async () => 77),
+      findBa: vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never,
+    });
+
+    const kongaResult = asKongaResult(result);
+    expect(kongaResult.positionNumber).toBe(77);
+    expect(fixture.state.claims.size).toBe(0);
+
+    const staleWrite = await fixture.persistence('mongodb', 'update', {
+      database: 'momentum',
+      collection: CLAIM_COLLECTION,
+      filter: {
         _id: claimId(input.prospectId),
-        prospectId: input.prospectId,
-        placementAttemptId: 'stale-attempt',
-        placementId: 'stale-placement',
         ownerAttempt: 'stale-owner',
         fence: 1,
-        createdAt: new Date(now.getTime() - 120_000).toISOString(),
-        heartbeatAt: new Date(now.getTime() - 120_000).toISOString(),
-        expiresAt: new Date(now.getTime() - 60_000).toISOString(),
-      };
-      const fixture = createFixture({ initialClaims: [stale] });
-
-      const strictWrite = fixture.strictWrite({
-        id: 'stale-placement-result',
-        mongoCollection: PLACEMENT_COLLECTION,
-        mongoDoc: {},
-        neo4j: { cypher: 'MERGE' },
-        chroma: {
-          collection: CHROMA_COLLECTION,
-          document: 'placement',
-        },
-        neo4jVerify: {
-          cypher:
-            'MATCH (:TmagProspect)-[r:IN_HOLDING_TANK {placementId:$id}]->(:TmagPool {id:$poolId}) RETURN count(r) AS n',
-        },
-      });
-
-      const result = await placeKongaProspect(input, {
-        persistence: fixture.persistence as never,
-        strictWrite,
-        strictVerify: fixture.strictVerify as never,
-        increment: vi.fn(async () => 77),
-        findBa: vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never,
-      });
-
-      const kongaResult = asKongaResult(result);
-      expect(kongaResult.positionNumber).toBe(77);
-      expect(fixture.state.claims.size).toBe(0);
-
-      const staleWrite = await fixture.persistence('mongodb', 'update', {
-        database: 'momentum',
-        collection: CLAIM_COLLECTION,
-        filter: {
-          _id: claimId(input.prospectId),
-          ownerAttempt: 'stale-owner',
-          fence: 1,
-        },
-        update: { $set: { ownerAttempt: 'no-op' } },
-      });
-      expect(staleWrite.matchedCount).toBe(0);
-    } finally {
-      vi.useRealTimers();
-    }
+      },
+      update: { $set: { ownerAttempt: 'no-op' } },
+    });
+    expect(staleWrite.matchedCount).toBe(0);
   });
 
   it('serializes concurrent same-attempt calls so only one writer persists', async () => {
@@ -952,7 +983,7 @@ describe('Konga placement permanence', () => {
       persistence: fixture.persistence as never,
       strictWrite,
       strictVerify: fixture.strictVerify as never,
-      claimAcquireYield: () => blockWrite.wait(),
+      claimAcquireYield: (_ms?: number) => blockWrite.wait(),
       claimAcquireMaxAttempts: 40,
       increment: vi.fn(async () => 52),
       findBa: vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never,
@@ -1051,8 +1082,9 @@ describe('Konga placement permanence', () => {
       initialClaims: [existingClaim],
     });
     // Remove neo/chroma projections to force a partial-failure readback path.
-    fixture.state.claimNeo.delete(existingClaim._id);
-    fixture.state.claimChroma.delete(existingClaim._id);
+    const existingClaimEventId = buildClaimEventId(existingClaim);
+    fixture.state.claimNeo.delete(existingClaimEventId);
+    fixture.state.claimChroma.delete(existingClaimEventId);
 
     const strictWrite = fixture.strictWrite({
       id: 'claim-partial-fix',
@@ -1079,8 +1111,8 @@ describe('Konga placement permanence', () => {
     const kongaResult = asKongaResult(result);
     expect(kongaResult.alreadyPlaced).toBe(false);
     expect(fixture.state.claims.has(existingClaim._id)).toBe(false);
-    expect(fixture.state.claimNeo.has(existingClaim._id)).toBe(false);
-    expect(fixture.state.claimChroma.has(existingClaim._id)).toBe(false);
+    expect(fixture.state.claimNeo.has(existingClaimEventId)).toBe(false);
+    expect(fixture.state.claimChroma.has(existingClaimEventId)).toBe(false);
   });
 
   it('projects legacy attribution as null without backfill', () => {

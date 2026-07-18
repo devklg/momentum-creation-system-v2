@@ -22,6 +22,13 @@ const PROSPECTS_COLLECTION = 'tmag_prospects';
 const KONGA_PLACEMENT_CLAIM_COLLECTION = 'tmag_konga_placement_claims';
 const KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION = 'mcs_konga_placement_claims';
 const KONGA_PLACEMENT_CLAIM_TTL_MS = 120_000;
+const CLAIM_HEARTBEAT_INTERVAL_MS = 100;
+const CLAIM_ACQUIRE_BASE_DELAY_MS = 20;
+const CLAIM_ACQUIRE_MAX_DELAY_MS = 200;
+const CLAIM_ACQUIRE_MAX_RETRIES = 12;
+const CLAIM_CLEANUP_ATTEMPTS = 4;
+const CLAIM_CLEANUP_BACKOFF_MS = 25;
+const CLAIM_IDENTITY_SEPARATOR = '|';
 
 type Persistence = typeof persistenceCall;
 type Publish = typeof publishPlacement;
@@ -30,6 +37,7 @@ type Increment = typeof incrementPoolCounter;
 
 interface KongaPlacementClaim {
   _id: string;
+  claimEventId: string;
   prospectId: string;
   placementAttemptId: string;
   placementId: string;
@@ -59,6 +67,10 @@ function claimDocumentId(prospectId: string): string {
   return `konga_claim_${prospectId}`;
 }
 
+function buildClaimEventId(claimId: string, ownerAttempt: string, fence: number): string {
+  return `${claimId}${CLAIM_IDENTITY_SEPARATOR}${ownerAttempt}${CLAIM_IDENTITY_SEPARATOR}${fence}`;
+}
+
 function claimExpiresAt(at: Date): string {
   return new Date(at.getTime() + KONGA_PLACEMENT_CLAIM_TTL_MS).toISOString();
 }
@@ -84,6 +96,7 @@ function isExpired(claim: KongaPlacementClaim, now: Date): boolean {
 function normalizeClaim(candidate: Record<string, unknown>): KongaPlacementClaim {
   return {
     _id: String(candidate._id),
+    claimEventId: String(candidate.claimEventId),
     prospectId: String(candidate.prospectId),
     placementAttemptId: String(candidate.placementAttemptId),
     placementId: String(candidate.placementId),
@@ -103,6 +116,7 @@ function claimToMetadata(claim: KongaPlacementClaim) {
   return {
     kind: 'konga_placement_claim',
     claimId: claim._id,
+    claimEventId: claim.claimEventId,
     prospectId: claim.prospectId,
     placementAttemptId: claim.placementAttemptId,
     placementId: claim.placementId,
@@ -122,8 +136,10 @@ function buildClaimInput(
   at: Date,
 ): KongaPlacementClaim {
   const nowIso = claimNow(at);
+  const claimId = claimDocumentId(prospectId);
   return {
-    _id: claimDocumentId(prospectId),
+    _id: claimId,
+    claimEventId: buildClaimEventId(claimId, ownerAttempt, fence),
     prospectId,
     placementAttemptId: identity.placementAttemptId,
     placementId: identity.placementId,
@@ -160,10 +176,10 @@ async function verifyClaimProjection(
     }),
     persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
       query:
-        'MATCH (c:TmagKongaPlacementClaim {claimId:$id, prospectId:$prospectId}) ' +
+        'MATCH (c:TmagKongaPlacementClaim {claimEventId:$claimEventId, prospectId:$prospectId}) ' +
         'WHERE c.ownerAttempt = $ownerAttempt AND c.fence = $fence RETURN count(c) AS n, c.fence AS fence, c.ownerAttempt AS ownerAttempt',
       params: {
-        id: claim._id,
+        claimEventId: claim.claimEventId,
         prospectId: claim.prospectId,
         ownerAttempt: claim.ownerAttempt,
         fence: claim.fence,
@@ -171,7 +187,7 @@ async function verifyClaimProjection(
     }),
     persistence<ChromaClaimRecord>('chromadb', 'get', {
       collection: KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION,
-      ids: [claim._id],
+      ids: [claim.claimEventId],
     }),
   ]);
 
@@ -188,14 +204,15 @@ async function verifyClaimProjection(
   }
   assertMetadataValue(neo?.fence, claim.fence);
   assertMetadataValue(neo?.ownerAttempt, claim.ownerAttempt);
-  if (!(chromaResult.ids ?? []).includes(claim._id)) {
-    throw new Error(`konga_placement_claim_chroma_missing:${claim._id}`);
+  if (!(chromaResult.ids ?? []).includes(claim.claimEventId)) {
+    throw new Error(`konga_placement_claim_chroma_missing:${claim.claimEventId}`);
   }
   const firstMetadata = chromaResult.metadatas?.[0];
   if (!firstMetadata) {
     throw new Error(`konga_placement_claim_chroma_missing_metadata:${claim._id}`);
   }
   assertMetadataValue(firstMetadata.claimId, claim._id);
+  assertMetadataValue(firstMetadata.claimEventId, claim.claimEventId);
   assertMetadataValue(firstMetadata.ownerAttempt, claim.ownerAttempt);
   assertMetadataValue(firstMetadata.fence, claim.fence);
   assertMetadataValue(firstMetadata.placementAttemptId, claim.placementAttemptId);
@@ -229,10 +246,12 @@ async function writeClaimMongo(
       prospectId: claim.prospectId,
       ownerAttempt: ownerAttemptFilter,
       fence: claim.fence,
+      claimEventId: claim.claimEventId,
       placementAttemptId: claim.placementAttemptId,
     },
     update: {
       $set: {
+        claimEventId: claim.claimEventId,
         placementAttemptId: claim.placementAttemptId,
         placementId: claim.placementId,
         ownerAttempt: claim.ownerAttempt,
@@ -252,33 +271,81 @@ async function cleanupClaimProjection(
   persistence: Persistence,
   claim: KongaPlacementClaim,
 ): Promise<void> {
-  await Promise.allSettled([
-    persistence('mongodb', 'delete', {
-      database: MONGO_DB,
-      collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
-      filter: {
-        _id: claim._id,
-        ownerAttempt: claim.ownerAttempt,
-        fence: claim.fence,
-      },
-    }),
-    persistence('neo4j', 'cypher', {
-      query:
-        'MATCH (c:TmagKongaPlacementClaim {claimId:$id, prospectId:$prospectId}) ' +
-        'WHERE c.ownerAttempt = $ownerAttempt AND c.fence = $fence ' +
-        'DETACH DELETE c',
-      params: {
-        id: claim._id,
-        prospectId: claim.prospectId,
-        ownerAttempt: claim.ownerAttempt,
-        fence: claim.fence,
-      },
-    }),
-    persistence('chromadb', 'delete', {
-      collection: KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION,
-      ids: [claim._id],
-    }),
-  ]);
+  for (let attempt = 0; attempt < CLAIM_CLEANUP_ATTEMPTS; attempt += 1) {
+    await Promise.all([
+      persistence('mongodb', 'delete', {
+        database: MONGO_DB,
+        collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+        filter: {
+          _id: claim._id,
+          ownerAttempt: claim.ownerAttempt,
+          fence: claim.fence,
+          claimEventId: claim.claimEventId,
+        },
+      }),
+      persistence('neo4j', 'cypher', {
+        query:
+          'MATCH (c:TmagKongaPlacementClaim {claimEventId:$claimEventId, prospectId:$prospectId}) ' +
+          'WHERE c.ownerAttempt = $ownerAttempt AND c.fence = $fence ' +
+          'DETACH DELETE c',
+        params: {
+          claimEventId: claim.claimEventId,
+          prospectId: claim.prospectId,
+          ownerAttempt: claim.ownerAttempt,
+          fence: claim.fence,
+        },
+      }),
+      persistence('chromadb', 'delete', {
+        collection: KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION,
+        ids: [claim.claimEventId],
+      }),
+    ]);
+
+    const [mongoResult, neoResult, chromaResult] = await Promise.all([
+      persistence<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
+        database: MONGO_DB,
+        collection: KONGA_PLACEMENT_CLAIM_COLLECTION,
+        filter: {
+          _id: claim._id,
+          ownerAttempt: claim.ownerAttempt,
+          fence: claim.fence,
+          claimEventId: claim.claimEventId,
+        },
+        limit: 1,
+      }),
+      persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+        query:
+          'MATCH (c:TmagKongaPlacementClaim {claimEventId:$claimEventId, prospectId:$prospectId}) ' +
+          'WHERE c.ownerAttempt = $ownerAttempt AND c.fence = $fence ' +
+          'RETURN count(c) AS n',
+        params: {
+          claimEventId: claim.claimEventId,
+          prospectId: claim.prospectId,
+          ownerAttempt: claim.ownerAttempt,
+          fence: claim.fence,
+        },
+      }),
+      persistence<{ ids?: string[] }>('chromadb', 'get', {
+        collection: KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION,
+        ids: [claim.claimEventId],
+      }),
+    ]);
+
+    const mongoClear = !mongoResult.documents?.[0];
+    const neoClear = Number(neoResult.records?.[0]?.n ?? 0) === 0;
+    const chromaClear = !(chromaResult.ids ?? []).includes(claim.claimEventId);
+    if (mongoClear && neoClear && chromaClear) {
+      return;
+    }
+
+    if (attempt + 1 < CLAIM_CLEANUP_ATTEMPTS) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, CLAIM_CLEANUP_BACKOFF_MS * (attempt + 1));
+      });
+    }
+  }
+
+  throw new Error(`konga_placement_claim_projection_cleanup_failed:${claim._id}`);
 }
 
 async function writeClaimProjection(
@@ -296,10 +363,10 @@ async function writeClaimProjection(
     await Promise.all([
       persistence('neo4j', 'cypher', {
         query:
-          'MERGE (c:TmagKongaPlacementClaim {claimId:$id, prospectId:$prospectId}) ' +
+          'MERGE (c:TmagKongaPlacementClaim {claimEventId:$claimEventId, prospectId:$prospectId}) ' +
           'SET c += $properties',
         params: {
-          id: claim._id,
+          claimEventId: claim.claimEventId,
           prospectId: claim.prospectId,
           properties: {
             ...claimToMetadata(claim),
@@ -308,7 +375,7 @@ async function writeClaimProjection(
       }),
       persistence('chromadb', 'add', {
         collection: KONGA_PLACEMENT_CLAIM_CHROMA_COLLECTION,
-        ids: [claim._id],
+        ids: [claim.claimEventId],
         documents: [
           `Konga placement claim ${claim.prospectId} ${claim.ownerAttempt} attempt ` +
           `${claim.placementAttemptId} fence ${claim.fence}`,
@@ -388,6 +455,7 @@ async function reclaimPlacementClaim(
     },
     update: {
       $set: {
+        claimEventId: claim.claimEventId,
         ownerAttempt: claim.ownerAttempt,
         fence: claim.fence,
         placementAttemptId: claim.placementAttemptId,
@@ -404,37 +472,113 @@ async function reclaimPlacementClaim(
   return claim;
 }
 
+function claimAcquireDelayMs(attempt: number): number {
+  return Math.min(CLAIM_ACQUIRE_MAX_DELAY_MS, CLAIM_ACQUIRE_BASE_DELAY_MS * 2 ** attempt);
+}
+
+async function waitMs(deps: PlacementDeps, ms: number): Promise<void> {
+  if (ms <= 0) return;
+  if (deps.claimHeartbeatSleep) {
+    await deps.claimHeartbeatSleep(ms);
+    return;
+  }
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function loadVerifiedAttemptPlacement(
+  persistence: Persistence,
+  identity: { placementAttemptId: string },
+  strictVerify: typeof verifyKongaThreeLegs,
+  ownerFence?: { ownerAttempt: string; fence: number },
+): Promise<McsKongaPoolPlacement | null> {
+  const placement = await readPlacementByAttempt(persistence, identity);
+  if (!placement) return null;
+  const fencedPlacement = placement as McsKongaPoolPlacement & {
+    ownerAttempt?: string;
+    fence?: unknown;
+  };
+  if (
+    ownerFence &&
+    (fencedPlacement.ownerAttempt !== ownerFence.ownerAttempt ||
+      parseFence(fencedPlacement.fence) !== ownerFence.fence)
+  ) {
+    return null;
+  }
+
+  try {
+    await strictVerify(
+      {
+        id: placement.placementId,
+        mongoCollection: PLACEMENTS_COLLECTION,
+        neo4jVerify: {
+          cypher:
+            'MATCH (:TmagProspect {prospectId:$prospectId})-[r:IN_HOLDING_TANK {placementId:$id}]->' +
+            '(:TmagPool {id:$poolId}) RETURN count(r) AS n',
+          params: {
+            poolId: TEAM_POOL_ID,
+            prospectId: placement.prospectId,
+            id: placement.placementId,
+          },
+        },
+        chromaCollection: CHROMA_COLLECTION,
+      },
+      persistence,
+    );
+    return placement;
+  } catch {
+    return null;
+  }
+}
+
 async function acquirePlacementClaim(
   persistence: Persistence,
   prospectId: string,
   identity: { placementAttemptId: string; placementId: string },
-  now: Date,
   deps: PlacementDeps,
 ): Promise<PlacementClaimAcquireResult> {
-  const maxAttempts = Math.max(4, deps.claimAcquireMaxAttempts ?? 12);
-  const wait = deps.claimAcquireYield ?? (() => Promise.resolve());
+  const maxAttempts = Math.max(4, deps.claimAcquireMaxAttempts ?? CLAIM_ACQUIRE_MAX_RETRIES);
+  const maxDelayAttempt = Math.max(1, maxAttempts - 2);
   const claimId = claimDocumentId(prospectId);
   const ownerAttempt = `konga_owner_${randomUUID()}`;
+  const nowClock = deps.clock ?? (() => new Date());
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const duplicate = await loadSameAttemptPlacement(persistence, identity);
+    const duplicate = await loadVerifiedAttemptPlacement(
+      persistence,
+      identity,
+      deps.strictVerify ?? verifyKongaThreeLegs,
+    );
     if (duplicate) {
       return { kind: 'same-attempt-seen', placement: duplicate };
     }
 
     const current = await readClaim(persistence, claimId);
     if (!current) {
+      const now = nowClock();
       const claim = buildClaimInput(prospectId, identity, ownerAttempt, 1, now);
       try {
         await writeClaimProjection(persistence, claim, 'create');
         return { kind: 'acquired', lease: claim };
       } catch (error) {
         if (isDuplicateError(error)) {
-          const raced = await loadSameAttemptPlacement(persistence, identity);
+          const raced = await loadVerifiedAttemptPlacement(
+            persistence,
+            identity,
+            deps.strictVerify ?? verifyKongaThreeLegs,
+          );
           if (raced) {
             return { kind: 'same-attempt-seen', placement: raced };
           }
-          await wait();
+          if (attempt + 1 < maxAttempts) {
+            const delay = claimAcquireDelayMs(Math.min(attempt + 1, maxDelayAttempt));
+            if (deps.claimAcquireYield) {
+              await deps.claimAcquireYield(delay);
+            } else {
+              await waitMs(deps, delay);
+            }
+          }
           continue;
         }
         throw error;
@@ -442,6 +586,7 @@ async function acquirePlacementClaim(
     }
 
     if (current.placementAttemptId === identity.placementAttemptId) {
+      const now = nowClock();
       if (isExpired(current, now)) {
         const reclaimed = await reclaimPlacementClaim(persistence, current, identity, now);
         if (reclaimed) {
@@ -449,22 +594,37 @@ async function acquirePlacementClaim(
         }
       }
       if (attempt + 1 < maxAttempts) {
-        await wait();
+        const delay = claimAcquireDelayMs(Math.min(attempt + 1, maxDelayAttempt));
+        if (deps.claimAcquireYield) {
+          await deps.claimAcquireYield(delay);
+        } else {
+          await waitMs(deps, delay);
+        }
       }
       continue;
     }
 
+    const now = nowClock();
     if (isExpired(current, now)) {
       const reclaimed = await reclaimPlacementClaim(persistence, current, identity, now);
       if (reclaimed) return { kind: 'acquired', lease: reclaimed };
     }
 
     if (attempt + 1 < maxAttempts) {
-      await wait();
+      const delay = claimAcquireDelayMs(Math.min(attempt + 1, maxDelayAttempt));
+      if (deps.claimAcquireYield) {
+        await deps.claimAcquireYield(delay);
+      } else {
+        await waitMs(deps, delay);
+      }
     }
   }
 
-  const resolved = await loadSameAttemptPlacement(persistence, identity);
+  const resolved = await loadVerifiedAttemptPlacement(
+    persistence,
+    identity,
+    deps.strictVerify ?? verifyKongaThreeLegs,
+  );
   if (resolved) return { kind: 'same-attempt-seen', placement: resolved };
   throw new Error(`konga_placement_claim_conflict:${prospectId}`);
 }
@@ -537,6 +697,7 @@ async function ensurePlacementReadback(
 async function repairPlacementProjection(
   persistence: Persistence,
   placement: McsKongaPoolPlacement,
+  claim?: { ownerAttempt: string; fence: number },
 ): Promise<void> {
   const placementProfile = placement as {
     firstName?: string;
@@ -552,6 +713,7 @@ async function repairPlacementProjection(
     sponsorTmagId: placement.sponsorTmagId,
     addedByFirstName: placement.addedBy?.firstName ?? '',
     addedByLastInitial: placement.addedBy?.lastInitial ?? '',
+    ...(claim ? { ownerAttempt: claim.ownerAttempt, fence: claim.fence } : {}),
   };
 
   await Promise.all([
@@ -597,6 +759,7 @@ async function repairPlacementProjection(
           placedAt: placement.placedAt,
           addedByFirstName: placement.addedBy?.firstName,
           addedByLastInitial: placement.addedBy?.lastInitial,
+          ...(claim ? { ownerAttempt: claim.ownerAttempt, fence: claim.fence } : {}),
         },
       ],
     }),
@@ -607,9 +770,9 @@ async function repairPlacementProjection(
     mongoCollection: PLACEMENTS_COLLECTION,
     neo4jVerify: {
       cypher:
-        'MATCH (:TmagProspect {prospectId:$id})-[r:IN_HOLDING_TANK {placementId:$id}]->' +
+        'MATCH (:TmagProspect {prospectId:$prospectId})-[r:IN_HOLDING_TANK {placementId:$placementId}]->' +
         '(:TmagPool {id:$poolId}) RETURN count(r) AS n',
-      params: { poolId: TEAM_POOL_ID },
+      params: { poolId: TEAM_POOL_ID, prospectId: placement.prospectId, placementId: placement.placementId },
     },
     chromaCollection: CHROMA_COLLECTION,
   };
@@ -623,37 +786,69 @@ async function cleanupPlacementAttempt(
   persistence: Persistence,
   placement: McsKongaPoolPlacement,
 ): Promise<void> {
-  await Promise.allSettled([
-    persistence('mongodb', 'delete', {
-      database: MONGO_DB,
-      collection: PLACEMENTS_COLLECTION,
-      filter: {
-        placementId: placement.placementId,
-        placementAttemptId: placement.placementAttemptId,
-        prospectId: placement.prospectId,
-      },
-    }),
-    persistence('neo4j', 'cypher', {
-      query:
-        'MATCH (p:TmagProspect {prospectId:$prospectId})-[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
-        'DELETE r',
-      params: {
-        prospectId: placement.prospectId,
-        placementId: placement.placementId,
-      },
-    }),
-    persistence('chromadb', 'delete', {
-      collection: CHROMA_COLLECTION,
-      ids: [placement.placementId],
-    }),
-  ]);
-}
+  const deleteFilter: Record<string, unknown> = {
+    placementId: placement.placementId,
+    placementAttemptId: placement.placementAttemptId,
+    prospectId: placement.prospectId,
+  };
+  const neoFilter = {
+    prospectId: placement.prospectId,
+    placementId: placement.placementId,
+  };
 
-async function loadSameAttemptPlacement(
-  persistence: Persistence,
-  identity: { placementAttemptId: string },
-): Promise<McsKongaPoolPlacement | null> {
-  return readPlacementByAttempt(persistence, identity);
+  for (let attempt = 0; attempt < CLAIM_CLEANUP_ATTEMPTS; attempt += 1) {
+    await Promise.all([
+      persistence('mongodb', 'delete', {
+        database: MONGO_DB,
+        collection: PLACEMENTS_COLLECTION,
+        filter: deleteFilter,
+      }),
+      persistence('neo4j', 'cypher', {
+        query:
+          'MATCH (p:TmagProspect {prospectId:$prospectId})-[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
+          'DELETE r',
+        params: neoFilter,
+      }),
+      persistence('chromadb', 'delete', {
+        collection: CHROMA_COLLECTION,
+        ids: [placement.placementId],
+      }),
+    ]);
+
+    const [mongoResult, neoResult, chromaResult] = await Promise.all([
+      persistence<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
+        database: MONGO_DB,
+        collection: PLACEMENTS_COLLECTION,
+        filter: deleteFilter,
+        limit: 1,
+      }),
+      persistence<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
+        query:
+          'MATCH (:TmagProspect)-[r:IN_HOLDING_TANK {placementId:$placementId}]->(:TmagPool) ' +
+          'RETURN count(r) AS n',
+        params: neoFilter,
+      }),
+      persistence<{ ids?: string[] }>('chromadb', 'get', {
+        collection: CHROMA_COLLECTION,
+        ids: [placement.placementId],
+      }),
+    ]);
+
+    const mongoClear = !mongoResult.documents?.[0];
+    const neoClear = Number(neoResult.records?.[0]?.n ?? 0) === 0;
+    const chromaClear = !(chromaResult.ids ?? []).includes(placement.placementId);
+    if (mongoClear && neoClear && chromaClear) {
+      return;
+    }
+
+    if (attempt + 1 < CLAIM_CLEANUP_ATTEMPTS) {
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, CLAIM_CLEANUP_BACKOFF_MS * (attempt + 1));
+      });
+    }
+  }
+
+  throw new Error(`konga_placement_projection_cleanup_failed:${placement.placementId}`);
 }
 
 function placementVerify(inputId: string) {
@@ -705,7 +900,9 @@ interface PlacementDeps {
   strictWrite?: typeof tripleStackWriteWithReadback;
   strictVerify?: typeof verifyKongaThreeLegs;
   claimAcquireMaxAttempts?: number;
-  claimAcquireYield?: () => Promise<void>;
+  claimAcquireYield?: (ms: number) => Promise<void>;
+  clock?: () => Date;
+  claimHeartbeatSleep?: (ms: number) => Promise<void>;
 }
 
 function publicAddedBy(ba: Awaited<ReturnType<FindBa>>): McsKongaAddedBy {
@@ -734,9 +931,23 @@ export async function placeKongaProspect(
   const persistence = deps.persistence ?? persistenceCall;
   const strictWrite = deps.strictWrite ?? tripleStackWriteWithReadback;
   const strictVerify = deps.strictVerify ?? verifyKongaThreeLegs;
+  const nowClock = deps.clock ?? (() => new Date());
   const identity = deriveKongaPlacementIdentity(input);
+  const sameAttemptPlacementVerification = async (
+    identityToMatch: { placementAttemptId: string },
+    ownerFilter?: { ownerAttempt: string; fence: number },
+  ) =>
+    loadVerifiedAttemptPlacement(
+      persistence,
+      identityToMatch,
+      strictVerify,
+      ownerFilter,
+    );
+  const sameAttemptPlacementRaw = async (
+    identityToMatch: { placementAttemptId: string },
+  ): Promise<McsKongaPoolPlacement | null> => readPlacementByAttempt(persistence, identityToMatch);
 
-  const sameAttempt = await loadSameAttemptPlacement(persistence, identity);
+  const sameAttempt = await sameAttemptPlacementRaw(identity);
   if (sameAttempt) {
     if (sameAttempt.prospectId !== input.prospectId || sameAttempt.sponsorTmagId !== input.sponsorTmagId) {
       throw new Error('konga_attempt_identity_conflict');
@@ -778,7 +989,7 @@ export async function placeKongaProspect(
   const ba = await (deps.findBa ?? findBAByTmagId)(input.sponsorTmagId);
   const addedBy = publicAddedBy(ba);
   const positionNumber = await (deps.increment ?? incrementPoolCounter)();
-  const now = input.now ?? new Date();
+  const now = input.now ?? nowClock();
   const placedAt = now.toISOString();
   const placement: McsKongaPoolPlacement & {
     firstName: string;
@@ -801,7 +1012,7 @@ export async function placeKongaProspect(
     addedBy,
   };
 
-  const acquireResult = await acquirePlacementClaim(persistence, input.prospectId, identity, now, deps);
+  const acquireResult = await acquirePlacementClaim(persistence, input.prospectId, identity, deps);
   if (acquireResult.kind === 'same-attempt-seen' && acquireResult.placement) {
     await ensurePlacementReadback(acquireResult.placement, strictVerify, persistence);
     return resultOf(acquireResult.placement, true);
@@ -811,6 +1022,22 @@ export async function placeKongaProspect(
   if (!lease) {
     throw new Error(`konga_placement_claim_conflict:${input.prospectId}`);
   }
+
+  let activeLease: KongaPlacementClaim = lease;
+  let heartbeatLostError: unknown = null;
+  let heartbeatStopped = false;
+  const heartbeatTask = (async () => {
+    while (!heartbeatStopped) {
+      await waitMs(deps, CLAIM_HEARTBEAT_INTERVAL_MS);
+      if (heartbeatStopped) break;
+      try {
+        activeLease = await heartbeatPlacementClaim(persistence, activeLease, nowClock());
+      } catch (error) {
+        heartbeatLostError = error;
+        heartbeatStopped = true;
+      }
+    }
+  })();
 
   const concurrentPlacementCheck = await persistence<{ documents?: Array<McsPoolPlacement> }>(
     'mongodb',
@@ -828,15 +1055,20 @@ export async function placeKongaProspect(
   }
 
   try {
-    await assertLeaseOwner(persistence, lease, now);
-    const leased = await heartbeatPlacementClaim(persistence, lease, now);
-    await assertLeaseOwner(persistence, leased, now);
+    await assertLeaseOwner(persistence, activeLease, nowClock());
+    if (heartbeatLostError) {
+      throw new Error(`konga_placement_claim_heartbeat_lost:${input.prospectId}`);
+    }
 
     await strictWrite(
       {
         id: identity.placementId,
         mongoCollection: PLACEMENTS_COLLECTION,
-        mongoDoc: { ...placement },
+        mongoDoc: {
+          ...placement,
+          ownerAttempt: activeLease.ownerAttempt,
+          fence: activeLease.fence,
+        },
         neo4j: {
           cypher:
             'MERGE (pool:TmagPool {id:$poolId}) ' +
@@ -853,6 +1085,8 @@ export async function placeKongaProspect(
               sponsorTmagId: input.sponsorTmagId,
               addedByFirstName: addedBy.firstName,
               addedByLastInitial: addedBy.lastInitial,
+              ownerAttempt: activeLease.ownerAttempt,
+              fence: activeLease.fence,
             },
           },
         },
@@ -871,14 +1105,19 @@ export async function placeKongaProspect(
             placedAt,
             addedByFirstName: addedBy.firstName,
             addedByLastInitial: addedBy.lastInitial,
+            ownerAttempt: activeLease.ownerAttempt,
+            fence: activeLease.fence,
           },
         },
         neo4jVerify: placementVerify(identity.placementId).neo4jVerify,
       },
       persistence,
     );
+    if (heartbeatLostError) {
+      throw new Error(`konga_placement_claim_heartbeat_lost:${input.prospectId}`);
+    }
+    await assertLeaseOwner(persistence, activeLease, nowClock());
 
-    await assertLeaseOwner(persistence, leased, now);
     const prospectUpdate = await persistence<{ matchedCount?: number; modifiedCount?: number }>(
       'mongodb',
       'update',
@@ -935,19 +1174,47 @@ export async function placeKongaProspect(
     (deps.publish ?? publishPlacement)(event);
     return resultOf(placement, false);
   } catch (error) {
-    const sameAttemptPlacement = await loadSameAttemptPlacement(persistence, identity);
-    if (sameAttemptPlacement) {
-      try {
-        await repairPlacementProjection(persistence, sameAttemptPlacement);
-        await ensurePlacementReadback(sameAttemptPlacement, strictVerify, persistence);
-        return resultOf(sameAttemptPlacement, true);
-      } catch (repairError) {
-        await cleanupPlacementAttempt(persistence, sameAttemptPlacement);
-        throw repairError;
+    const sameAttemptPlacement = await sameAttemptPlacementRaw(identity);
+    const fencedSameAttemptPlacement = sameAttemptPlacement as
+      | (McsKongaPoolPlacement & { ownerAttempt?: string; fence?: unknown })
+      | null;
+    const isOwnOwnerAttempt =
+      fencedSameAttemptPlacement?.ownerAttempt === activeLease.ownerAttempt &&
+      parseFence(fencedSameAttemptPlacement?.fence) === activeLease.fence;
+
+    if (isOwnOwnerAttempt) {
+      if (sameAttemptPlacement) {
+        try {
+          await repairPlacementProjection(
+            persistence,
+            sameAttemptPlacement,
+            { ownerAttempt: activeLease.ownerAttempt, fence: activeLease.fence },
+          );
+          await ensurePlacementReadback(sameAttemptPlacement, strictVerify, persistence);
+          return resultOf(sameAttemptPlacement, true);
+        } catch (repairError) {
+          await cleanupPlacementAttempt(persistence, sameAttemptPlacement);
+          throw repairError;
+        }
       }
+    } else if (
+      sameAttemptPlacement &&
+      (fencedSameAttemptPlacement?.ownerAttempt !== undefined || fencedSameAttemptPlacement?.fence !== undefined)
+    ) {
+      await cleanupPlacementAttempt(persistence, sameAttemptPlacement);
     }
+
+    const sameAttemptPlacementVerified = await sameAttemptPlacementVerification(identity, {
+      ownerAttempt: activeLease.ownerAttempt,
+      fence: activeLease.fence,
+    });
+    if (sameAttemptPlacementVerified) return resultOf(sameAttemptPlacementVerified, true);
     throw error;
   } finally {
+    heartbeatStopped = true;
+    heartbeatTask.catch(() => {
+      /* intentional: heartbeat stop is enforced by boolean signal */
+    });
     await releasePlacementClaim(persistence, lease).catch(() => {
       // Non-throwing release keeps prior outcomes authoritative.
     });
