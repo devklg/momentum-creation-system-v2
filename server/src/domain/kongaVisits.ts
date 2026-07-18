@@ -4,6 +4,28 @@ import { tripleStackWriteWithReadback, verifyKongaThreeLegs } from './kongaPersi
 
 const COLLECTION = 'tmag_konga_page_visits';
 const CHROMA_COLLECTION = 'mcs_konga_page_visits';
+const MARKER_COLLECTION = 'tmag_konga_visit_markers';
+const MAX_MARKER_ATTEMPTS = 8;
+
+const MARKER_KEY_PREFIX = 'konga_visit_marker_';
+
+interface KongaPageVisitMarker {
+  _id: string;
+  tokenHash: string;
+  version: number;
+  observedGlobalPosition: number | null;
+  lastVisitRecordId: string | null;
+  observedAt: string;
+}
+
+interface MarkerClaim {
+  mode: 'inserted' | 'advanced';
+  markerId: string;
+  tokenHash: string;
+  previousGlobalPosition: number | null;
+  claimedVersion: number;
+  previousMarker: KongaPageVisitMarker;
+}
 
 export interface KongaPageVisitObservation {
   pageVisitId: string;
@@ -31,6 +53,10 @@ function identity(token: string, pageVisitId: string): { id: string; tokenHash: 
   return { tokenHash, id: `konga_visit_${sha(`${tokenHash}|${pageVisitId}`)}` };
 }
 
+function markerId(tokenHash: string): string {
+  return `${MARKER_KEY_PREFIX}${tokenHash}`;
+}
+
 function verify(id: string) {
   return {
     id,
@@ -40,6 +66,158 @@ function verify(id: string) {
     },
     chromaCollection: CHROMA_COLLECTION,
   };
+}
+
+async function readTokenVisitLatestGlobalPosition(
+  tokenHash: string,
+  persistence: Persistence,
+): Promise<{ observedGlobalPosition: number | null; visitRecordId: string | null; observedAt: string | null }> {
+  const result = await persistence<{
+    documents?: Array<{ observedGlobalPosition: number; visitRecordId: string; observedAt: string }>;
+  }>('mongodb', 'query', {
+    database: 'momentum',
+    collection: COLLECTION,
+    filter: { tokenHash },
+    sort: { observedAt: -1 },
+    limit: 1,
+  });
+  const latest = result.documents?.[0];
+  if (!latest) return { observedGlobalPosition: null, visitRecordId: null, observedAt: null };
+  return {
+    observedGlobalPosition: latest.observedGlobalPosition,
+    visitRecordId: latest.visitRecordId,
+    observedAt: latest.observedAt,
+  };
+}
+
+async function rollbackMarkerClaim(
+  claim: MarkerClaim,
+  pageVisitId: string,
+  persistence: Persistence,
+): Promise<void> {
+  if (claim.mode === 'inserted') {
+    await persistence<{ deletedCount: number }>('mongodb', 'delete', {
+      database: 'momentum',
+      collection: MARKER_COLLECTION,
+      filter: {
+        _id: claim.markerId,
+        tokenHash: claim.tokenHash,
+        lastVisitRecordId: pageVisitId,
+        version: claim.claimedVersion,
+      },
+    });
+    return;
+  }
+
+  const rollback = await persistence<{ matchedCount: number }>('mongodb', 'update', {
+    database: 'momentum',
+    collection: MARKER_COLLECTION,
+    filter: {
+      _id: claim.markerId,
+      tokenHash: claim.tokenHash,
+      version: claim.claimedVersion,
+      lastVisitRecordId: pageVisitId,
+    },
+    update: {
+      $set: {
+        version: claim.previousMarker.version,
+        observedGlobalPosition: claim.previousMarker.observedGlobalPosition,
+        lastVisitRecordId: claim.previousMarker.lastVisitRecordId,
+        observedAt: claim.previousMarker.observedAt,
+      },
+    },
+  });
+  if (rollback.matchedCount !== 1) {
+    throw new Error('konga_visit_marker_rollback_failed');
+  }
+}
+
+async function claimVisitMarker(
+  params: {
+    tokenHash: string;
+    pageVisitId: string;
+    globalMaxPosition: number;
+    observedAt: string;
+  },
+  persistence: Persistence,
+): Promise<MarkerClaim> {
+  const markerDocId = markerId(params.tokenHash);
+
+  for (let attempt = 0; attempt < MAX_MARKER_ATTEMPTS; attempt += 1) {
+    const markerResult = await persistence<{ documents?: KongaPageVisitMarker[] }>('mongodb', 'query', {
+      database: 'momentum',
+      collection: MARKER_COLLECTION,
+      filter: { _id: markerDocId, tokenHash: params.tokenHash },
+      limit: 1,
+    });
+    const existingMarker = markerResult.documents?.[0];
+    if (!existingMarker) {
+      const prior = await readTokenVisitLatestGlobalPosition(params.tokenHash, persistence);
+      const insertedMarker: KongaPageVisitMarker = {
+        _id: markerDocId,
+        tokenHash: params.tokenHash,
+        version: 1,
+        observedGlobalPosition: params.globalMaxPosition,
+        lastVisitRecordId: params.pageVisitId,
+        observedAt: params.observedAt,
+      };
+      try {
+        await persistence<{ insertedCount: number; insertedIds: Record<number, unknown> }>('mongodb', 'insert', {
+          database: 'momentum',
+          collection: MARKER_COLLECTION,
+          documents: [insertedMarker],
+        });
+        return {
+          mode: 'inserted',
+          markerId: markerDocId,
+          tokenHash: params.tokenHash,
+          previousGlobalPosition: prior.observedGlobalPosition,
+          claimedVersion: insertedMarker.version,
+          previousMarker: {
+            _id: markerDocId,
+            tokenHash: params.tokenHash,
+            version: 0,
+            observedGlobalPosition: prior.observedGlobalPosition,
+            lastVisitRecordId: prior.visitRecordId,
+            observedAt: prior.observedAt ?? params.observedAt,
+          },
+        };
+      } catch {
+        continue;
+      }
+    }
+
+    const update = await persistence<{ matchedCount: number }>('mongodb', 'update', {
+      database: 'momentum',
+      collection: MARKER_COLLECTION,
+      filter: {
+        _id: existingMarker._id,
+        tokenHash: existingMarker.tokenHash,
+        version: existingMarker.version,
+      },
+      update: {
+        $set: {
+          version: existingMarker.version + 1,
+          observedGlobalPosition: params.globalMaxPosition,
+          lastVisitRecordId: params.pageVisitId,
+          observedAt: params.observedAt,
+        },
+      },
+    });
+
+    if ((update.matchedCount ?? 0) === 1) {
+      return {
+        mode: 'advanced',
+        markerId: markerDocId,
+        tokenHash: params.tokenHash,
+        previousGlobalPosition: existingMarker.observedGlobalPosition,
+        claimedVersion: existingMarker.version + 1,
+        previousMarker: existingMarker,
+      };
+    }
+  }
+
+  throw new Error('konga_visit_marker_claim_exhausted');
 }
 
 export async function observeKongaPageVisit(
@@ -71,25 +249,27 @@ export async function observeKongaPageVisit(
     return existing;
   }
 
-  const previousResult = await persistence<{ documents?: KongaPageVisitObservation[] }>('mongodb', 'query', {
-    database: 'momentum',
-    collection: COLLECTION,
-    filter: { tokenHash: ids.tokenHash },
-    sort: { observedAt: -1 },
-    limit: 1,
-  });
-  const previous = previousResult.documents?.[0] ?? null;
   const observedAt = (input.now ?? new Date()).toISOString();
+  const marker = await claimVisitMarker(
+    {
+      tokenHash: ids.tokenHash,
+      pageVisitId: ids.id,
+      globalMaxPosition: input.globalMaxPosition,
+      observedAt,
+    },
+    persistence,
+  );
+
   const observation: KongaPageVisitObservation & { tokenHash: string; visitRecordId: string } = {
     visitRecordId: ids.id,
     tokenHash: ids.tokenHash,
     pageVisitId: input.pageVisitId,
     observedGlobalPosition: input.globalMaxPosition,
-    previousGlobalPosition: previous?.observedGlobalPosition ?? null,
+    previousGlobalPosition: marker.previousGlobalPosition,
     sinceLastVisit:
-      previous === null
+      marker.previousGlobalPosition === null
         ? null
-        : Math.max(0, input.globalMaxPosition - previous.observedGlobalPosition),
+        : Math.max(0, input.globalMaxPosition - marker.previousGlobalPosition),
     observedAt,
   };
 
@@ -138,7 +318,10 @@ export async function observeKongaPageVisit(
       limit: 1,
     });
     const stored = winner.documents?.[0];
-    if (!stored) throw error;
+    if (!stored) {
+      await rollbackMarkerClaim(marker, ids.id, persistence);
+      throw error;
+    }
     await (deps.strictVerify ?? verifyKongaThreeLegs)(verify(ids.id), persistence);
     return stored;
   }
