@@ -5,6 +5,7 @@ import {
   type McsKongaLineLens,
   type McsKongaPlacementEvent,
   type McsKongaPlacementTickerEntry,
+  type McsKongaTeamGenesisNode,
 } from '@momentum/shared';
 import './konga-line.css';
 
@@ -17,11 +18,22 @@ export interface KongaLineConnectionState {
   latestJoin: McsJoinEvent | null;
 }
 
-export interface KongaLineViewer {
+export interface KongaLineProspectViewer {
   firstName: string;
   positionNumber: number;
   placedAt: string;
+  genesis?: never;
 }
+
+export interface KongaLineTeamViewer {
+  firstName: string;
+  /** A BA is the contextual head, not a holding-tank placement. */
+  positionNumber: null;
+  placedAt: null;
+  genesis: McsKongaTeamGenesisNode;
+}
+
+export type KongaLineViewer = KongaLineProspectViewer | KongaLineTeamViewer;
 
 export interface KongaLineWebinar {
   eventId: string;
@@ -46,8 +58,9 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
   const lastSignalAt = useRef<Record<SignalKind, number>>({ arrival: 0, join: 0 });
   const sponsorIdentity = formatPersonIdentity(sponsorFullName);
   const headLabel = lens.head === 'sponsor' ? sponsorIdentity : viewer.firstName;
+  const isTeamViewer = viewer.positionNumber === null;
   const visiblePlacements = useMemo(
-    () => stream.ticker.filter((entry) => entry.positionNumber !== viewer.positionNumber).slice(0, 6),
+    () => stream.ticker.filter((entry) => viewer.positionNumber === null || entry.positionNumber !== viewer.positionNumber).slice(0, 6),
     [stream.ticker, viewer.positionNumber],
   );
 
@@ -147,6 +160,15 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
         <div className="konga-rail" aria-label="Vertical upward live placement line">
           <div className="konga-belt" aria-hidden="true" />
           <div className="konga-node-stack">
+            {isTeamViewer && (
+              <article className="konga-genesis" aria-label={`Your line began with your first invite, ${viewer.genesis.firstName} ${viewer.genesis.lastInitial}.`}>
+                <span className="konga-mono">Your first invite · genesis</span>
+                <strong>{viewer.genesis.firstName} {viewer.genesis.lastInitial}.</strong>
+                <span>{formatLocation(viewer.genesis.city, viewer.genesis.stateOrRegion)}</span>
+                <time dateTime={viewer.genesis.invitedAt}>invited {formatPlacedAt(viewer.genesis.invitedAt)}</time>
+              </article>
+            )}
+
             {visiblePlacements.map((entry) => (
               <article
                 key={`${entry.positionNumber}-${entry.placedAt ?? ''}`}
@@ -162,11 +184,13 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
               </article>
             ))}
 
-            <article className="konga-you" aria-label={'Your pinned position is ' + viewer.positionNumber}>
-              <span className="konga-mono">Pinned in your view</span>
-              <strong>YOU · {viewer.firstName}</strong>
-              <span>Position {viewer.positionNumber.toLocaleString()} · placed {formatPlacedAt(viewer.placedAt)}</span>
-            </article>
+            {!isTeamViewer && (
+              <article className="konga-you" aria-label={'Your pinned position is ' + viewer.positionNumber}>
+                <span className="konga-mono">Pinned in your view</span>
+                <strong>YOU · {viewer.firstName}</strong>
+                <span>Position {viewer.positionNumber.toLocaleString()} · placed {formatPlacedAt(viewer.placedAt)}</span>
+              </article>
+            )}
 
             {visiblePlacements.length === 0 && (
               <p className="konga-honest-empty">

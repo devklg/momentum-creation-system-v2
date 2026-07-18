@@ -157,6 +157,9 @@ importers:
 
   apps/team:
     dependencies:
+      '@momentum/konga-ui':
+        specifier: workspace:*
+        version: link:../../packages/konga-ui
       '@momentum/shared':
         specifier: workspace:*
         version: link:../../packages/shared

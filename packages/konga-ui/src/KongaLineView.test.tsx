@@ -82,4 +82,37 @@ describe('KongaLineView', () => {
     expect(css).toContain('animation: none !important;');
     expect(css).toContain('transition: none !important;');
   });
+
+  it('renders the Team self lens from a confirmed genesis without inventing a BA position', () => {
+    render(
+      <KongaLineView
+        lens={{ head: 'self' }}
+        sponsorFullName=""
+        viewer={{
+          firstName: 'Kevin',
+          positionNumber: null,
+          placedAt: null,
+          genesis: {
+            prospectId: 'prospect-1',
+            firstName: 'Jordan',
+            lastInitial: 'R',
+            city: 'Pasadena',
+            stateOrRegion: 'CA',
+            invitedAt: placedAt,
+            positionNumber: null,
+            sourceAuthority: 'invitation_activity.invitation_sent',
+          },
+        }}
+        stream={connectedStream()}
+        nextWebinar={null}
+      />,
+    );
+
+    expect(screen.getByText('Kevin')).toBeInTheDocument();
+    expect(screen.getByText('Your first invite · genesis')).toBeInTheDocument();
+    expect(screen.getByText('Jordan R.')).toBeInTheDocument();
+    expect(screen.queryByText(/YOU · Kevin/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Position /i)).not.toBeInTheDocument();
+    expect(screen.getAllByText('Avery Q.')).toHaveLength(2);
+  });
 });
