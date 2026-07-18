@@ -748,6 +748,423 @@ describe('Konga reconnect-safe page visits', () => {
     expect(replayAAfterC).toMatchObject(replayA);
   });
 
+  it('fails historical replay when latest committed head is later and historical marker is missing', async () => {
+    const token = 'TOKEN-HISTORICAL-MISSING-HEAD';
+    const hash = tokenHash(token);
+    const baselinePageId = '11111111-1111-4111-8111-111111111111';
+    const headPageId = '22222222-2222-4222-8222-222222222222';
+    const baselineVisitId = visitRecordId(token, baselinePageId);
+    const headVisitId = visitRecordId(token, headPageId);
+    const fixture = createFixture();
+
+    await writeDirectToStores(
+      {
+        id: baselineVisitId,
+        mongoCollection: 'tmag_konga_page_visits',
+        mongoDoc: {
+          pageVisitId: baselinePageId,
+          tokenHash: hash,
+          visitRecordId: baselineVisitId,
+          observedGlobalPosition: 10,
+          previousGlobalPosition: null,
+          sinceLastVisit: null,
+          observedAt: '2026-07-10T09:00:00.000Z',
+        },
+        neo4j: {
+          cypher: 'MERGE (v:TmagKongaPageVisit {visitRecordId:$id}) SET v += $props',
+          params: {
+            props: {
+              tokenHash: hash,
+              pageVisitId: baselinePageId,
+              observedGlobalPosition: 10,
+              previousGlobalPosition: null,
+              sinceLastVisit: null,
+              observedAt: '2026-07-10T09:00:00.000Z',
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_page_visits',
+          document: 'seeded baseline visit',
+          metadata: {
+            kind: 'konga_page_visit',
+            tokenHash: hash,
+            pageVisitId: baselinePageId,
+            observedGlobalPosition: 10,
+            observedAt: '2026-07-10T09:00:00.000Z',
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (v:TmagKongaPageVisit {visitRecordId:$id}) RETURN count(v) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    await writeDirectToStores(
+      {
+        id: headVisitId,
+        mongoCollection: 'tmag_konga_page_visits',
+        mongoDoc: {
+          pageVisitId: headPageId,
+          tokenHash: hash,
+          visitRecordId: headVisitId,
+          observedGlobalPosition: 20,
+          previousGlobalPosition: 10,
+          sinceLastVisit: 10,
+          observedAt: '2026-07-10T09:05:00.000Z',
+        },
+        neo4j: {
+          cypher: 'MERGE (v:TmagKongaPageVisit {visitRecordId:$id}) SET v += $props',
+          params: {
+            props: {
+              tokenHash: hash,
+              pageVisitId: headPageId,
+              observedGlobalPosition: 20,
+              previousGlobalPosition: 10,
+              sinceLastVisit: 10,
+              observedAt: '2026-07-10T09:05:00.000Z',
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_page_visits',
+          document: 'seeded head visit',
+          metadata: {
+            kind: 'konga_page_visit',
+            tokenHash: hash,
+            pageVisitId: headPageId,
+            observedGlobalPosition: 20,
+            observedAt: '2026-07-10T09:05:00.000Z',
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (v:TmagKongaPageVisit {visitRecordId:$id}) RETURN count(v) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    const headMarker = markerEvent(hash, 1, 'committed', {
+      previousGlobalPosition: 10,
+      observedGlobalPosition: 20,
+      previousVisitRecordId: baselineVisitId,
+      pageVisitRecordId: headVisitId,
+      observedAt: '2026-07-10T09:05:00.000Z',
+    });
+    const headMarkerRow: MarkerRow = { ...headMarker };
+
+    await writeDirectToStores(
+      {
+        id: headMarker._id,
+        mongoCollection: 'tmag_konga_visit_markers',
+        mongoDoc: { ...headMarkerRow } as Record<string, unknown>,
+        neo4j: {
+          cypher: 'MERGE (m:TmagKongaPageVisitMarker {eventId:$id}) SET m += $props',
+          params: {
+            props: {
+              ...headMarker,
+              markerVersion: headMarker.version,
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_visit_markers',
+          document: `Konga page visit marker committed version ${headMarker.version}.`,
+          metadata: {
+            kind: 'konga_page_visit_marker',
+            tokenHash: hash,
+            markerVersion: headMarker.version,
+            markerId: headMarker._id,
+            markerKey: headMarker.markerKey,
+            markerState: headMarker.state,
+            observedAt: headMarker.observedAt,
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (m:TmagKongaPageVisitMarker {eventId:$id}) RETURN count(m) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    const observation = observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: baselinePageId,
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:30:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    await expect(observation).rejects.toThrow('konga_visit_marker_replay_reject_non_exact');
+
+    const head = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(head?.version).toBe(1);
+    expect(head?.pageVisitRecordId).toBe(headVisitId);
+    expect(fixture.state.markerRows.size).toBe(1);
+  });
+
+  it('fails historical replay when committed marker fields are non-exact', async () => {
+    const token = 'TOKEN-HISTORICAL-MISMATCH';
+    const hash = tokenHash(token);
+    const historicalPageId = '33333333-3333-4333-8333-333333333333';
+    const headPageId = '44444444-4444-4444-8444-444444444444';
+    const historicalVisitId = visitRecordId(token, historicalPageId);
+    const headVisitId = visitRecordId(token, headPageId);
+    const fixture = createFixture();
+
+    await writeDirectToStores(
+      {
+        id: historicalVisitId,
+        mongoCollection: 'tmag_konga_page_visits',
+        mongoDoc: {
+          pageVisitId: historicalPageId,
+          tokenHash: hash,
+          visitRecordId: historicalVisitId,
+          observedGlobalPosition: 10,
+          previousGlobalPosition: null,
+          sinceLastVisit: null,
+          observedAt: '2026-07-10T09:00:00.000Z',
+        },
+        neo4j: {
+          cypher: 'MERGE (v:TmagKongaPageVisit {visitRecordId:$id}) SET v += $props',
+          params: {
+            props: {
+              tokenHash: hash,
+              pageVisitId: historicalPageId,
+              observedGlobalPosition: 10,
+              previousGlobalPosition: null,
+              sinceLastVisit: null,
+              observedAt: '2026-07-10T09:00:00.000Z',
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_page_visits',
+          document: 'seeded historical visit',
+          metadata: {
+            kind: 'konga_page_visit',
+            tokenHash: hash,
+            pageVisitId: historicalPageId,
+            observedGlobalPosition: 10,
+            observedAt: '2026-07-10T09:00:00.000Z',
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (v:TmagKongaPageVisit {visitRecordId:$id}) RETURN count(v) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    await writeDirectToStores(
+      {
+        id: headVisitId,
+        mongoCollection: 'tmag_konga_page_visits',
+        mongoDoc: {
+          pageVisitId: headPageId,
+          tokenHash: hash,
+          visitRecordId: headVisitId,
+          observedGlobalPosition: 20,
+          previousGlobalPosition: 10,
+          sinceLastVisit: 10,
+          observedAt: '2026-07-10T09:06:00.000Z',
+        },
+        neo4j: {
+          cypher: 'MERGE (v:TmagKongaPageVisit {visitRecordId:$id}) SET v += $props',
+          params: {
+            props: {
+              tokenHash: hash,
+              pageVisitId: headPageId,
+              observedGlobalPosition: 20,
+              previousGlobalPosition: 10,
+              sinceLastVisit: 10,
+              observedAt: '2026-07-10T09:06:00.000Z',
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_page_visits',
+          document: 'seeded head visit',
+          metadata: {
+            kind: 'konga_page_visit',
+            tokenHash: hash,
+            pageVisitId: headPageId,
+            observedGlobalPosition: 20,
+            observedAt: '2026-07-10T09:06:00.000Z',
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (v:TmagKongaPageVisit {visitRecordId:$id}) RETURN count(v) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    const historicalMarker = markerEvent(hash, 1, 'committed', {
+      previousGlobalPosition: 99,
+      observedGlobalPosition: 10,
+      previousVisitRecordId: null,
+      pageVisitRecordId: historicalVisitId,
+      observedAt: '2026-07-10T09:00:00.000Z',
+    });
+    const headMarker = markerEvent(hash, 2, 'committed', {
+      previousGlobalPosition: 10,
+      observedGlobalPosition: 20,
+      previousVisitRecordId: historicalVisitId,
+      pageVisitRecordId: headVisitId,
+      observedAt: '2026-07-10T09:06:00.000Z',
+    });
+    const historicalMarkerRow: MarkerRow = { ...historicalMarker };
+    const headMarkerRow: MarkerRow = { ...headMarker };
+
+    await writeDirectToStores(
+      {
+        id: historicalMarker._id,
+        mongoCollection: 'tmag_konga_visit_markers',
+        mongoDoc: { ...historicalMarkerRow } as Record<string, unknown>,
+        neo4j: {
+          cypher: 'MERGE (m:TmagKongaPageVisitMarker {eventId:$id}) SET m += $props',
+          params: {
+            props: {
+              ...historicalMarker,
+              markerVersion: historicalMarker.version,
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_visit_markers',
+          document: `Konga page visit marker committed version ${historicalMarker.version}.`,
+          metadata: {
+            kind: 'konga_page_visit_marker',
+            tokenHash: hash,
+            markerVersion: historicalMarker.version,
+            markerId: historicalMarker._id,
+            markerKey: historicalMarker.markerKey,
+            markerState: historicalMarker.state,
+            observedAt: historicalMarker.observedAt,
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (m:TmagKongaPageVisitMarker {eventId:$id}) RETURN count(m) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    await writeDirectToStores(
+      {
+        id: headMarker._id,
+        mongoCollection: 'tmag_konga_visit_markers',
+        mongoDoc: { ...headMarkerRow } as Record<string, unknown>,
+        neo4j: {
+          cypher: 'MERGE (m:TmagKongaPageVisitMarker {eventId:$id}) SET m += $props',
+          params: {
+            props: {
+              ...headMarker,
+              markerVersion: headMarker.version,
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_visit_markers',
+          document: `Konga page visit marker committed version ${headMarker.version}.`,
+          metadata: {
+            kind: 'konga_page_visit_marker',
+            tokenHash: hash,
+            markerVersion: headMarker.version,
+            markerId: headMarker._id,
+            markerKey: headMarker.markerKey,
+            markerState: headMarker.state,
+            observedAt: headMarker.observedAt,
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (m:TmagKongaPageVisitMarker {eventId:$id}) RETURN count(m) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    const observation = observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: historicalPageId,
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:31:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    await expect(observation).rejects.toThrow('konga_visit_marker_replay_reject_non_exact');
+
+    const head = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(head?.version).toBe(2);
+    expect(head?.pageVisitRecordId).toBe(headVisitId);
+    expect(fixture.state.markerRows.size).toBe(2);
+  });
+
+  it('accepts an exact historical committed marker and returns byte-identical replay observation', async () => {
+    const token = 'TOKEN-HISTORICAL-EXACT';
+    const fixture = createFixture();
+    const headVisitId = visitRecordId(token, 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+
+    const historical = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:32:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        globalMaxPosition: 20,
+        now: new Date('2026-07-17T10:33:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    const headBefore = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(headBefore?.pageVisitRecordId).toBe(headVisitId);
+    expect(headBefore?.version).toBe(2);
+
+    const replayed = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        globalMaxPosition: 99,
+        now: new Date('2026-07-17T10:34:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    expect({
+      pageVisitId: replayed.pageVisitId,
+      observedGlobalPosition: replayed.observedGlobalPosition,
+      previousGlobalPosition: replayed.previousGlobalPosition,
+      sinceLastVisit: replayed.sinceLastVisit,
+      observedAt: replayed.observedAt,
+    }).toEqual({
+      pageVisitId: historical.pageVisitId,
+      observedGlobalPosition: historical.observedGlobalPosition,
+      previousGlobalPosition: historical.previousGlobalPosition,
+      sinceLastVisit: historical.sinceLastVisit,
+      observedAt: historical.observedAt,
+    });
+    expect(replayed.observedAt).toBe('2026-07-17T10:32:00.000Z');
+    expect(fixture.state.markerRows.size).toBe(4);
+    const headAfter = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(headAfter?._id).toBe(headBefore?._id);
+    expect(headAfter?.pageVisitRecordId).toBe(headVisitId);
+  });
+
   it('keeps a later distinct visit from advancing from a pending/failing first attempt', async () => {
     const token = 'TOKEN-INTERLEAVE';
     const hash = tokenHash(token);

@@ -286,7 +286,11 @@ async function markFailedAttempt(
   }
 }
 
-type VisitObservationWithIds = KongaPageVisitObservation & { tokenHash: string; visitRecordId: string };
+type VisitObservationWithIds = KongaPageVisitObservation & {
+  tokenHash: string;
+  visitRecordId: string;
+  previousVisitRecordId?: string | null;
+};
 
 async function findPendingMarkerForVisit(
   observation: VisitObservationWithIds,
@@ -366,10 +370,17 @@ function sameCommittedMarkerForVisit(
 ): boolean {
   return (
     marker.state === 'committed' &&
+    marker.tokenHash === observation.tokenHash &&
+    marker.markerKey === markerKey(observation.tokenHash) &&
+    marker.version >= 1 &&
+    marker.markerId === markerEventId(marker.markerKey, marker.version, 'committed') &&
+    marker.markerId === marker._id &&
     marker.pageVisitRecordId === observation.visitRecordId &&
     marker.observedGlobalPosition === observation.observedGlobalPosition &&
     marker.previousGlobalPosition === observation.previousGlobalPosition &&
-    marker.observedAt === observation.observedAt
+    marker.observedAt === observation.observedAt &&
+    (typeof observation.previousVisitRecordId === 'undefined' ||
+      marker.previousVisitRecordId === observation.previousVisitRecordId)
   );
 }
 
@@ -387,7 +398,9 @@ async function ensureCommittedVisitMarker(
 
   const committedVisitMarker = await findCommittedMarkerForVisit(observation, persistence);
   if (committedVisitMarker) {
-    return;
+    if (sameCommittedMarkerForVisit(committedVisitMarker, observation)) {
+      return;
+    }
   }
 
   const baseMarker =
@@ -401,7 +414,9 @@ async function ensureCommittedVisitMarker(
     snapshot.committedVisitRecordId !== null &&
     snapshot.committedVisitRecordId !== observation.visitRecordId
   ) {
-    return;
+    throw new Error(
+      `konga_visit_marker_replay_reject_non_exact:${observation.visitRecordId}:${snapshot.committedVisitRecordId}:${observation.tokenHash}`,
+    );
   }
 
   const repairMarker = baseMarker
