@@ -632,6 +632,7 @@ export async function reinvite(
     token = await mintUniqueToken();
     const newExpiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
     expiresAt = newExpiresAt;
+    const invitationRecordId = `invite_${randomUUID()}`;
 
     // 1. Insert the fresh token record.
     await writeProspectTokenGraphCritical({
@@ -640,6 +641,7 @@ export async function reinvite(
       sponsorTmagId,
       mongoDoc: {
         token,
+        invitationRecordId,
         prospectId,
         sponsorTmagId,
         state: 'minted',
@@ -650,6 +652,7 @@ export async function reinvite(
       tokenProps: {
         state: 'minted',
         createdAt: now,
+        invitationRecordId,
         expiresAt: newExpiresAt,
       },
     });

@@ -27,6 +27,7 @@ import { buildEnrollmentReport } from '../../domain/reports/enrollmentCompletion
 import { buildFollowUpReport } from '../../domain/reports/followUpAging.js';
 import { buildLeaderScorecardReport } from '../../domain/reports/leaderScorecards.js';
 import { buildAdminBottleneckReport } from '../../domain/adminBottlenecks.js';
+import { buildMissionFunnelReport } from '../../domain/reports/missionFunnel.js';
 import { resolveTimeRange } from '../../domain/reports/timeRange.js';
 import {
   exportBaActivation,
@@ -694,5 +695,35 @@ adminReportingRoutes.get('/leader-scorecards/export', requireAdmin, async (req, 
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     res.status(500).json({ ok: false, error: `Leader scorecards export failed: ${msg}` });
+  }
+});
+
+adminReportingRoutes.get('/mission-funnel', requireAdmin, async (req, res) => {
+  try {
+    const report = await buildMissionFunnelReport();
+    await appendAuditEntry({
+      actor: adminActorFromRequest(req),
+      action: 'admin.reporting.konga_mission_funnel_generated',
+      entity: { kind: 'admin_session', id: req.session!.tmagId, displayLabel: null },
+      severity: 'info',
+      before: null,
+      after: {
+        reportOnly: true,
+        generatedAt: report.generatedAt,
+        eventCount: report.events.length,
+      },
+      reason: null,
+      context: {
+        ip: req.ip ?? null,
+        userAgent: req.get('user-agent') ?? null,
+        route: '/api/admin/reporting/mission-funnel',
+        method: 'GET',
+        requestId: null,
+      },
+    });
+    return res.status(200).json(report);
+  } catch (error) {
+    console.error('[GET /api/admin/reporting/mission-funnel] failed', error);
+    return res.status(500).json({ ok: false, error: 'server_error' });
   }
 });

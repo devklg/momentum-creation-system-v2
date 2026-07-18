@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:35:51.683Z
+- Generated: 2026-07-18T02:41:41.205Z
 - Mongo collections: 76
-- Neo4j labels: 84
-- Neo4j relationships: 69
-- Chroma collections: 53
+- Neo4j labels: 90
+- Neo4j relationships: 71
+- Chroma collections: 59
 - Route modules: 49
-- Route handlers: 293
-- Shared exports: 1228
+- Route handlers: 300
+- Shared exports: 1229
 
 ## Mongo Collections
 
@@ -67,9 +67,9 @@
 | `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_counters` | permissive_mongoose_schema | yes | 8 |
-| `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 22 |
+| `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 24 |
 | `tmag_prospect_invitation_activity` | permissive_mongoose_schema | yes | 7 |
-| `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 9 |
+| `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 10 |
 | `tmag_prospect_magic_links` | permissive_mongoose_schema | yes | 5 |
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
@@ -103,10 +103,10 @@
 | `BrandAmbassador` | 1 |
 | `Decision` | 3 |
 | `DISPOSED` | 5 |
-| `ENROLLED` | 1 |
+| `ENROLLED` | 2 |
 | `FOUNDER_PASSWORD` | 1 |
 | `HAS_FOLLOWUP` | 5 |
-| `IN_HOLDING_TANK` | 8 |
+| `IN_HOLDING_TANK` | 19 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
 | `KnowledgeCandidate` | 1 |
@@ -128,7 +128,7 @@
 | `SPONSORED_BY` | 3 |
 | `SUPERSEDES` | 1 |
 | `TeamMagnificent` | 6 |
-| `TeamMagnificentMember` | 94 |
+| `TeamMagnificentMember` | 100 |
 | `Tenant` | 2 |
 | `TenantSettingsVersion` | 1 |
 | `TmagAccessCode` | 3 |
@@ -147,14 +147,20 @@
 | `TmagGeneratorRun` | 1 |
 | `TmagHealthHeartbeat` | 3 |
 | `TmagInvitationActivity` | 2 |
-| `TmagInviteToken` | 12 |
+| `TmagInviteToken` | 13 |
 | `TmagIvoryName` | 6 |
 | `TmagKnowledge` | 5 |
+| `TmagKongaEnrollmentAttestation` | 2 |
+| `TmagKongaPageVisit` | 2 |
+| `TmagKongaPageVisitMarker` | 2 |
+| `TmagKongaPlacementClaim` | 4 |
+| `TmagKongaReplayCompletion` | 2 |
+| `TmagKongaReplayPointer` | 2 |
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 4 |
 | `TmagOutcome` | 4 |
-| `TmagPool` | 7 |
-| `TmagProspect` | 45 |
+| `TmagPool` | 18 |
+| `TmagProspect` | 56 |
 | `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
@@ -163,7 +169,7 @@
 | `TmagRecruitingCycle` | 2 |
 | `TmagResource` | 3 |
 | `TmagResourceUsageEvent` | 1 |
-| `TmagResourceVersion` | 8 |
+| `TmagResourceVersion` | 9 |
 | `TmagSponsorAvailability` | 1 |
 | `TmagSponsorOverride` | 4 |
 | `TmagSteveDiscovery` | 10 |
@@ -204,9 +210,10 @@
 | `CONTAINS_LEAD` | 2 |
 | `DELIVERS_RESOURCE_VERSION` | 2 |
 | `DERIVED_FROM` | 2 |
+| `ENROLLED` | 2 |
 | `FOR` | 1 |
 | `FOR_EVENT` | 1 |
-| `FOR_PROSPECT` | 8 |
+| `FOR_PROSPECT` | 9 |
 | `FOR_VM_LEAD` | 4 |
 | `HAD_STEVE_DISCOVERY` | 3 |
 | `HAS_ACTIVITY` | 2 |
@@ -254,6 +261,7 @@
 | `SUPPORTS_TRAINING_MODULE` | 2 |
 | `SUPPRESSED_BY` | 1 |
 | `TARGETS_LEAD` | 2 |
+| `USES_AUTHORIZED_VERSION` | 1 |
 | `USES_VM_LEAD_OWNER` | 1 |
 | `WITH_UPLINE` | 1 |
 | `WROTE_NOTE` | 2 |
@@ -280,6 +288,12 @@
 | `mcs_ivory_prospect_names` | `server/src/services/chromaCollections.ts` |
 | `mcs_knowledge_chunks` | `server/src/services/chromaCollections.ts` |
 | `mcs_knowledge_sources` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_enrollment_attestations` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_page_visits` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_placement_claims` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_replay_completions` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_replay_pointers` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_visit_markers` | `server/src/services/chromaCollections.ts` |
 | `mcs_learning_candidates_review` | `server/src/services/chromaCollections.ts` |
 | `mcs_members` | `server/src/services/chromaCollections.ts` |
 | `mcs_new_member_orientation_reservations` | `server/src/services/chromaCollections.ts` |
@@ -328,15 +342,15 @@
 | `(unmounted)` | `server/src/routes/admin/consistency.ts` | GET /report<br>GET user-agent<br>GET /crm-integrity<br>GET user-agent | `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/content-videos.ts` | GET user-agent<br>GET /<br>POST /<br>PATCH /:contentVideoId<br>POST /reorder | `McsAuditActor`, `McsContentVideoAudience`, `McsContentVideoMutationResponse`, `McsContentVideoReorderResponse`, `McsContentVideosAdminListResponse` |
 | `(unmounted)` | `server/src/routes/admin/dashboard.ts` | GET /metrics<br>GET user-agent<br>GET /filters<br>GET user-agent<br>GET /drilldown<br>GET user-agent<br>GET /training-analytics<br>GET user-agent<br>GET /stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminDashboardFiltersResponse`, `McsAdminDashboardMetricsResponse`, `McsAdminDrilldownResponse`, `McsAdminLiveAuditEvent`, `McsAdminLiveEvent`, `McsAdminLivePlacementEvent`, `McsAdminLiveSnapshot`, `McsAdminTrainingAnalyticsResponse`, `McsAuditActor`, `McsAuditLogEntry`, `McsPlacementEvent` |
-| `(unmounted)` | `server/src/routes/admin/events.ts` | GET /<br>POST /webinars/:eventId/reservations/:reservationId/attendance | `McsAuditActor`, `McsRecordEventAttendanceResponse` |
+| `(unmounted)` | `server/src/routes/admin/events.ts` | GET /<br>POST /webinars/:eventId/reservations/:reservationId/attendance<br>POST /webinars/replay-rotation<br>GET user-agent | `McsAuditActor`, `McsRecordEventAttendanceResponse` |
 | `(unmounted)` | `server/src/routes/admin/health.ts` | GET x-mcs-health-secret<br>GET /triple-stack<br>GET /status<br>GET /llm-provider | none |
 | `(unmounted)` | `server/src/routes/admin/knowledge.ts` | GET /status<br>GET /source-versions<br>GET /source-versions/:sourceVersionId<br>POST /source-versions/:sourceVersionId/corrections/preview<br>POST /source-versions/:sourceVersionId/corrections<br>GET /corrections/:correctionId<br>POST /corrections/:correctionId/retry<br>POST /corrections/:correctionId/rollback<br>POST /sources<br>POST /sources/upload | `MCS_KNOWLEDGE_CORRECTION_CONFIRMATION`, `MCS_KNOWLEDGE_ROLLBACK_CONFIRMATION`, `McsAdminKnowledgeCorrectionApplyRequest`, `McsAdminKnowledgeCorrectionRetryRequest`, `McsAdminKnowledgeCorrectionRollbackRequest` |
 | `(unmounted)` | `server/src/routes/admin/liveOps.ts` | GET /operations<br>GET /growth<br>GET user-agent<br>GET /grid<br>GET user-agent<br>GET /funnel<br>GET user-agent<br>GET /usage/stream<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminFunnelKind`, `McsAdminLiveUsageSample`, `McsAdminLiveUsageStreamEvent`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/michael-runtime-observability.ts` | GET /observability | none |
 | `(unmounted)` | `server/src/routes/admin/orientation.ts` | GET user-agent<br>GET /sessions<br>GET /diagnostic<br>POST /sessions | `McsAdminCreateOrientationSessionResponse`, `McsAdminOrientationDiagnosticResponse`, `McsAdminOrientationSessionsResponse`, `McsAuditActor`, `McsAuditContext` |
-| `(unmounted)` | `server/src/routes/admin/prospects.ts` | GET user-agent<br>GET /<br>GET /filters<br>GET /:prospectId<br>GET /:prospectId/sandbox-preview<br>POST /:prospectId/notes<br>POST /:prospectId/move<br>POST /:prospectId/reassign-sponsor<br>POST /:prospectId/manual-flush<br>POST /:prospectId/force-enroll<br>POST /<br>PATCH /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/restore<br>POST /flush-expired<br>GET /alerts/aged | `McsAdminDashboardFilter`, `McsAdminPaginationContract`, `McsAdminProspectActivityEvent`, `McsAdminProspectActivityEventKind`, `McsAdminProspectAddNoteResponse`, `McsAdminProspectDetailResponse`, `McsAdminProspectDirectoryResponse`, `McsAuditActor`, `McsAuditContext`, `McsAuditLogEntry` |
+| `(unmounted)` | `server/src/routes/admin/prospects.ts` | GET user-agent<br>GET /<br>GET /filters<br>GET /:prospectId<br>GET /:prospectId/sandbox-preview<br>POST /:prospectId/notes<br>POST /:prospectId/move<br>POST /:prospectId/reassign-sponsor<br>POST /:prospectId/manual-flush<br>POST /:prospectId/force-enroll<br>POST /<br>PATCH /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/restore<br>POST /flush-expired<br>GET /alerts/aged<br>POST /:prospectId/konga-enrollment-attestation | `McsAdminDashboardFilter`, `McsAdminPaginationContract`, `McsAdminProspectActivityEvent`, `McsAdminProspectActivityEventKind`, `McsAdminProspectAddNoteResponse`, `McsAdminProspectDetailResponse`, `McsAdminProspectDirectoryResponse`, `McsAuditActor`, `McsAuditContext`, `McsAuditLogEntry` |
 | `(unmounted)` | `server/src/routes/admin/queue.ts` | GET user-agent<br>GET /summary<br>GET /lookup<br>GET /visible-window<br>PUT /visible-window<br>GET /ticker<br>GET /ticker/stream<br>GET /rules<br>PUT /rules/:key | `McsAdminQueueTickerSnapshot`, `McsAdminQueueTickerSseEvent`, `McsAdminTickerEntry`, `McsAuditActor`, `McsPlacementEvent`, `McsQueueAdminTickerResponse`, `McsQueueLookupResponse`, `McsQueueOversightSummaryResponse`, `McsQueueRulesResponse`, `McsQueueVisibleWindow`, `McsQueueVisibleWindowResponse` |
-| `(unmounted)` | `server/src/routes/admin/reporting.ts` | GET /bottlenecks<br>GET user-agent<br>GET /master-report.pdf<br>GET user-agent<br>GET /activation<br>GET user-agent<br>GET /training<br>GET user-agent<br>GET /invite-funnel<br>GET user-agent<br>GET /queue-velocity<br>GET user-agent<br>GET /enrollment-completion<br>GET user-agent<br>GET /follow-up-aging<br>GET user-agent<br>GET /leader-scorecards<br>GET user-agent<br>GET user-agent<br>GET /activation/export<br>GET /training/export<br>GET /invite-funnel/export<br>GET /queue-velocity/export<br>GET /enrollment-completion/export<br>GET /follow-up-aging/export<br>GET /leader-scorecards/export | `McsAdminDashboardFilter`, `McsAdminReportTimeRange`, `McsAuditActor` |
+| `(unmounted)` | `server/src/routes/admin/reporting.ts` | GET /bottlenecks<br>GET user-agent<br>GET /master-report.pdf<br>GET user-agent<br>GET /activation<br>GET user-agent<br>GET /training<br>GET user-agent<br>GET /invite-funnel<br>GET user-agent<br>GET /queue-velocity<br>GET user-agent<br>GET /enrollment-completion<br>GET user-agent<br>GET /follow-up-aging<br>GET user-agent<br>GET /leader-scorecards<br>GET user-agent<br>GET user-agent<br>GET /activation/export<br>GET /training/export<br>GET /invite-funnel/export<br>GET /queue-velocity/export<br>GET /enrollment-completion/export<br>GET /follow-up-aging/export<br>GET /leader-scorecards/export<br>GET /mission-funnel<br>GET user-agent | `McsAdminDashboardFilter`, `McsAdminReportTimeRange`, `McsAuditActor` |
 | `(unmounted)` | `server/src/routes/admin/resourceCenter.ts` | GET /index-awareness<br>GET user-agent<br>GET /analytics | none |
 | `(unmounted)` | `server/src/routes/admin/tenant.ts` | GET user-agent<br>GET /overview<br>PATCH /settings<br>POST /templates/validate<br>PUT /templates/:templateKey | `McsAuditActor`, `McsSaveTenantTemplateResponse`, `McsTenantOverviewResponse`, `McsTenantSurface`, `McsTenantTemplateKey`, `McsUpdateTenantSettingsResponse`, `McsValidateTenantTemplateResponse` |
 | `(unmounted)` | `server/src/routes/admin/vm.ts` | GET /overview<br>GET user-agent<br>POST /campaigns/:vmCampaignId/live-approval<br>GET user-agent<br>POST /ownership-correction<br>GET user-agent | `McsAdminVmLiveApprovalPayload`, `McsAdminVmLiveApprovalResponse`, `McsAdminVmOwnershipCorrectionPayload`, `McsAdminVmOwnershipCorrectionResponse`, `McsAuditActor` |
@@ -344,7 +358,7 @@
 | `(unmounted)` | `server/src/routes/auth.ts` | POST /verify-code<br>POST /register<br>POST /login<br>POST /logout<br>GET /me | none |
 | `(unmounted)` | `server/src/routes/cockpit.ts` | GET /launch<br>GET /invites<br>GET /summary<br>GET /pmv<br>GET /todays-actions<br>GET /follow-up-queue<br>GET /team-calendar<br>GET /invites/print.pdf | none |
 | `(unmounted)` | `server/src/routes/content-videos.ts` | GET /videos | `McsContentVideosResponse` |
-| `(unmounted)` | `server/src/routes/crm.ts` | GET /today<br>GET /:prospectId<br>POST /:prospectId/notes<br>POST /:prospectId/followup<br>DELETE /:prospectId/followup<br>POST /:prospectId/disposition<br>POST /:prospectId/reinvite<br>POST /:prospectId/reinvite-script<br>POST /<br>PUT /:prospectId<br>DELETE /:prospectId | `McsClearFollowUpResponse`, `McsCreateNotePayload`, `McsCreateNoteResponse`, `McsCrmBundleResponse`, `McsReinviteResponse`, `McsReinviteScriptResponse`, `McsReinviteTerminalError`, `McsReinviteUnsentError`, `McsSetDispositionPayload`, `McsSetDispositionResponse`, `McsSetFollowUpPayload`, `McsSetFollowUpResponse`, `McsTodaysActionsResponse` |
+| `(unmounted)` | `server/src/routes/crm.ts` | GET /today<br>GET /:prospectId<br>POST /:prospectId/notes<br>POST /:prospectId/followup<br>DELETE /:prospectId/followup<br>POST /:prospectId/disposition<br>POST /:prospectId/reinvite<br>POST /:prospectId/reinvite-script<br>POST /<br>PUT /:prospectId<br>DELETE /:prospectId<br>POST /:prospectId/enrollment-attestation | `McsClearFollowUpResponse`, `McsCreateNotePayload`, `McsCreateNoteResponse`, `McsCrmBundleResponse`, `McsReinviteResponse`, `McsReinviteScriptResponse`, `McsReinviteTerminalError`, `McsReinviteUnsentError`, `McsSetDispositionPayload`, `McsSetDispositionResponse`, `McsSetFollowUpPayload`, `McsSetFollowUpResponse`, `McsTodaysActionsResponse` |
 | `(unmounted)` | `server/src/routes/crmHub.ts` | GET /prospects<br>GET /prospects/:prospectId<br>POST /prospects/:prospectId/close-as-ba | `McsCloseAsNewBaResponse`, `McsProspectCrmListResponse`, `McsProspectCrmRecordResponse` |
 | `(unmounted)` | `server/src/routes/events.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/health.ts` | GET /<br>GET /persistence | none |
@@ -354,7 +368,7 @@
 | `(unmounted)` | `server/src/routes/michael.ts` | GET /training-support/:downlineTmagId | none |
 | `(unmounted)` | `server/src/routes/orientation.ts` | GET /state<br>GET /sessions<br>POST /sessions/:sessionId/reserve<br>DELETE /sessions/:sessionId/reserve | `McsOrientationCancelResponse`, `McsOrientationReserveResponse`, `McsOrientationSessionsResponse`, `McsOrientationStateResponse` |
 | `(unmounted)` | `server/src/routes/p-login.ts` | GET x-forwarded-for<br>GET origin<br>POST /start<br>POST /redeem<br>POST /code<br>POST /logout | `McsProspectLoginRedeemError`, `McsProspectLoginRedeemResponse`, `McsProspectLoginStartResponse` |
-| `(unmounted)` | `server/src/routes/p.ts` | GET /:token<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats | `McsCallbackIntent`, `McsCallbackRequestPayload`, `McsCallbackRequestResponse`, `McsComProspectCopy`, `McsEnrolledResponse`, `McsExpiredResponse`, `McsHoldingTankSnapshot`, `McsPlacementEvent`, `McsResolvedTokenPayload`, `McsTeamStatsResponse`, `McsTokenState`, `McsVideoEventKind`, `McsVideoEventPayload`, `McsVideoEventResponse`, `McsWebinarReservationPayload`, `McsWebinarReservationResponse` |
+| `(unmounted)` | `server/src/routes/p.ts` | GET /:token<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/replay<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats | `McsCallbackIntent`, `McsCallbackRequestPayload`, `McsCallbackRequestResponse`, `McsComProspectCopy`, `McsEnrolledResponse`, `McsExpiredResponse`, `McsHoldingTankSnapshot`, `McsJoinEvent`, `McsKongaPlacementEvent`, `McsKongaVideoEventPayload`, `McsKongaVideoEventResponse`, `McsPlacementEvent`, `McsResolvedTokenPayload`, `McsTeamStatsResponse`, `McsTokenState`, `McsVideoEventKind`, `McsWebinarReservationPayload`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/profile.ts` | GET /<br>GET /sponsor<br>PATCH /<br>POST /password<br>POST /email/start<br>POST /email/verify<br>POST /phone | `McsProfileGetResponse` |
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
@@ -1330,6 +1344,7 @@
 | `McsIvoryName` | interface | `packages/shared/src/types.ts` |
 | `McsIvoryNameResponse` | interface | `packages/shared/src/types.ts` |
 | `McsIvoryStatus` | type | `packages/shared/src/types.ts` |
+| `McsKongaInviteTokenRecord` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchFastStartState` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchFirstInvitationState` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchMichaelState` | interface | `packages/shared/src/types.ts` |

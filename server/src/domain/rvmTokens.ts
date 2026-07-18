@@ -7,6 +7,7 @@
  */
 
 import type {
+  McsInviteTokenRecord,
   McsRvmResolvedTokenPayload,
   McsTokenState,
   McsVideoEventKind,
@@ -26,7 +27,10 @@ import {
   createOrUpdateCrmRecordForToken,
   findCrmRecordByProspectId,
 } from './prospectCrm.js';
-import { placeProspect } from './holdingTank.js';
+import {
+  placeKongaProspect,
+  resolveInvitationRecordId,
+} from './kongaPlacement.js';
 import { findNextUpcomingEvent } from './webinarEvent.js';
 
 const DR_DAN_VIDEO_URL = 'https://www.youtube.com/embed/1IZiV7RXdCY';
@@ -63,7 +67,7 @@ export async function resolveRvmToken(token: string): Promise<McsRvmResolvedToke
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
 
-  const tokenRecord = await findTokenRecord(token);
+  const tokenRecord = (await findTokenRecord(token)) as (McsInviteTokenRecord & { invitationRecordId?: string }) | null;
   if (!tokenRecord) throw new RvmTokenError('invalid_token');
   if (tokenRecord.state === 'enrolled') throw new RvmTokenError('enrolled');
   if (tokenRecord.state === 'expired') throw new RvmTokenError('expired');
@@ -91,6 +95,7 @@ export async function resolveRvmToken(token: string): Promise<McsRvmResolvedToke
       leadId: bulkLead.leadId,
       leadOwnerId: bulkLead.leadOwnerId,
       vmCampaignId: bulkLead.vmCampaignId,
+      invitationRecordId: tokenRecord.invitationRecordId,
     });
   }
 
@@ -158,7 +163,7 @@ export async function recordRvmVideoEvent(
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
 
-  const tokenRecord = await findTokenRecord(token);
+  const tokenRecord = (await findTokenRecord(token)) as (McsInviteTokenRecord & { invitationRecordId?: string }) | null;
   if (!tokenRecord) throw new RvmTokenError('invalid_token');
   if (tokenRecord.state === 'enrolled') throw new RvmTokenError('enrolled');
   if (tokenRecord.state === 'expired') throw new RvmTokenError('expired');
@@ -184,9 +189,14 @@ export async function recordRvmVideoEvent(
   }
 
   if (kind === 'complete') {
-    const result = await placeProspect({
+    const invitationRecordId = resolveInvitationRecordId(tokenRecord);
+    if (!invitationRecordId) {
+      throw new Error('konga_invitation_attempt_identity_unresolved');
+    }
+    const result = await placeKongaProspect({
       prospectId: prospect.prospectId,
       sponsorTmagId: tokenRecord.sponsorTmagId,
+      invitationRecordId,
       prospectExpiresAt: prospect.expiresAt,
       firstName: prospect.firstName,
       lastInitial: prospect.lastInitial || lastInitialOf(prospect.lastName),
@@ -220,7 +230,7 @@ export async function activateRvmLeadByToken(
 ): Promise<{ prospectId: string; createdAt: string }> {
   const bulkLead = await findBulkLeadByToken(token);
   if (!bulkLead) throw new RvmTokenError('invalid_token');
-  const tokenRecord = await findTokenRecord(token);
+  const tokenRecord = (await findTokenRecord(token)) as (McsInviteTokenRecord & { invitationRecordId?: string }) | null;
   if (!tokenRecord) throw new RvmTokenError('invalid_token');
   if (tokenRecord.state === 'enrolled') throw new RvmTokenError('enrolled');
   if (tokenRecord.state === 'expired' || isTokenExpired(tokenRecord)) {

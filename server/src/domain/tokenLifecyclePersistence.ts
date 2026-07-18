@@ -5,6 +5,7 @@ import {
 } from '../services/tieredWrite.js';
 import { persistenceCall } from '../services/persistence/dispatch.js';
 import { enqueueProjection, extractCount, type Neo4jProjectionPayload } from '../services/projectionOutbox.js';
+import { createHash } from 'node:crypto';
 
 const MONGO_DB = 'momentum';
 const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
@@ -44,11 +45,11 @@ export function buildProspectTokenGraphCypher(): {
   return {
     cypher:
       'MATCH (p:TmagProspect {prospectId: $prospectId}) ' +
-      'MERGE (t:TmagInviteToken {token: $id}) ' +
+      'MERGE (t:TmagInviteToken {tokenHash: $tokenHash}) ' +
       'SET t += $tokenProps ' +
       'MERGE (t)-[:FOR_PROSPECT]->(p)',
     verifyCypher:
-      'MATCH (t:TmagInviteToken {token: $id})-[:FOR_PROSPECT]->' +
+      'MATCH (t:TmagInviteToken {tokenHash: $tokenHash})-[:FOR_PROSPECT]->' +
       '(p:TmagProspect {prospectId: $prospectId}) RETURN count(t) AS n',
   };
 }
@@ -60,11 +61,11 @@ export function buildVmLeadTokenGraphCypher(): {
   return {
     cypher:
       'MATCH (l:TmagVmBulkLead {leadId: $leadId}) ' +
-      'MERGE (t:TmagInviteToken {token: $id}) ' +
+      'MERGE (t:TmagInviteToken {tokenHash: $tokenHash}) ' +
       'SET t += $tokenProps ' +
       'MERGE (t)-[:FOR_VM_LEAD]->(l)',
     verifyCypher:
-      'MATCH (t:TmagInviteToken {token: $id})-[:FOR_VM_LEAD]->' +
+      'MATCH (t:TmagInviteToken {tokenHash: $tokenHash})-[:FOR_VM_LEAD]->' +
       '(l:TmagVmBulkLead {leadId: $leadId}) RETURN count(t) AS n',
   };
 }
@@ -73,26 +74,32 @@ export function writeProspectTokenGraphCritical(
   input: ProspectTokenGraphWriteInput,
 ): Promise<TieredWriteResult> {
   const graph = buildProspectTokenGraphCypher();
+  const tokenHash =
+    typeof input.tokenProps.tokenHash === 'string'
+      ? input.tokenProps.tokenHash
+      : createHash('sha256').update(input.token).digest('hex');
   const tokenProps = withoutUndefined({
-    token: input.token,
+    tokenHash,
     prospectId: input.prospectId,
     sponsorTmagId: input.sponsorTmagId,
     ...input.tokenProps,
   });
 
   return writeGraphCritical({
-    id: input.token,
+    id: tokenHash,
     mongoCollection: TOKENS_COLLECTION,
     mongoDoc: input.mongoDoc,
     neo4j: {
       cypher: graph.cypher,
       params: {
         prospectId: input.prospectId,
+        tokenHash,
         tokenProps,
       },
       verifyCypher: graph.verifyCypher,
       verifyParams: {
         prospectId: input.prospectId,
+        tokenHash,
       },
     },
     ...(input.chroma ? { chroma: input.chroma } : {}),
@@ -103,8 +110,12 @@ export function writeVmLeadTokenGraphCritical(
   input: VmLeadTokenGraphWriteInput,
 ): Promise<TieredWriteResult> {
   const graph = buildVmLeadTokenGraphCypher();
+  const tokenHash =
+    typeof input.tokenProps.tokenHash === 'string'
+      ? input.tokenProps.tokenHash
+      : createHash('sha256').update(input.token).digest('hex');
   const tokenProps = withoutUndefined({
-    token: input.token,
+    tokenHash,
     leadId: input.leadId,
     ownerTmagId: input.ownerTmagId,
     sponsorTmagId: input.sponsorTmagId,
@@ -112,18 +123,20 @@ export function writeVmLeadTokenGraphCritical(
   });
 
   return writeGraphCritical({
-    id: input.token,
+    id: tokenHash,
     mongoCollection: TOKENS_COLLECTION,
     mongoDoc: input.mongoDoc,
     neo4j: {
       cypher: graph.cypher,
       params: {
         leadId: input.leadId,
+        tokenHash,
         tokenProps,
       },
       verifyCypher: graph.verifyCypher,
       verifyParams: {
         leadId: input.leadId,
+        tokenHash,
       },
     },
     ...(input.chroma ? { chroma: input.chroma } : {}),
@@ -131,6 +144,7 @@ export function writeVmLeadTokenGraphCritical(
 }
 
 async function verifyTokenPatch(token: string, expected: Record<string, unknown>): Promise<void> {
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const result = await persistenceCall<{ documents?: Array<Record<string, unknown>> }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: TOKENS_COLLECTION,
@@ -138,42 +152,44 @@ async function verifyTokenPatch(token: string, expected: Record<string, unknown>
     limit: 1,
   });
   const doc = result.documents?.[0];
-  if (!doc) throw new Error(`token_lifecycle_readback_missing:${token}`);
+  if (!doc) throw new Error(`token_lifecycle_readback_missing:tokenHash=${tokenHash}`);
   for (const [key, value] of Object.entries(expected)) {
     if (doc[key] !== value) {
-      throw new Error(`token_lifecycle_readback_mismatch:${token}:${key}`);
+      throw new Error(`token_lifecycle_readback_mismatch:tokenHash=${tokenHash}:field=${key}`);
     }
   }
 }
 
 async function projectTokenPatchToNeo4j(token: string, patch: Record<string, unknown>): Promise<void> {
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const payload: Neo4jProjectionPayload = {
     cypher:
-      'MATCH (t:TmagInviteToken {token: $id}) ' +
+      'MATCH (t:TmagInviteToken {tokenHash: $tokenHash}) ' +
       'SET t += $tokenProps',
     params: {
+      tokenHash,
       tokenProps: patch,
     },
     verifyCypher:
-      'MATCH (t:TmagInviteToken {token: $id}) ' +
+      'MATCH (t:TmagInviteToken {tokenHash: $tokenHash}) ' +
       'RETURN count(t) AS n',
   };
 
   try {
     await persistenceCall('neo4j', 'cypher', {
       query: payload.cypher,
-      params: { id: token, ...(payload.params ?? {}) },
+      params: payload.params,
     });
     const check = await persistenceCall<{ records?: Array<Record<string, unknown>> }>('neo4j', 'cypher', {
       query: payload.verifyCypher,
-      params: { id: token, ...(payload.verifyParams ?? {}) },
+      params: { tokenHash, ...(payload.verifyParams ?? {}) },
     });
     if (extractCount(check) < 1) throw new Error('token graph read-back returned 0');
   } catch (err) {
     await enqueueProjection({
       tier: 'operational',
       target: 'neo4j',
-      entityId: token,
+      entityId: tokenHash,
       mongoCollection: TOKENS_COLLECTION,
       payload,
       lastError: err instanceof Error ? err.message : String(err),

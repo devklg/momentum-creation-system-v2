@@ -41,7 +41,13 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_members', // domain/entitlements.ts + founder backfills
   'mcs_prospect_invitation_activity', // domain/invitations.ts, domain/crm.ts
   'mcs_prospect_callback_requests', // domain/callbackRequest.ts
-  'mcs_prospect_htank_events', // domain/holdingTank.ts
+  'mcs_prospect_htank_events', // domain/holdingTank.ts + domain/kongaPlacement.ts
+  'mcs_konga_placement_claims', // domain/kongaPlacement.ts (governed placement claim lease metadata)
+  'mcs_konga_page_visits', // domain/kongaVisits.ts
+  'mcs_konga_visit_markers', // domain/kongaVisits.ts
+  'mcs_konga_replay_pointers', // domain/kongaReplay.ts
+  'mcs_konga_replay_completions', // domain/kongaReplay.ts
+  'mcs_konga_enrollment_attestations', // domain/kongaEnrollment.ts
   'mcs_ivory_prospect_names', // domain/ivory.ts, domain/generator.ts
   'mcs_audit_log', // domain/auditLog.ts + domain/adminBaOversight.ts (sponsor-override audit)
   'mcs_admin_prospect_notes', // domain/adminProspectOversight.ts

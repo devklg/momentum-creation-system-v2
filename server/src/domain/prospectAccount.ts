@@ -65,6 +65,8 @@ export interface CreateProspectAccountInput {
    * a join back to invite_tokens.
    */
   tokenExpiresAt: McsIsoTimestamp;
+  /** Deterministic token identity projected to Neo4j/Chroma. */
+  invitationRecordId?: string;
 }
 
 /**
@@ -221,6 +223,7 @@ export async function createProspectAccount(
 
   const accountId = `pacct_${randomUUID()}`;
   const createdAt = new Date().toISOString();
+  const tokenHash = createHash('sha256').update(input.tokenId).digest('hex');
 
   const record: McsProspectAccountRecord = {
     accountId,
@@ -243,18 +246,21 @@ export async function createProspectAccount(
         cypher:
           'MERGE (a:TmagProspectAccount {accountId: $accountId}) ' +
           'SET a.prospectId = $prospectId, ' +
-          '    a.tokenId = $tokenId, ' +
+          '    a.tokenHash = $tokenHash, ' +
+          '    a.invitationRecordId = $invitationRecordId, ' +
           '    a.sponsorTmagId = $sponsorTmagId, ' +
           '    a.createdAt = $createdAt, ' +
           '    a.expiresAt = $expiresAt ' +
-          'MERGE (t:TmagInviteToken {token: $tokenId}) ' +
+          'MERGE (t:TmagInviteToken {tokenHash: $tokenHash}) ' +
+          'SET t.invitationRecordId = $invitationRecordId ' +
           'MERGE (a)-[:KEYS]->(t) ' +
           'MERGE (b:TeamMagnificentMember {tmagId: $sponsorTmagId}) ' +
           'MERGE (a)-[:SPONSORED_BY]->(b)',
         params: {
           accountId,
           prospectId: input.prospectId,
-          tokenId: input.tokenId,
+          tokenHash,
+          invitationRecordId: input.invitationRecordId ?? null,
           sponsorTmagId: input.sponsorTmagId,
           createdAt,
           expiresAt: input.tokenExpiresAt,
@@ -264,13 +270,15 @@ export async function createProspectAccount(
         collection: CHROMA_COLLECTION,
         document:
           `prospect account created for prospect ${input.prospectId} ` +
-          `(token ${input.tokenId}) · sponsor ${input.sponsorTmagId} ` +
+          `(identity ${tokenHash}) · sponsor ${input.sponsorTmagId} ` +
+          `${input.invitationRecordId ? `· identity ${input.invitationRecordId} · ` : ''}` +
           `· expires ${input.tokenExpiresAt}`,
         metadata: {
           kind: 'prospect_account_created',
           accountId,
           prospectId: input.prospectId,
-          tokenId: input.tokenId,
+          tokenHash,
+          invitationRecordId: input.invitationRecordId ?? null,
           sponsorTmagId: input.sponsorTmagId,
           createdAt,
           expiresAt: input.tokenExpiresAt,
@@ -318,7 +326,8 @@ export async function attachPhoneOnConsent(
   if (!phone) {
     // eslint-disable-next-line no-console
     console.warn(
-      `[prospectAccount] attachPhoneOnConsent: phone failed normalization for token ${tokenId}`,
+      `[prospectAccount] attachPhoneOnConsent: phone failed normalization for token ` +
+        `${createHash('sha256').update(tokenId).digest('hex')}`,
     );
     return;
   }

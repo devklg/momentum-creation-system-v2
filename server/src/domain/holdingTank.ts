@@ -66,7 +66,7 @@ export const TEAM_POOL_ID = 'tm_team_pool';
  * $inc path. This collapses to at most one extra round trip during the
  * very-first placement; steady state is one $inc + one query.
  */
-async function incrementPoolCounter(): Promise<number> {
+export async function incrementPoolCounter(): Promise<number> {
   // Try $inc first. If counter doc exists, this is the entire happy path.
   // The PERSISTENCE returns matchedCount/modifiedCount; we then read to learn
   // the new value.
@@ -135,13 +135,30 @@ async function incrementPoolCounter(): Promise<number> {
  * inside placeProspect.
  */
 export async function findPlacementByProspectId(prospectId: string): Promise<McsPoolPlacement | null> {
+  const liveResult = await findPlacementByProspectIdLive(prospectId);
+  if (liveResult) return liveResult;
+
   const result = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
     filter: { prospectId },
+    sort: { placedAt: -1, placementId: -1, _id: -1 },
     limit: 1,
   });
   return result.documents[0] ?? null;
+}
+
+export async function findPlacementByProspectIdLive(
+  prospectId: string,
+): Promise<McsPoolPlacement | null> {
+  const liveResult = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: PLACEMENTS_COLLECTION,
+    filter: { prospectId, flushedAt: null },
+    sort: { placedAt: -1, placementId: -1, _id: -1 },
+    limit: 1,
+  });
+  return liveResult.documents[0] ?? null;
 }
 
 export interface PlaceProspectInput {
@@ -177,7 +194,7 @@ export interface PlaceProspectInput {
  */
 export async function placeProspect(input: PlaceProspectInput): Promise<McsPlaceProspectResult> {
   // Idempotency check first — cheapest path is no-op.
-  const existing = await findPlacementByProspectId(input.prospectId);
+  const existing = await findPlacementByProspectIdLive(input.prospectId);
   if (existing) {
     return {
       prospectId: existing.prospectId,
@@ -234,7 +251,7 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
     // Concurrent placement won; return the persisted one. The position we
     // minted in step 1 is now vacant (intentional per monotonicity
     // contract). We do not attempt to reclaim it.
-    const winner = await findPlacementByProspectId(input.prospectId);
+    const winner = await findPlacementByProspectIdLive(input.prospectId);
     if (winner) {
       return {
         prospectId: winner.prospectId,
@@ -312,7 +329,7 @@ export async function buildHoldingTankSnapshot(
  * Returns 0 if the counter doc has not been seeded yet (no placements
  * have happened ever).
  */
-async function readPoolCounter(): Promise<number> {
+export async function readPoolCounter(): Promise<number> {
   const result = await persistenceCall<{ documents: Array<{ current: number }> }>(
     'mongodb',
     'query',
@@ -405,6 +422,7 @@ export interface AgedPlacement {
   positionNumber: number;
   sponsorTmagId: string;
   placedAt: string;
+  placementId?: string;
   /** Whole weeks the prospect has been in the tank (floor). */
   weeksInTank: number;
 }
@@ -419,20 +437,28 @@ export async function listProspectsAgedBeyond(
   nowMs: number = Date.now(),
 ): Promise<AgedPlacement[]> {
   const cutoff = windowCutoffIso(weeks, nowMs);
-  const result = await persistenceCall<{ documents: McsPoolPlacement[] }>('mongodb', 'query', {
+  const result = await persistenceCall<{ results: McsPoolPlacement[] }>('mongodb', 'aggregate', {
     database: MONGO_DB,
     collection: PLACEMENTS_COLLECTION,
-    filter: {
-      flushedAt: null,
-      placedAt: { $lt: cutoff },
-    },
-    sort: { placedAt: -1 },
-    limit: 50_000,
+    pipeline: [
+      { $match: { flushedAt: null, placedAt: { $lt: cutoff } } },
+      { $sort: { prospectId: 1, placedAt: -1, placementId: -1, _id: -1 } },
+      {
+        $group: {
+          _id: '$prospectId',
+          placement: { $first: '$$ROOT' },
+        },
+      },
+      { $replaceRoot: { newRoot: '$placement' } },
+      { $sort: { placedAt: -1, placementId: -1, _id: -1 } },
+      { $limit: 50_000 },
+    ],
   });
-  return (result.documents ?? []).map<AgedPlacement>((p) => ({
+  return (result.results ?? []).map<AgedPlacement>((p) => ({
     prospectId: p.prospectId,
     positionNumber: p.positionNumber,
     sponsorTmagId: p.sponsorTmagId,
+    placementId: (p as McsPoolPlacement & { placementId?: string }).placementId,
     placedAt: p.placedAt,
     weeksInTank: Math.floor((nowMs - new Date(p.placedAt).getTime()) / ONE_WEEK_MS),
   }));
@@ -481,6 +507,7 @@ export async function flushExpiredPlacements(
       // 1. Placement row — flush stamp. Position untouched.
       await updatePoolPlacementOperational({
         prospectId: c.prospectId,
+        placementId: c.placementId,
         patch: { flushedAt, flushReason: 'expired' },
         relationshipPatch: { flushedAt, flushReason: 'expired' },
       });

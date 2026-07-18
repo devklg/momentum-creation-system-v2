@@ -58,6 +58,10 @@ import {
   HOLDING_TANK_WINDOW_WEEKS,
 } from '../../domain/holdingTank.js';
 import { appendAuditEntry, queryAuditEntries } from '../../domain/auditLog.js';
+import {
+  attestKongaEnrollment,
+  KongaEnrollmentError,
+} from '../../domain/kongaEnrollment.js';
 import type {
   McsAdminDashboardFilter,
   McsAdminProspectActivityEvent,
@@ -800,3 +804,74 @@ adminProspectsRoutes.get('/alerts/aged', requireAdmin, async (req, res) => {
     res.status(500).json({ ok: false, error: `Aged alert failed: ${msg}` });
   }
 });
+
+const KongaAdminEnrollmentSchema = z.object({
+  sponsorTmagId: z.string().min(2).max(80),
+  enrolleeTmagId: z.string().min(2).max(80),
+  legPlacement: z.enum(['left', 'right', 'core3']),
+  offAppEnrollmentComplete: z.literal(true),
+  legPlacementComplete: z.literal(true),
+  reason: z.string().min(8).max(2000),
+}).strict();
+
+/** Audited Kevin override. Sponsor attribution remains immutable and exact. */
+adminProspectsRoutes.post(
+  '/:prospectId/konga-enrollment-attestation',
+  requireAdmin,
+  async (req, res) => {
+    const parsed = KongaAdminEnrollmentSchema.safeParse(req.body);
+    const prospectId = Array.isArray(req.params.prospectId)
+      ? req.params.prospectId[0] ?? ''
+      : req.params.prospectId ?? '';
+    if (!parsed.success || !prospectId) {
+      return res.status(400).json({ ok: false, error: 'invalid_enrollment_attestation' });
+    }
+    const actor = adminActorFromRequest(req);
+    try {
+      const result = await attestKongaEnrollment({
+        prospectId,
+        sponsorTmagId: parsed.data.sponsorTmagId,
+        enrolleeTmagId: parsed.data.enrolleeTmagId,
+        actorTmagId: actor.tmagId,
+        actorKind: 'admin_override',
+        legPlacement: parsed.data.legPlacement,
+        offAppEnrollmentComplete: true,
+        legPlacementComplete: true,
+        reason: parsed.data.reason,
+      });
+      await appendAuditEntry({
+        actor,
+        action: 'admin.prospects.konga_enrollment_attested',
+        entity: { kind: 'prospect', id: prospectId, displayLabel: null },
+        severity: 'critical',
+        before: null,
+        after: {
+          attestationId: result.attestationId,
+          sponsorTmagId: parsed.data.sponsorTmagId,
+          enrolleeTmagId: parsed.data.enrolleeTmagId,
+          legPlacement: parsed.data.legPlacement,
+          joinedAt: result.event.joinedAt,
+          alreadyAttested: result.alreadyAttested,
+        },
+        reason: parsed.data.reason,
+        context: contextFromRequest(
+          req,
+          `/api/admin/prospects/${prospectId}/konga-enrollment-attestation`,
+          'POST',
+        ),
+      });
+      return res.status(200).json({
+        ok: true,
+        attestationId: result.attestationId,
+        joinedAt: result.event.joinedAt,
+        alreadyAttested: result.alreadyAttested,
+      });
+    } catch (error) {
+      if (error instanceof KongaEnrollmentError) {
+        return res.status(409).json({ ok: false, error: error.code });
+      }
+      console.error('[admin konga enrollment attestation] failed', error);
+      return res.status(500).json({ ok: false, error: 'server_error' });
+    }
+  },
+);

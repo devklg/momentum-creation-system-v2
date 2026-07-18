@@ -82,7 +82,8 @@ describe('pool placement persistence', () => {
 
   it('updates Mongo, verifies the placement patch, and projects the graph patch', async () => {
     mocks.persistenceCall
-      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ documents: [{ _id: 'legacy-1', prospectId: 'prospect_1' }] })
+      .mockResolvedValueOnce({ matchedCount: 1 })
       .mockResolvedValueOnce({
         documents: [{ prospectId: 'prospect_1', sponsorTmagId: 'TMAG-02', updatedAt: 'now' }],
       })
@@ -95,18 +96,45 @@ describe('pool placement persistence', () => {
       relationshipPatch: { sponsorTmagId: 'TMAG-02' },
     });
 
-    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(1, 'mongodb', 'update', {
+    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(1, 'mongodb', 'query', {
       database: 'momentum',
       collection: 'tmag_prospect_htank_placements',
-      filter: { prospectId: 'prospect_1' },
+      filter: {
+        prospectId: 'prospect_1',
+        placementId: { $exists: false },
+        flushedAt: null,
+      },
+      sort: { placedAt: -1, placementId: -1, _id: -1 },
+      limit: 2,
+    });
+    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(2, 'mongodb', 'update', {
+      database: 'momentum',
+      collection: 'tmag_prospect_htank_placements',
+      filter: {
+        _id: 'legacy-1',
+        prospectId: 'prospect_1',
+        flushedAt: null,
+        placementId: { $exists: false },
+      },
       update: { $set: { sponsorTmagId: 'TMAG-02', updatedAt: 'now' } },
     });
     expect(mocks.persistenceCall).toHaveBeenNthCalledWith(
-      3,
+      4,
       'neo4j',
       'cypher',
       expect.objectContaining({
         query: expect.stringContaining('IN_HOLDING_TANK'),
+      }),
+    );
+    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(
+      3,
+      'mongodb',
+      'query',
+      expect.objectContaining({
+        filter: {
+          prospectId: 'prospect_1',
+          _id: 'legacy-1',
+        },
       }),
     );
     expect(mocks.enqueueProjection).not.toHaveBeenCalled();
@@ -114,7 +142,8 @@ describe('pool placement persistence', () => {
 
   it('queues placement graph projection when the operational graph patch does not verify', async () => {
     mocks.persistenceCall
-      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ documents: [{ _id: 'legacy-2', placementId: undefined }] })
+      .mockResolvedValueOnce({ matchedCount: 1 })
       .mockResolvedValueOnce({ documents: [{ prospectId: 'prospect_1', flushReason: 'expired' }] })
       .mockResolvedValueOnce({})
       .mockResolvedValueOnce({ records: [{ n: 0 }] });
@@ -131,6 +160,137 @@ describe('pool placement persistence', () => {
         target: 'neo4j',
         entityId: 'prospect_1',
         mongoCollection: 'tmag_prospect_htank_placements',
+      }),
+    );
+  });
+
+  it('updates exactly one legacy row by _id when placementId is absent', async () => {
+    mocks.persistenceCall
+      .mockResolvedValueOnce({
+        documents: [
+          { _id: 'legacy-live', prospectId: 'prospect_1', flushedAt: null },
+          { _id: 'legacy-old', prospectId: 'prospect_1', flushedAt: null },
+        ],
+      });
+
+    await expect(
+      updatePoolPlacementOperational({
+        prospectId: 'prospect_1',
+        patch: { flushReason: 'archived' },
+        relationshipPatch: { flushReason: 'archived' },
+      }),
+    ).rejects.toThrow('pool_placement_target_not_unique_legacy:prospect_1');
+    expect(mocks.persistenceCall).toHaveBeenCalledTimes(1);
+    expect(mocks.enqueueProjection).not.toHaveBeenCalled();
+  });
+
+  it('targets a specific konga-like placement by placementId', async () => {
+    mocks.persistenceCall
+      .mockResolvedValueOnce({ documents: [{ _id: 'new-live-1', placementId: 'placement-live-1' }] })
+      .mockResolvedValueOnce({ matchedCount: 1 })
+      .mockResolvedValueOnce({ documents: [{ placementId: 'placement-live-1', flushReason: 'expired' }] })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ records: [{ n: 1 }] });
+
+    await updatePoolPlacementOperational({
+      prospectId: 'prospect_1',
+      placementId: 'placement-live-1',
+      patch: { flushReason: 'expired' },
+      relationshipPatch: { flushReason: 'expired' },
+    });
+
+    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(1, 'mongodb', 'query', {
+      database: 'momentum',
+      collection: 'tmag_prospect_htank_placements',
+      filter: {
+        prospectId: 'prospect_1',
+        placementId: 'placement-live-1',
+        flushedAt: null,
+      },
+      sort: { placedAt: -1, placementId: -1, _id: -1 },
+      limit: 1,
+    });
+    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(
+      2,
+      'mongodb',
+      'update',
+      expect.objectContaining({
+        filter: {
+          _id: 'new-live-1',
+          prospectId: 'prospect_1',
+          flushedAt: null,
+          placementId: 'placement-live-1',
+        },
+      }),
+    );
+    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(
+      3,
+      'mongodb',
+      'query',
+      expect.objectContaining({
+        filter: {
+          prospectId: 'prospect_1',
+          _id: 'new-live-1',
+        },
+      }),
+    );
+    expect(mocks.persistenceCall).toHaveBeenNthCalledWith(
+      4,
+      'neo4j',
+      'cypher',
+      expect.objectContaining({
+        query: expect.stringContaining('r.placementId = $placementId'),
+        params: expect.objectContaining({ placementId: 'placement-live-1' }),
+      }),
+    );
+  });
+
+  it('throws stale update when update precondition cannot match exactly one row', async () => {
+    mocks.persistenceCall
+      .mockResolvedValueOnce({ documents: [{ _id: 'legacy-live', prospectId: 'prospect_1' }] })
+      .mockResolvedValueOnce({ matchedCount: 0 })
+      .mockResolvedValueOnce({
+        documents: [{ _id: 'legacy-live', prospectId: 'prospect_1', flushReason: 'archived' }],
+      });
+
+    await expect(
+      updatePoolPlacementOperational({
+        prospectId: 'prospect_1',
+        patch: { flushReason: 'archived' },
+        relationshipPatch: { flushReason: 'archived' },
+      }),
+    ).rejects.toThrow('pool_placement_operational_update_stale:prospect_1');
+    expect(mocks.enqueueProjection).not.toHaveBeenCalled();
+  });
+
+  it('queues projection when Neo4j verify reports the wrong row count', async () => {
+    mocks.persistenceCall
+      .mockResolvedValueOnce({ documents: [{ _id: 'legacy-3', prospectId: 'prospect_1' }] })
+      .mockResolvedValueOnce({ matchedCount: 1 })
+      .mockResolvedValueOnce({ documents: [{ prospectId: 'prospect_1', flushReason: 'expired' }] })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ records: [{ n: 2 }] });
+
+    await updatePoolPlacementOperational({
+      prospectId: 'prospect_1',
+      patch: { flushReason: 'expired' },
+      relationshipPatch: { flushReason: 'expired' },
+    });
+
+    expect(mocks.enqueueProjection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: 'neo4j',
+        entityId: 'prospect_1',
+        mongoCollection: 'tmag_prospect_htank_placements',
+        payload: expect.objectContaining({
+          verifyParams: expect.objectContaining({
+            placementId: null,
+          }),
+          params: expect.objectContaining({
+            placementId: null,
+          }),
+          verifyCypher: expect.stringContaining('RETURN count(r) AS n'),
+        }),
       }),
     );
   });

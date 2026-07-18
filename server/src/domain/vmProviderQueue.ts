@@ -36,6 +36,7 @@ const MONGO_DB = 'momentum';
 const CHROMA_COLLECTION = 'mcs_vm_campaigns';
 
 const LEADS_COLLECTION = 'tmag_vm_bulk_leads';
+const TOKENS_COLLECTION = 'tmag_prospect_invite_tokens';
 const QUEUE_COLLECTION = 'tmag_vm_queue_jobs';
 const DELIVERY_EVENTS_COLLECTION = 'tmag_vm_delivery_events';
 const WEBHOOK_EVENTS_COLLECTION = 'tmag_vm_provider_webhook_events';
@@ -713,6 +714,8 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
   }
 
   const token = await mintUniqueToken();
+  const invitationRecordId = `invite_${randomUUID()}`;
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const now = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
 
@@ -734,20 +737,24 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
       createdAt: now,
       clickedAt: null,
       expiresAt,
+      invitationRecordId,
     },
     tokenProps: {
+      invitationRecordId,
       tokenKind: 'rvm',
+      tokenHash,
       state: 'minted',
       createdAt: now,
       expiresAt,
     },
     chroma: {
       collection: CHROMA_COLLECTION,
-      document: `RVM token minted for VM lead ${lead.leadId} owned by ${lead.ownerTmagId}.`,
+      document: `RVM token minted for VM lead ${lead.leadId} owned by ${lead.ownerTmagId} with identity ${tokenHash}.`,
       metadata: {
         kind: 'rvm_token_created',
         leadId: lead.leadId,
-        token,
+        invitationRecordId,
+        tokenHash,
         ownerTmagId: lead.ownerTmagId,
         createdAt: now,
       },
@@ -778,6 +785,16 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
 
   const now = new Date().toISOString();
   const crmRecordId = `crm_${randomUUID()}`;
+  const tokenHash = createHash('sha256').update(lead.token).digest('hex');
+  const tokenRecord = await persistenceCall<{
+    documents: Array<{ invitationRecordId?: string }>;
+  }>('mongodb', 'query', {
+    database: MONGO_DB,
+    collection: TOKENS_COLLECTION,
+    filter: { token: lead.token },
+    limit: 1,
+  });
+  const invitationRecordId = tokenRecord.documents?.[0]?.invitationRecordId;
   await writeCrmOwnershipGraphCritical({
     id: crmRecordId,
     mongoDoc: {
@@ -790,7 +807,7 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
       sourceLabel: lead.sourceLabel,
       leadOwnerId: lead.leadOwnerId,
       vmCampaignId: lead.vmCampaignId,
-      token: lead.token,
+      tokenHash,
       status: 'inactive_pre_engagement',
       disposition: null,
       followUpDueAt: null,
@@ -804,11 +821,12 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
     crmProps: {
       leadId: lead.leadId,
       sponsorTmagId: lead.sponsorTmagId,
+      invitationRecordId,
+      tokenHash,
       source: 'rvm',
       sourceLabel: lead.sourceLabel,
       leadOwnerId: lead.leadOwnerId,
       vmCampaignId: lead.vmCampaignId,
-      token: lead.token,
       status: 'inactive_pre_engagement',
       createdAt: now,
       updatedAt: now,
@@ -821,6 +839,8 @@ export async function processCrmCreation(job: VmQueueJob<LeadPayload>): Promise<
         leadId: lead.leadId,
         crmRecordId,
         ownerTmagId: lead.ownerTmagId,
+        tokenHash,
+        invitationRecordId,
         createdAt: now,
       },
     },

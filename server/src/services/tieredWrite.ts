@@ -63,6 +63,7 @@ export interface TieredNeo4jWrite {
 export interface TieredChromaWrite {
   collection: string;
   document: string;
+  id?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -190,7 +191,7 @@ function toNeo4jPayload(write: TieredNeo4jWrite): Neo4jProjectionPayload {
 }
 
 function toChromaPayload(write: TieredChromaWrite): ChromaProjectionPayload {
-  return { collection: write.collection, document: write.document, metadata: write.metadata };
+  return { collection: write.collection, id: write.id, document: write.document, metadata: write.metadata };
 }
 
 /**
@@ -302,7 +303,7 @@ async function projectChromaDurable(
     await assertChromaCollectionExists(chroma.collection);
     await persistenceCall('chromadb', 'add', {
       collection: chroma.collection,
-      ids: [input.id],
+      ids: [chroma.id ?? input.id],
       documents: [chroma.document],
       metadatas: [chroma.metadata ?? {}],
     });

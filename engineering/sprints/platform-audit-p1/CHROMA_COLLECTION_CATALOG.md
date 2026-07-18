@@ -5,12 +5,12 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:35:38.621Z
-- Registered collections: 53
-- Schema-catalog collections: 53
+- Generated: 2026-07-18T02:41:33.367Z
+- Registered collections: 59
+- Schema-catalog collections: 59
 - Collections with observed write/query usage: 33
 - Language-scoped collections: 10
-- Metadata contract rows: 53
+- Metadata contract rows: 59
 - Observed unregistered/dynamic targets: 10
 - Embedding model: all-MiniLM-L6-v2
 - Embedding dimension: 384
@@ -25,7 +25,7 @@
 | content_resources | 3 |
 | crm | 2 |
 | events | 4 |
-| general | 3 |
+| general | 9 |
 | holding_tank | 2 |
 | identity_access | 4 |
 | knowledge | 12 |
@@ -59,6 +59,12 @@
 | `mcs_ivory_prospect_names` | agents | not_language_scoped | Prospect funnel semantic record. | `add`<br>`create_collection`<br>`writeGraphCritical`<br>`writeKnowledge` | `angle`, `chat_number`, `createdAt`, `description`, `ivoryId`, `kind`, `preferredAngle`, `productKey`, `project`, `runId`, `tmagId` | none observed | `ivoryId`, `runId`, `tmagId` |
 | `mcs_knowledge_chunks` | knowledge | metadata.language | Approved knowledge chunk retrieval index. | `add`<br>`query_with_filter`<br>`writeKnowledge` | `agentScopes`, `authority`, `authorityStatus`, `chunkId`, `chunkIndex`, `citationLabel`, `citationSourceRef`, `documentId`, `domain`, `endOffset`, `heading`, `kind`, `language`, `retrievalEligible`, `scope.teamId`, `scope.teamKey`, `scope.teamName`, `scope.tenantId`, `sourceId`, `sourceTitle`, `sourceVersion`, `startOffset`, `status`, `surfaceScopes`, `title`, `topicTags` | `retrievalEligible`, `status` | `chunkId`, `documentId`, `domain`, `language`, `retrievalEligible`, `scope.teamId`, `scope.tenantId`, `sourceId`, `status` |
 | `mcs_knowledge_sources` | knowledge | not_language_scoped | Approved knowledge source retrieval and source lookup. | not observed | none observed | none observed | `domain`, `language` |
+| `mcs_konga_enrollment_attestations` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_page_visits` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_placement_claims` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_replay_completions` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_replay_pointers` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
+| `mcs_konga_visit_markers` | general | not_language_scoped | Registered app Chroma collection. | not observed | none observed | none observed | none inferred |
 | `mcs_learning_candidates_review` | knowledge_review | metadata.language | Review-only learning candidates; never active retrieval knowledge. | `writeKnowledge` | `createdAt`, `domain`, `kind`, `language`, `status`, `tenantId` | none observed | `tenantId` |
 | `mcs_members` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `add`<br>`delete`<br>`get` | `backfilledAt`, `entitlements`, `kind`, `role`, `threeBaId`, `timezone`, `tmagId`, `updatedAt` | none observed | `threeBaId`, `tmagId` |
 | `mcs_new_member_orientation_reservations` | identity_access | not_language_scoped | Team Magnificent member identity semantic record. | `create_collection`<br>`writeOperational` | `capacity`, `chat_number`, `contentBindingDigestSha256`, `createdAt`, `kind`, `primaryResourceVersionId`, `purpose`, `reservationId`, `resourceVersionIdsJson`, `scheduledFor`, `sessionId`, `status`, `tmagId`, `wireframe_leaf` | none observed | `primaryResourceVersionId`, `reservationId`, `sessionId`, `tmagId` |
@@ -69,9 +75,9 @@
 | `mcs_performance_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_prospect_callback_requests` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `callbackRequestId`, `createdAt`, `intent`, `kind`, `leadId`, `prospectId`, `source`, `sponsorTmagId` | none observed | `callbackRequestId`, `leadId`, `prospectId`, `source`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_crm_records` | crm | not_language_scoped | Prospect CRM and lifecycle semantic records. | not observed | none observed | none observed | none inferred |
-| `mcs_prospect_htank_accounts` | holding_tank | not_language_scoped | Holding-tank pool event/account semantic records. | `writeOperational` | `accountId`, `createdAt`, `expiresAt`, `kind`, `prospectId`, `sponsorTmagId`, `tokenId` | none observed | `accountId`, `prospectId`, `sponsorTmagId`, `tmagId`, `tokenId` |
+| `mcs_prospect_htank_accounts` | holding_tank | not_language_scoped | Holding-tank pool event/account semantic records. | `writeOperational` | `accountId`, `createdAt`, `expiresAt`, `invitationRecordId`, `kind`, `prospectId`, `sponsorTmagId`, `tokenHash` | none observed | `accountId`, `invitationRecordId`, `prospectId`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_htank_events` | holding_tank | not_language_scoped | Holding-tank pool event/account semantic records. | `delete`<br>`query_with_filter` | none observed | `prospectId` | none inferred |
-| `mcs_prospect_invitation_activity` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeGraphCritical`<br>`writeKnowledge` | `at`, `city`, `correlationId`, `createdAt`, `disposition`, `dueAt`, `kind`, `leadId`, `ownerTmagId`, `prospectId`, `relationshipReason`, `source`, `sponsorTmagId`, `stateOrRegion`, `token` | none observed | `correlationId`, `leadId`, `ownerTmagId`, `prospectId`, `source`, `sponsorTmagId`, `tmagId` |
+| `mcs_prospect_invitation_activity` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeGraphCritical`<br>`writeKnowledge` | `at`, `city`, `correlationId`, `createdAt`, `disposition`, `dueAt`, `invitationRecordId`, `kind`, `leadId`, `ownerTmagId`, `prospectId`, `relationshipReason`, `source`, `sponsorTmagId`, `stateOrRegion`, `tokenHash` | none observed | `correlationId`, `invitationRecordId`, `leadId`, `ownerTmagId`, `prospectId`, `source`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_magic_links` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `accountId`, `expiresAt`, `issuedAt`, `kind`, `linkToken`, `phoneHash`, `tokenId` | none observed | `accountId`, `tokenId` |
 | `mcs_prospect_timeline_events` | crm | not_language_scoped | Prospect CRM and lifecycle semantic records. | `writeKnowledge` | `createdAt`, `kind`, `leadId`, `ownerTmagId`, `prospectId`, `sponsorTmagId` | none observed | `leadId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tmagId` |
 | `mcs_prospect_webinar_reservations` | prospect_funnel | not_language_scoped | Prospect funnel semantic record. | `writeOperational` | `createdAt`, `eventId`, `kind`, `prospectId`, `reservationId`, `scheduledFor`, `sponsorTmagId` | none observed | `eventId`, `prospectId`, `reservationId`, `sponsorTmagId`, `tmagId` |
@@ -88,7 +94,7 @@
 | `mcs_three_way_bookings` | events | not_language_scoped | Registered app Chroma collection. | `add`<br>`writeOperational` | `bookerTmagId`, `bookingId`, `cancelledAt`, `cancelledByTmagId`, `kind`, `notificationChannel`, `sponsorTmagId`, `startAt`, `status` | none observed | `bookerTmagId`, `bookingId`, `cancelledByTmagId`, `sponsorTmagId`, `tmagId` |
 | `mcs_training_knowledge_en` | knowledge | en | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
 | `mcs_training_knowledge_es` | knowledge | es | Active approved GraphRAG knowledge for a single domain/language. | not observed | none observed | none observed | `domain`, `knowledgeObjectId`, `language`, `retrievalReady`, `tenantId` |
-| `mcs_vm_bulk_leads` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `writeGraphCritical` | `correlationId`, `createdAt`, `kind`, `leadId`, `leadOwnerId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `token`, `vmCampaignId` | none observed | `correlationId`, `leadId`, `leadOwnerId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tmagId`, `vmCampaignId` |
+| `mcs_vm_bulk_leads` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `writeGraphCritical` | `correlationId`, `createdAt`, `invitationRecordId`, `kind`, `leadId`, `leadOwnerId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tokenHash`, `vmCampaignId` | none observed | `correlationId`, `invitationRecordId`, `leadId`, `leadOwnerId`, `ownerTmagId`, `prospectId`, `sponsorTmagId`, `tmagId`, `vmCampaignId` |
 | `mcs_vm_campaigns` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `add`<br>`writeOperational` | `action`, `available`, `createdAt`, `entityId`, `inboundCallId`, `jobKind`, `kind`, `leadId`, `leadOwnerId`, `matched`, `ownerTmagId`, `provider`, `status`, `suppressionId`, `updatedAt`, `vmCampaignId` | none observed | `entityId`, `inboundCallId`, `leadId`, `leadOwnerId`, `ownerTmagId`, `suppressionId`, `tmagId`, `vmCampaignId` |
 | `mcs_vm_delivery_events` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | not observed | none observed | none observed | none inferred |
 | `mcs_vm_lead_owners` | vm_rvm | not_language_scoped | VM/RVM ownership, campaign, lead, and delivery semantic records. | `writeGraphCritical` | `country`, `createdAt`, `kind`, `leadOwnerId`, `ownerTmagId`, `source` | none observed | `leadOwnerId`, `ownerTmagId`, `source`, `tmagId` |
@@ -105,10 +111,10 @@ entries need explicit contract handling in P1-43.
 | --- | --- | --- | ---: | --- |
 | `activeKnowledgeCollection(group[0]!.domain, group[0]!.language)` | expression | `get` | 1 | `server/src/domain/graphragReadiness.ts:145` |
 | `agentEventsCollection` | expression | `writeKnowledge` | 1 | `server/src/domain/agents/orchestrator.ts:299` |
-| `c.collection` | expression | `add` | 1 | `server/src/services/projectionOutbox.ts:174` |
-| `chroma.collection` | expression | `add` | 2 | `server/src/domain/steveVersioning.ts:266`<br>`server/src/services/tieredWrite.ts:303` |
+| `c.collection` | expression | `add` | 1 | `server/src/services/projectionOutbox.ts:178` |
+| `chroma.collection` | expression | `add` | 2 | `server/src/domain/steveVersioning.ts:266`<br>`server/src/services/tieredWrite.ts:304` |
 | `collection` | expression | `create_collection` | 1 | `server/src/runtime/knowledge-evolution/indexing/knowledgeEvolutionReindex.service.ts:63` |
-| `input.chroma.collection` | expression | `add` | 1 | `server/src/services/tripleStack.ts:72` |
+| `input.chroma.collection` | expression | `add` | 1 | `server/src/services/tripleStack.ts:74` |
 | `knowledgeChromaCollection(current.domain, current.language)` | expression | `writeKnowledge` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:383` |
 | `knowledgeChromaCollection(source.domain, source.language)` | expression | `add` | 1 | `server/src/services/knowledge/knowledgeCorrectionStore.ts:1104` |
 | `mcs_questionnaires` | literal/constant | `writeKnowledge` | 1 | `server/src/domain/questionnaire.ts:203` |

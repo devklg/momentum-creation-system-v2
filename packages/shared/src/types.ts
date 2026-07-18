@@ -6470,3 +6470,8 @@ export interface McsSteveDiscoveryArtifact {
 export interface McsSteveDiscoveryView {
   retakeInProgress?: boolean;
 }
+
+/** Invitation token with optional Konga placement-attempt identity payload. */
+export interface McsKongaInviteTokenRecord extends McsInviteTokenRecord {
+  invitationRecordId?: string;
+}
