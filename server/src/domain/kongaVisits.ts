@@ -9,7 +9,7 @@ const MARKER_CHROMA_COLLECTION = 'mcs_konga_visit_markers';
 const MAX_MARKER_ATTEMPTS = 8;
 
 const MARKER_KEY_PREFIX = 'konga_visit_marker_';
-const MARKER_VERIFY_CYPHER = 'MATCH (m:TmagKongaPageVisitMarker {markerId:$id}) RETURN count(m) AS n';
+const MARKER_VERIFY_CYPHER = 'MATCH (m:TmagKongaPageVisitMarker {eventId:$id}) RETURN count(m) AS n';
 
 type MarkerState = 'pending' | 'committed' | 'aborted';
 const MARKER_STATE_PRIORITY: Record<MarkerState, number> = {
@@ -22,6 +22,7 @@ type Persistence = typeof persistenceCall;
 interface KongaPageVisitMarker {
   _id: string;
   markerId: string;
+  markerKey: string;
   tokenHash: string;
   version: number;
   state: MarkerState;
@@ -71,12 +72,12 @@ function identity(token: string, pageVisitId: string): { id: string; tokenHash: 
   return { tokenHash, id: `konga_visit_${sha(`${tokenHash}|${pageVisitId}`)}` };
 }
 
-function markerId(tokenHash: string): string {
+function markerKey(tokenHash: string): string {
   return `${MARKER_KEY_PREFIX}${tokenHash}`;
 }
 
-function markerEventId(markerKey: string, version: number, state: MarkerState): string {
-  return `${markerKey}:v${version}:${state}`;
+function markerEventId(markerKeyValue: string, version: number, state: MarkerState): string {
+  return `${markerKeyValue}:v${version}:${state}`;
 }
 
 function verify(id: string) {
@@ -104,27 +105,36 @@ function markerVerify(id: string) {
 async function readTokenVisitLatestGlobalPosition(
   tokenHash: string,
   persistence: Persistence,
+  strictVerify: typeof verifyKongaThreeLegs,
 ): Promise<{ observedGlobalPosition: number | null; visitRecordId: string | null; observedAt: string | null }> {
   const result = await persistence<{
-    documents?: Array<{ observedGlobalPosition: number; visitRecordId: string; observedAt: string }>;
+    documents?: Array<{ _id: string; observedGlobalPosition: number; visitRecordId: string; observedAt: string }>;
   }>('mongodb', 'query', {
     database: 'momentum',
     collection: COLLECTION,
     filter: { tokenHash },
-    sort: { observedAt: -1 },
-    limit: 1,
+    sort: { observedAt: -1, _id: -1 },
+    limit: 25,
   });
-  const latest = result.documents?.[0];
-  if (!latest) return { observedGlobalPosition: null, visitRecordId: null, observedAt: null };
-  return {
-    observedGlobalPosition: latest.observedGlobalPosition,
-    visitRecordId: latest.visitRecordId,
-    observedAt: latest.observedAt,
-  };
+
+  for (const latest of result.documents ?? []) {
+    try {
+      await strictVerify(verify(latest._id), persistence);
+      return {
+        observedGlobalPosition: latest.observedGlobalPosition,
+        visitRecordId: latest.visitRecordId,
+        observedAt: latest.observedAt,
+      };
+    } catch {
+      continue;
+    }
+  }
+
+  return { observedGlobalPosition: null, visitRecordId: null, observedAt: null };
 }
 
 function makeMarkerEvent(
-  markerKey: string,
+  markerKeyValue: string,
   version: number,
   state: MarkerState,
   tokenHash: string,
@@ -134,9 +144,11 @@ function makeMarkerEvent(
   previousVisitRecordId: string | null,
   pageVisitRecordId: string | null,
 ): KongaPageVisitMarker {
+  const markerId = markerEventId(markerKeyValue, version, state);
   return {
-    _id: markerEventId(markerKey, version, state),
-    markerId: markerKey,
+    _id: markerId,
+    markerId,
+    markerKey: markerKeyValue,
     tokenHash,
     version,
     state,
@@ -178,7 +190,11 @@ async function isMarkerEventVerified(
   }
 }
 
-async function readMarkerSnapshot(tokenHash: string, persistence: Persistence): Promise<MarkerSnapshot> {
+async function readMarkerSnapshot(
+  tokenHash: string,
+  persistence: Persistence,
+  strictVerify: typeof verifyKongaThreeLegs,
+): Promise<MarkerSnapshot> {
   const markerRows = await persistence<{ documents?: KongaPageVisitMarker[] }>('mongodb', 'query', {
     database: 'momentum',
     collection: MARKER_COLLECTION,
@@ -193,7 +209,7 @@ async function readMarkerSnapshot(tokenHash: string, persistence: Persistence): 
     b.observedAt.localeCompare(a.observedAt),
   );
   const latestEventVersion = rows[0]?.version ?? 0;
-  const fallback = await readTokenVisitLatestGlobalPosition(tokenHash, persistence);
+  const fallback = await readTokenVisitLatestGlobalPosition(tokenHash, persistence, strictVerify);
 
   let latestValidEvent: KongaPageVisitMarker | null = null;
   let latestCommitted: KongaPageVisitMarker | null = null;
@@ -230,7 +246,7 @@ async function writeMarker(
       mongoCollection: MARKER_COLLECTION,
       mongoDoc: { ...marker },
       neo4j: {
-        cypher: 'MERGE (m:TmagKongaPageVisitMarker {markerId:$id}) SET m += $props',
+        cypher: 'MERGE (m:TmagKongaPageVisitMarker {eventId:$id}) SET m += $props',
         params: { props: { ...marker } },
       },
       chroma: {
@@ -239,6 +255,7 @@ async function writeMarker(
         metadata: {
           kind: 'konga_page_visit_marker',
           markerId: marker._id,
+          markerKey: marker.markerKey,
           markerState: marker.state,
           markerVersion: marker.version,
           tokenHash: marker.tokenHash,
@@ -257,11 +274,46 @@ async function markFailedAttempt(
   strictWrite: typeof tripleStackWriteWithReadback = tripleStackWriteWithReadback,
 ): Promise<void> {
   try {
-    const aborted = { ...marker, _id: markerEventId(marker.markerId, marker.version, 'aborted'), state: 'aborted' as const };
+    const aborted = {
+      ...marker,
+      _id: markerEventId(marker.markerKey, marker.version, 'aborted'),
+      markerId: markerEventId(marker.markerKey, marker.version, 'aborted'),
+      state: 'aborted' as const,
+    };
     await writeMarker(aborted, persistence, strictWrite);
   } catch {
     // If another observer has already finalized this attempt, allow it to own recovery.
   }
+}
+
+async function commitMarker(
+  marker: KongaPageVisitMarker,
+  observation: KongaPageVisitObservation & { tokenHash: string; visitRecordId: string },
+  persistence: Persistence,
+  strictVerify: typeof verifyKongaThreeLegs,
+  strictWrite: typeof tripleStackWriteWithReadback = tripleStackWriteWithReadback,
+): Promise<void> {
+  const committed = {
+    ...marker,
+    _id: markerEventId(marker.markerKey, marker.version, 'committed'),
+    markerId: markerEventId(marker.markerKey, marker.version, 'committed'),
+    state: 'committed' as const,
+    observedGlobalPosition: observation.observedGlobalPosition,
+    pageVisitRecordId: observation.visitRecordId,
+    previousVisitRecordId: marker.previousVisitRecordId,
+    observedAt: observation.observedAt,
+  };
+
+  try {
+    await writeMarker(committed, persistence, strictWrite);
+    return;
+  } catch (error) {
+    if (!isDuplicateMarkerWriteError(error)) {
+      throw error;
+    }
+  }
+
+  await strictVerify(markerVerify(committed._id), persistence);
 }
 
 async function claimVisitMarker(
@@ -277,7 +329,7 @@ async function claimVisitMarker(
   strictWrite: typeof tripleStackWriteWithReadback = tripleStackWriteWithReadback,
 ): Promise<MarkerClaim> {
   for (let attempt = 0; attempt < MAX_MARKER_ATTEMPTS; attempt += 1) {
-    const snapshot = await readMarkerSnapshot(params.tokenHash, persistence);
+    const snapshot = await readMarkerSnapshot(params.tokenHash, persistence, strictVerify);
     const marker = snapshot.latestValidEvent;
     if (marker && marker.state === 'pending') {
       const winner = marker.pageVisitRecordId
@@ -287,7 +339,7 @@ async function claimVisitMarker(
         if (winner.pageVisitId === params.pageVisitId) {
           return {
             mode: 'reuse',
-            marker: marker,
+            marker,
             previousGlobalPosition: winner.previousGlobalPosition,
             previousVisitRecordId: marker.previousVisitRecordId,
             observation: winner,
@@ -296,7 +348,7 @@ async function claimVisitMarker(
 
         try {
           const committed = makeMarkerEvent(
-            marker.markerId,
+            marker.markerKey,
             marker.version,
             'committed',
             params.tokenHash,
@@ -315,7 +367,7 @@ async function claimVisitMarker(
         // continue through the same claim lane with the original baseline.
         return {
           mode: 'claim',
-          marker: marker,
+          marker,
           previousGlobalPosition: marker.previousGlobalPosition,
           previousVisitRecordId: marker.previousVisitRecordId,
         };
@@ -329,7 +381,7 @@ async function claimVisitMarker(
     }
 
     const pending = makeMarkerEvent(
-      markerId(params.tokenHash),
+      markerKey(params.tokenHash),
       snapshot.latestEventVersion + 1,
       'pending',
       params.tokenHash,
@@ -467,16 +519,7 @@ export async function observeKongaPageVisit(
   }
 
   if (marker) {
-    const committed = {
-      ...marker,
-      state: 'committed' as const,
-      _id: markerEventId(marker.markerId, marker.version, 'committed'),
-      observedGlobalPosition: observation.observedGlobalPosition,
-      pageVisitRecordId: ids.id,
-      previousVisitRecordId,
-      observedAt,
-    };
-     await writeMarker(committed, persistence, strictWrite).catch(() => {});
+    await commitMarker(marker, observation, persistence, strictVerify, strictWrite);
   }
 
   return {
@@ -493,6 +536,7 @@ export async function readKongaPageVisit(
   token: string,
   pageVisitId: string,
   persistence: Persistence = persistenceCall,
+  strictVerify: typeof verifyKongaThreeLegs = verifyKongaThreeLegs,
 ): Promise<KongaPageVisitObservation | null> {
   if (!isPageVisitUuid(pageVisitId)) return null;
   const ids = identity(token, pageVisitId);
@@ -502,5 +546,8 @@ export async function readKongaPageVisit(
     filter: { _id: ids.id, tokenHash: ids.tokenHash },
     limit: 1,
   });
-  return result.documents?.[0] ?? null;
+  const visit = result.documents?.[0];
+  if (!visit) return null;
+  await strictVerify(verify(ids.id), persistence);
+  return visit;
 }

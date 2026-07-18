@@ -1,13 +1,19 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import { tripleStackWriteWithReadback } from '../kongaPersistence.js';
+import { tripleStackWrite } from '../../services/tripleStack.js';
 import {
   observeKongaPageVisit,
   readKongaPageVisit,
 } from '../kongaVisits.js';
 
 type Persistence = <T = unknown>(tool: string, action: string, params: Record<string, unknown>) => Promise<T>;
-type StrictWrite = typeof tripleStackWriteWithReadback;
+type StrictWriter = NonNullable<Parameters<typeof tripleStackWriteWithReadback>[2]>;
+type StrictWrite = (
+  input: Parameters<typeof tripleStackWriteWithReadback>[0],
+  persistence?: Parameters<typeof tripleStackWriteWithReadback>[1],
+  writer?: StrictWriter,
+) => ReturnType<typeof tripleStackWriteWithReadback>;
 
 type MarkerState = 'pending' | 'committed' | 'aborted';
 type AnyRec = Record<string, unknown>;
@@ -26,6 +32,7 @@ interface VisitRow {
 interface MarkerRow {
   _id: string;
   markerId: string;
+  markerKey: string;
   tokenHash: string;
   version: number;
   state: MarkerState;
@@ -48,7 +55,7 @@ interface KongaFixture {
     visitRows: Map<string, VisitRow>;
     markerRows: Map<string, MarkerRow>;
     neo4jVisits: Set<string>;
-    neo4jMarkers: Set<string>;
+    neo4jMarkers: Map<string, AnyRec>;
     chromaCollections: Map<string, Set<string>>;
     markerQueryGate: {
       wait: () => Promise<void>;
@@ -139,7 +146,10 @@ function makeReadBarrier(requiredReads: number) {
   };
 }
 
-function matchesFilter(document: AnyRec, filter: AnyRec = {}): boolean {
+function matchesFilter(
+  document: Record<string, unknown>,
+  filter: Record<string, unknown> = {},
+): boolean {
   for (const [field, expected] of Object.entries(filter)) {
     if (typeof expected === 'object' && expected !== null && !Array.isArray(expected) && '$lte' in expected) {
       const limit = (expected as { $lte: number }).$lte;
@@ -166,7 +176,7 @@ function createFixture({
   const visitRows = new Map<string, VisitRow>();
   const markerRows = new Map<string, MarkerRow>();
   const neo4jVisits = new Set<string>();
-  const neo4jMarkers = new Set<string>();
+  const neo4jMarkers = new Map<string, AnyRec>();
   const chromaCollections = new Map<string, Set<string>>();
   const markerQueryGate = makeReadBarrier(markerReadBarrier);
   const defaultCollections = ['mcs_konga_page_visits', 'mcs_konga_visit_markers'] as const;
@@ -174,7 +184,9 @@ function createFixture({
   for (const visit of seedVisits) visitRows.set(visit._id, visit);
   for (const marker of seedMarkers) {
     markerRows.set(marker._id, marker);
-    if (marker.neo4jReady) neo4jMarkers.add(marker._id);
+    if (marker.neo4jReady) {
+      neo4jMarkers.set(marker._id, { ...marker, markerId: marker.markerId, eventId: marker._id } as AnyRec);
+    }
     if (marker.chromaReady) {
       const set = chromaCollections.get('mcs_konga_visit_markers') ?? new Set<string>();
       set.add(marker._id);
@@ -198,7 +210,9 @@ function createFixture({
       const limit = typeof anyParams.limit === 'number' ? anyParams.limit : undefined;
 
       if (collection === 'tmag_konga_page_visits') {
-        let documents = Array.from(visitRows.values()).filter((row) => matchesFilter(row, filter));
+        let documents = Array.from(visitRows.values()).filter((row) =>
+          matchesFilter(row as unknown as Record<string, unknown>, filter),
+        );
         if (sort?.observedAt === -1) {
           documents = documents.sort((a, b) => b.observedAt.localeCompare(a.observedAt));
         }
@@ -209,7 +223,7 @@ function createFixture({
       if (collection === 'tmag_konga_visit_markers') {
         await markerQueryGate.wait();
         let documents = Array.from(markerRows.values())
-          .filter((row) => matchesFilter(row, filter))
+          .filter((row) => matchesFilter(row as unknown as Record<string, unknown>, filter))
           .sort((a, b) => b.version - a.version || b.observedAt.localeCompare(a.observedAt));
         if (typeof limit === 'number') documents = documents.slice(0, limit);
         return { documents } as T;
@@ -239,10 +253,28 @@ function createFixture({
 
     if (tool === 'neo4j' && action === 'cypher') {
       const query = String(anyParams.query ?? '');
-      const id = String((anyParams.params as AnyRec | undefined)?.id ?? anyParams.id ?? '');
+      const queryParams = (anyParams.params as AnyRec | undefined) ?? {};
+      const id = String(queryParams.id ?? anyParams.id ?? '');
       if (query.includes('TmagKongaPageVisitMarker')) {
-        if (query.includes('MERGE')) neo4jMarkers.add(id);
-        return { records: [{ n: neo4jMarkers.has(id) ? 1 : 0 }] } as T;
+        if (query.includes('MERGE')) {
+          const props = (queryParams.props as AnyRec) ?? {};
+          const mergeField = query.includes('eventId:$id')
+            ? 'eventId'
+            : query.includes('markerId:$id')
+              ? 'markerId'
+              : 'visitRecordId';
+          neo4jMarkers.set(id, { ...neo4jMarkers.get(id), [mergeField]: id, ...props } as AnyRec);
+          return { summary: { counters: {} } } as T;
+        }
+
+        const markerMatchField = query.includes('eventId:$id')
+          ? 'eventId'
+          : query.includes('markerId:$id')
+            ? 'markerId'
+            : 'visitRecordId';
+        const markerNode = neo4jMarkers.get(id);
+        const match = markerNode?.[markerMatchField] === id ? 1 : 0;
+        return { records: [{ n: match }] } as T;
       }
       if (query.includes('TmagKongaPageVisit')) {
         if (query.includes('MERGE')) neo4jVisits.add(id);
@@ -274,15 +306,18 @@ function createFixture({
     }
 
     return {} as T;
-  });
+  }) as unknown as Persistence;
 
   const defaultStrictWrite: StrictWrite = async (input, nextPersistence = persistence, writer) => {
-    const write: Parameters<StrictWrite>[2] = (writerInput: Parameters<StrictWrite>[0]) =>
-      writeDirectToStores(writerInput, nextPersistence) as ReturnType<Parameters<StrictWrite>[2]>;
+    const localWriter = ((writerInput: Parameters<typeof writeDirectToStores>[0]) => {
+      const writeInput = writerInput as Parameters<typeof writeDirectToStores>[0];
+      return writeDirectToStores(writeInput, nextPersistence) as ReturnType<typeof tripleStackWrite>;
+    }) as StrictWriter;
+    const selectedWriter: StrictWriter = (writer ?? localWriter) as StrictWriter;
     return tripleStackWriteWithReadback(
       input as Parameters<StrictWrite>[0],
       nextPersistence as Parameters<StrictWrite>[1],
-      (writer ?? write) as Parameters<StrictWrite>[2],
+      selectedWriter,
     ) as ReturnType<StrictWrite>;
   };
 
@@ -331,7 +366,8 @@ function markerEvent(hash: string, version: number, state: MarkerState, options:
   const key = markerCollectionKey(hash);
   return {
     _id: markerEventId(key, version, state),
-    markerId: key,
+    markerId: markerEventId(key, version, state),
+    markerKey: key,
     tokenHash: hash,
     version,
     state,
@@ -414,6 +450,18 @@ describe('Konga reconnect-safe page visits', () => {
       ],
     });
 
+    let pendingSeen = false;
+    const barrier = makeDeferred();
+    const originalStrictWrite: StrictWrite = fixture.strictWrite;
+    fixture.strictWrite = async (input, strictPersistence = fixture.persistence, writer) => {
+      const nextInput = input as { id: string };
+      if (nextInput.id.endsWith(':pending')) {
+        pendingSeen = true;
+        barrier.resolve();
+      }
+      return originalStrictWrite(input, strictPersistence, writer);
+    };
+
     const pageVisitId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
     const [first, second] = await Promise.all([
       observeKongaPageVisit(
@@ -435,6 +483,8 @@ describe('Konga reconnect-safe page visits', () => {
         { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
       ),
     ]);
+    await barrier.promise;
+    expect(pendingSeen).toBe(true);
 
     expect(first.previousGlobalPosition).toBe(4);
     expect(second.previousGlobalPosition).toBe(4);
@@ -442,6 +492,9 @@ describe('Konga reconnect-safe page visits', () => {
     expect(latestMarkerForToken(token, fixture.state.markerRows)?.version).toBe(2);
     expect(latestMarkerForToken(token, fixture.state.markerRows)?.state).toBe('committed');
     expect(first.observedGlobalPosition).toBe(19);
+    expect(first.observedAt).toBe(second.observedAt);
+    expect(first.previousGlobalPosition).toBe(second.previousGlobalPosition);
+    expect(first.sinceLastVisit).toBe(second.sinceLastVisit);
   });
 
   it('serializes two concurrent distinct pageVisitIds into monotonic claim order', async () => {
@@ -526,7 +579,7 @@ describe('Konga reconnect-safe page visits', () => {
         });
         throw new Error('konga_neo4j_readback_not_exact');
       }
-      return writeDirectToStores(input, strictPersistence);
+      return writeDirectToStores(input, strictPersistence) as ReturnType<StrictWrite>;
     };
 
     await expect(
@@ -603,7 +656,7 @@ describe('Konga reconnect-safe page visits', () => {
         });
         throw new Error('konga_neo4j_readback_not_exact');
       }
-      return writeDirectToStores(input, strictPersistence);
+      return writeDirectToStores(input, strictPersistence) as ReturnType<StrictWrite>;
     };
 
     const failing = observeKongaPageVisit(
@@ -670,7 +723,8 @@ describe('Konga reconnect-safe page visits', () => {
         }),
         {
           _id: markerEventId(markerCollectionKey(hash), 2, 'pending'),
-          markerId: markerCollectionKey(hash),
+          markerId: markerEventId(markerCollectionKey(hash), 2, 'pending'),
+          markerKey: markerCollectionKey(hash),
           tokenHash: hash,
           version: 2,
           state: 'pending',
@@ -705,18 +759,6 @@ describe('Konga reconnect-safe page visits', () => {
     const hash = tokenHash(token);
     const baseVisitId = visitRecordId(token, 'base-page');
     const fixture = createFixture({
-      seedVisits: [
-        {
-          _id: baseVisitId,
-          pageVisitId: 'base-page',
-          tokenHash: hash,
-          visitRecordId: baseVisitId,
-          observedGlobalPosition: 60,
-          previousGlobalPosition: null,
-          sinceLastVisit: null,
-          observedAt: '2026-07-10T09:00:00.000Z',
-        },
-      ],
       seedMarkers: [
         markerEvent(hash, 1, 'committed', {
           previousGlobalPosition: 99,
@@ -728,6 +770,49 @@ describe('Konga reconnect-safe page visits', () => {
         }),
       ],
     });
+    await writeDirectToStores(
+      {
+        id: baseVisitId,
+        mongoCollection: 'tmag_konga_page_visits',
+        mongoDoc: {
+          pageVisitId: 'base-page',
+          tokenHash: hash,
+          visitRecordId: baseVisitId,
+          observedGlobalPosition: 60,
+          previousGlobalPosition: null,
+          sinceLastVisit: null,
+          observedAt: '2026-07-10T09:00:00.000Z',
+        },
+        neo4j: {
+          cypher: 'MERGE (v:TmagKongaPageVisit {visitRecordId:$id}) SET v += $props',
+          params: {
+            props: {
+              tokenHash: hash,
+              pageVisitId: 'base-page',
+              observedGlobalPosition: 60,
+              previousGlobalPosition: null,
+              sinceLastVisit: null,
+              observedAt: '2026-07-10T09:00:00.000Z',
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_page_visits',
+          document: 'verified seed visit',
+          metadata: {
+            kind: 'konga_page_visit',
+            tokenHash: hash,
+            pageVisitId: 'base-page',
+            observedGlobalPosition: 60,
+            observedAt: '2026-07-10T09:00:00.000Z',
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (v:TmagKongaPageVisit {visitRecordId:$id}) RETURN count(v) AS n',
+        },
+      },
+      fixture.persistence,
+    );
 
     const next = await observeKongaPageVisit(
       {
@@ -741,5 +826,138 @@ describe('Konga reconnect-safe page visits', () => {
 
     expect(next.previousGlobalPosition).toBe(60);
     expect(next.sinceLastVisit).toBe(40);
+  });
+
+  it('does not reuse Mongo-only orphan visits as marker baseline', async () => {
+    const token = 'TOKEN-ORPHAN-BASELINE';
+    const hash = tokenHash(token);
+    const fixture = createFixture();
+    const verifiedVisitId = visitRecordId(token, 'verified-page');
+    const orphanVisitId = visitRecordId(token, 'orphan-page');
+
+    await writeDirectToStores(
+      {
+        id: verifiedVisitId,
+        mongoCollection: 'tmag_konga_page_visits',
+        mongoDoc: {
+          pageVisitId: 'verified-page',
+          tokenHash: hash,
+          visitRecordId: verifiedVisitId,
+          observedGlobalPosition: 15,
+          previousGlobalPosition: null,
+          sinceLastVisit: null,
+          observedAt: '2026-07-10T09:00:00.000Z',
+        },
+        neo4j: {
+          cypher: 'MERGE (v:TmagKongaPageVisit {visitRecordId:$id}) SET v += $props',
+          params: {
+            props: {
+              tokenHash: hash,
+              pageVisitId: 'verified-page',
+              observedGlobalPosition: 15,
+              previousGlobalPosition: null,
+              sinceLastVisit: null,
+              observedAt: '2026-07-10T09:00:00.000Z',
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_page_visits',
+          document: 'verified seed visit',
+          metadata: {
+            kind: 'konga_page_visit',
+            tokenHash: hash,
+            pageVisitId: 'verified-page',
+            observedGlobalPosition: 15,
+            observedAt: '2026-07-10T09:00:00.000Z',
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (v:TmagKongaPageVisit {visitRecordId:$id}) RETURN count(v) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    await fixture.persistence('mongodb', 'insert', {
+      database: 'momentum',
+      collection: 'tmag_konga_page_visits',
+      documents: [
+        {
+          _id: orphanVisitId,
+          pageVisitId: 'orphan-page',
+          tokenHash: hash,
+          visitRecordId: orphanVisitId,
+          observedGlobalPosition: 25,
+          previousGlobalPosition: 15,
+          sinceLastVisit: 10,
+          observedAt: '2026-07-10T09:30:00.000Z',
+        },
+      ],
+    });
+
+    const next = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        globalMaxPosition: 35,
+        now: new Date('2026-07-17T10:20:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    expect(next.previousGlobalPosition).toBe(15);
+    expect(next.sinceLastVisit).toBe(20);
+  });
+
+  it('verifies marker readback against immutable eventId not overwritten marker identity', async () => {
+    const token = 'TOKEN-MARKER-EVENT-ID';
+    const hash = tokenHash(token);
+    const fixture = createFixture();
+
+    const recorded = await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        globalMaxPosition: 12,
+        now: new Date('2026-07-17T10:21:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    const marker = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(marker).not.toBeNull();
+    const markerNode = fixture.state.neo4jMarkers.get(marker?._id ?? '');
+    expect(markerNode).toBeDefined();
+    expect(markerNode?.eventId).toBe(marker?._id);
+    expect(markerNode?.markerId).toBe(marker?._id);
+    expect(markerNode?.markerKey).toBe(markerCollectionKey(hash));
+    expect(marker?.state).toBe('committed');
+    expect(recorded.observedAt).toBe('2026-07-17T10:21:00.000Z');
+  });
+
+  it('readKongaPageVisit requires exact three-legs readback', async () => {
+    const token = 'TOKEN-READBACK-STRICT';
+    const fixture = createFixture({
+      seedVisits: [
+        {
+          _id: visitRecordId(token, 'mongo-only'),
+          pageVisitId: 'mongo-only',
+          tokenHash: tokenHash(token),
+          visitRecordId: visitRecordId(token, 'mongo-only'),
+          observedGlobalPosition: 80,
+          previousGlobalPosition: null,
+          sinceLastVisit: null,
+          observedAt: '2026-07-10T09:45:00.000Z',
+        },
+      ],
+    });
+
+    const missing = await readKongaPageVisit(
+      token,
+      '11111111-1111-4111-8111-111111111111',
+      fixture.persistence,
+    );
+    expect(missing).toBeNull();
   });
 });
