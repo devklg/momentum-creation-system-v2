@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type {
-  McsKongaAddedBy,
   McsInviteTokenRecord,
+  McsKongaAddedBy,
   McsKongaPlaceProspectResult,
   McsKongaPlacementEvent,
   McsKongaPoolPlacement,
@@ -25,10 +25,8 @@ type Publish = typeof publishPlacement;
 type FindBa = typeof findBAByTmagId;
 type Increment = typeof incrementPoolCounter;
 
-type LegacyIdInput = Pick<
-  McsInviteTokenRecord,
-  'invitationRecordId' | 'prospectId' | 'sponsorTmagId' | 'createdAt'
-> & {
+type LegacyIdInput = Pick<McsInviteTokenRecord, 'prospectId' | 'sponsorTmagId' | 'createdAt'> & {
+  invitationRecordId?: string;
   _id?: unknown;
   token?: string;
 };

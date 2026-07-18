@@ -180,7 +180,7 @@ describe('Konga placement permanence', () => {
       return { mongo: input.mongoDoc, neo4jCount: 1, chromaId: 'x' };
     });
 
-    const result = await placeKongaProspect(
+    const result = (await placeKongaProspect(
       { ...input, invitationRecordId: 'fresh-attempt' },
       {
         persistence: persistence as never,
@@ -188,11 +188,11 @@ describe('Konga placement permanence', () => {
         increment: vi.fn(async () => 200),
         findBa: vi.fn(async () => ({ firstName: 'Jordan', lastName: 'Rivera' })) as never,
       },
-    );
+    )) as { placementId: string; placementAttemptId: string; positionNumber: number };
 
     expect(result.placementId).not.toBe(flushRow.placementId);
     expect(placements).toHaveLength(2);
-    expect((result.placementAttemptId !== flushRow.placementAttemptId)).toBe(true);
+    expect(result.placementAttemptId !== null && result.placementAttemptId !== flushRow.placementAttemptId).toBe(true);
     expect(placements[0]).toMatchObject({
       placementId: flushRow.placementId,
       flushedAt: flushRow.flushedAt,
@@ -214,7 +214,7 @@ describe('Konga placement permanence', () => {
     const invitationRecordId = resolveInvitationRecordId(tokenRecord);
     const { placementAttemptId } = deriveKongaPlacementIdentity({
       prospectId: tokenRecord.prospectId,
-      invitationRecordId,
+      invitationRecordId: invitationRecordId!,
     });
 
     expect(invitationRecordId).toBe('legacy_invitation_legacy-token-doc-id');
@@ -256,7 +256,12 @@ describe('Konga placement permanence', () => {
     const fresh = await make('fresh-invitation');
     expect('placementAttemptId' in prior).toBe(true);
     expect('placementAttemptId' in fresh).toBe(true);
-    if (!('placementAttemptId' in prior) || !('placementAttemptId' in fresh)) {
+    if (
+      !('placementAttemptId' in prior) ||
+      !('placementAttemptId' in fresh) ||
+      prior.placementAttemptId == null ||
+      fresh.placementAttemptId == null
+    ) {
       throw new Error('expected Konga placement results');
     }
     expect(fresh.placementAttemptId).not.toBe(prior.placementAttemptId);

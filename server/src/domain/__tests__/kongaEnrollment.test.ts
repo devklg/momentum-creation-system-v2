@@ -381,13 +381,13 @@ describe('truthful Konga join boundary', () => {
     token.createdAt = undefined as unknown as string;
     const fixture = persistenceFixture({
       tokenRecords: [
-        {
+        ({
           ...token,
           token: 'TOKEN-RAW',
           _id: 'TOKEN-RAW',
           createdAt: undefined as unknown as string,
           state: 'video_complete',
-        },
+        } as typeof token & { _id: string }),
       ],
     });
     const publish = vi.fn();

@@ -152,9 +152,6 @@ export interface McsInviteTokenRecord {
 }
 
 /** Invitation token with optional Konga placement-attempt identity payload. */
-export interface McsKongaInviteTokenRecord extends McsInviteTokenRecord {
-  invitationRecordId?: string;
-}
 
 /**
  * Discrete video milestones the .com client reports as the prospect
@@ -6474,4 +6471,9 @@ export interface McsSteveDiscoveryArtifact {
  * active action plan until the in-progress retake completes successfully. */
 export interface McsSteveDiscoveryView {
   retakeInProgress?: boolean;
+}
+
+/** Invitation token with optional Konga placement-attempt identity payload. */
+export interface McsKongaInviteTokenRecord extends McsInviteTokenRecord {
+  invitationRecordId?: string;
 }

@@ -79,7 +79,9 @@ function findMatchingVideoCompleteToken(
   if (matching.length !== 1) {
     throw new KongaEnrollmentError('exact_live_linkage_required');
   }
-  return matching[0];
+  const match = matching[0];
+  if (!match) throw new KongaEnrollmentError('exact_live_linkage_required');
+  return match;
 }
 
 export class KongaEnrollmentError extends Error {

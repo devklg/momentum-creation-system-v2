@@ -713,6 +713,7 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
   }
 
   const token = await mintUniqueToken();
+  const invitationRecordId = `invite_${randomUUID()}`;
   const now = new Date().toISOString();
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString();
 
@@ -734,8 +735,10 @@ export async function processTokenGeneration(job: VmQueueJob<LeadPayload>): Prom
       createdAt: now,
       clickedAt: null,
       expiresAt,
+      invitationRecordId,
     },
     tokenProps: {
+      invitationRecordId,
       tokenKind: 'rvm',
       state: 'minted',
       createdAt: now,

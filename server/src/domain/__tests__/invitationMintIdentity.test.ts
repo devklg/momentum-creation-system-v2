@@ -8,9 +8,11 @@ const mocks = vi.hoisted(() => ({
   markLeadOwnerImported: vi.fn(),
   mintUniqueToken: vi.fn(),
   persistenceCall: vi.fn(),
+  writeOperational: vi.fn(),
   writeGraphCritical: vi.fn(),
   writeKnowledge: vi.fn(),
   writeProspectTokenGraphCritical: vi.fn(),
+  writeVmLeadTokenGraphCritical: vi.fn(),
 }));
 
 vi.mock('../../services/persistence/dispatch.js', () => ({
@@ -18,12 +20,14 @@ vi.mock('../../services/persistence/dispatch.js', () => ({
 }));
 
 vi.mock('../../services/tieredWrite.js', () => ({
+  writeOperational: mocks.writeOperational,
   writeGraphCritical: mocks.writeGraphCritical,
   writeKnowledge: mocks.writeKnowledge,
 }));
 
 vi.mock('../tokenLifecyclePersistence.js', () => ({
   writeProspectTokenGraphCritical: mocks.writeProspectTokenGraphCritical,
+  writeVmLeadTokenGraphCritical: mocks.writeVmLeadTokenGraphCritical,
 }));
 
 vi.mock('../prospectAccount.js', async () => {
@@ -64,9 +68,11 @@ describe('invitation mint identity', () => {
     mocks.markLeadOwnerImported.mockReset();
     mocks.mintUniqueToken.mockReset();
     mocks.persistenceCall.mockReset();
+    mocks.writeOperational.mockReset();
     mocks.writeGraphCritical.mockReset();
     mocks.writeKnowledge.mockReset();
     mocks.writeProspectTokenGraphCritical.mockReset();
+    mocks.writeVmLeadTokenGraphCritical.mockReset();
     vi.resetModules();
   });
 
@@ -100,7 +106,7 @@ describe('invitation mint identity', () => {
       stateOrRegion: 'CA',
       country: 'US',
       message: null,
-      source: 'pmv',
+      source: 'ivory',
       relationshipReason: null,
     });
 
@@ -162,6 +168,59 @@ describe('invitation mint identity', () => {
     expect(response.fresh).toBe(true);
     expect(response.token).toBe('TOKEN-CRM-REINVITE');
     expect(write.token).toBe('TOKEN-CRM-REINVITE');
+    expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
+    expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
+    expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
+  });
+
+  it('writes fresh invitationRecordId for fresh VM provider tokens and keeps token separate', async () => {
+    const { processTokenGeneration } = await import('../vmProviderQueue.js');
+    mocks.mintUniqueToken.mockResolvedValue('TOKEN-VM-LIVE');
+    mocks.findVMCampaignForOwner.mockResolvedValue({
+      leadOwnerId: 'lead-owner-1',
+      provider: 'rvm',
+    } as never);
+    mocks.writeVmLeadTokenGraphCritical.mockResolvedValue({
+      mongo: { ok: true },
+    } as never);
+    mocks.writeOperational.mockResolvedValue({
+      mongo: { ok: true },
+      neo4j: { ok: true },
+      chroma: { ok: true },
+    } as never);
+    mocks.persistenceCall.mockResolvedValue({ documents: [] });
+    mocks.persistenceCall.mockImplementation(async (_tool: string, action: string, params: Record<string, unknown>) => {
+      if (action === 'query') {
+        if (params.collection === 'tmag_vm_bulk_leads') {
+          return {
+            documents: [
+              {
+                leadId: 'lead-vm-1',
+                leadOwnerId: 'owner-1',
+                ownerTmagId: 'TMBA-OWNER',
+                sponsorTmagId: 'TMBA-SPONSOR',
+                vmCampaignId: 'campaign-1',
+                token: null,
+                status: 'validated',
+                firstName: 'Avery',
+                lastName: 'Quinn',
+              },
+            ],
+          };
+        }
+      }
+      if (action === 'update') return { matchedCount: 1 };
+      return { ok: true };
+    });
+
+    await processTokenGeneration({ jobId: 'vmjob_vm_fresh', payload: { leadId: 'lead-vm-1' } } as never);
+
+    const write = mocks.writeVmLeadTokenGraphCritical.mock.calls[0]?.[0] as {
+      token: string;
+      mongoDoc: { invitationRecordId?: string; token: string };
+      tokenProps: Record<string, unknown>;
+    };
+    expect(write.token).toBe('TOKEN-VM-LIVE');
     expect(write.mongoDoc.invitationRecordId).toMatch(/^invite_/);
     expect(write.mongoDoc.invitationRecordId).not.toBe(write.token);
     expect(write.tokenProps.invitationRecordId).toBe(write.mongoDoc.invitationRecordId);
