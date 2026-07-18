@@ -1106,6 +1106,99 @@ describe('Konga reconnect-safe page visits', () => {
     expect(fixture.state.markerRows.size).toBe(2);
   });
 
+  it('rejects replay when same-version pending conflicts with later committed head payload', async () => {
+    const token = 'TOKEN-HISTORICAL-DUP-HEAD';
+    const hash = tokenHash(token);
+    const historicalPageId = '55555555-5555-4555-8555-555555555555';
+    const headPageId = '66666666-6666-4666-8666-666666666666';
+    const historicalVisitId = visitRecordId(token, historicalPageId);
+    const headVisitId = visitRecordId(token, headPageId);
+    const fixture = createFixture();
+
+    await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: historicalPageId,
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:35:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    await observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: headPageId,
+        globalMaxPosition: 20,
+        now: new Date('2026-07-17T10:36:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    const headBefore = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(headBefore?.version).toBe(2);
+    expect(headBefore?.pageVisitRecordId).toBe(headVisitId);
+
+    const adversarialPending = markerEvent(hash, 2, 'pending', {
+      previousGlobalPosition: 10,
+      observedGlobalPosition: 10,
+      previousVisitRecordId: null,
+      pageVisitRecordId: historicalVisitId,
+      observedAt: '2026-07-10T09:06:00.000Z',
+    });
+
+    await writeDirectToStores(
+      {
+        id: adversarialPending._id,
+        mongoCollection: 'tmag_konga_visit_markers',
+        mongoDoc: { ...adversarialPending },
+        neo4j: {
+          cypher: 'MERGE (m:TmagKongaPageVisitMarker {eventId:$id}) SET m += $props',
+          params: {
+            props: {
+              ...adversarialPending,
+              markerVersion: adversarialPending.version,
+            },
+          },
+        },
+        chroma: {
+          collection: 'mcs_konga_visit_markers',
+          document: `Konga page visit marker pending version ${adversarialPending.version}.`,
+          metadata: {
+            kind: 'konga_page_visit_marker',
+            tokenHash: hash,
+            markerVersion: adversarialPending.version,
+            markerId: adversarialPending._id,
+            markerKey: adversarialPending.markerKey,
+            markerState: adversarialPending.state,
+            observedAt: adversarialPending.observedAt,
+          },
+        },
+        neo4jVerify: {
+          cypher: 'MATCH (m:TmagKongaPageVisitMarker {eventId:$id}) RETURN count(m) AS n',
+        },
+      },
+      fixture.persistence,
+    );
+
+    const observation = observeKongaPageVisit(
+      {
+        token,
+        pageVisitId: historicalPageId,
+        globalMaxPosition: 10,
+        now: new Date('2026-07-17T10:37:00.000Z'),
+      },
+      { persistence: fixture.persistence, strictWrite: fixture.strictWrite },
+    );
+
+    await expect(observation).rejects.toThrow('konga_visit_marker_replay_reject_non_exact');
+
+    const headAfter = latestMarkerForToken(token, fixture.state.markerRows);
+    expect(headAfter?.version).toBe(2);
+    expect(headAfter?.pageVisitRecordId).toBe(headVisitId);
+    expect(fixture.state.markerRows.size).toBe(3);
+  });
+
   it('accepts an exact historical committed marker and returns byte-identical replay observation', async () => {
     const token = 'TOKEN-HISTORICAL-EXACT';
     const fixture = createFixture();

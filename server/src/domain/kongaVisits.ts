@@ -364,6 +364,23 @@ async function findCommittedMarkerForVisit(
   return null;
 }
 
+async function readMarkerById(
+  markerId: string,
+  persistence: Persistence,
+): Promise<KongaPageVisitMarker | null> {
+  const rows = await persistence<{ documents?: KongaPageVisitMarker[] }>(
+    'mongodb',
+    'query',
+    {
+      database: 'momentum',
+      collection: MARKER_COLLECTION,
+      filter: { _id: markerId },
+      limit: 1,
+    },
+  );
+  return rows.documents?.[0] ?? null;
+}
+
 function sameCommittedMarkerForVisit(
   marker: KongaPageVisitMarker,
   observation: VisitObservationWithIds,
@@ -449,6 +466,13 @@ async function ensureCommittedVisitMarker(
     if (!isDuplicateMarkerWriteError(error)) {
       throw error;
     }
+  }
+
+  const committedMarker = await readMarkerById(repairMarker._id, persistence);
+  if (!committedMarker || !sameCommittedMarkerForVisit(committedMarker, observation)) {
+    throw new Error(
+      `konga_visit_marker_replay_reject_non_exact:${observation.visitRecordId}:${repairMarker._id}:${observation.tokenHash}`,
+    );
   }
 
   await strictVerify(markerVerify(repairMarker._id), persistence);
