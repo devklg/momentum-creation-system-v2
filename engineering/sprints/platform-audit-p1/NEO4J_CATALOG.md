@@ -4,11 +4,11 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:58:41.607Z
-- Labels: 88
+- Generated: 2026-07-18T02:41:31.343Z
+- Labels: 90
 - Relationships: 71
 - Constraints/indexes cataloged: 18
-- Labels without a cataloged constraint/index: 73
+- Labels without a cataloged constraint/index: 75
 
 ## Constraints By Status
 
@@ -28,7 +28,7 @@
 | `ENROLLED` | 2 |
 | `FOUNDER_PASSWORD` | 1 |
 | `HAS_FOLLOWUP` | 5 |
-| `IN_HOLDING_TANK` | 12 |
+| `IN_HOLDING_TANK` | 19 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
 | `KnowledgeCandidate` | 1 |
@@ -74,13 +74,15 @@
 | `TmagKnowledge` | 5 |
 | `TmagKongaEnrollmentAttestation` | 2 |
 | `TmagKongaPageVisit` | 2 |
+| `TmagKongaPageVisitMarker` | 2 |
+| `TmagKongaPlacementClaim` | 4 |
 | `TmagKongaReplayCompletion` | 2 |
 | `TmagKongaReplayPointer` | 2 |
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 4 |
 | `TmagOutcome` | 4 |
-| `TmagPool` | 11 |
-| `TmagProspect` | 49 |
+| `TmagPool` | 18 |
+| `TmagProspect` | 56 |
 | `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
@@ -258,6 +260,8 @@
 - `TmagIvoryName`
 - `TmagKongaEnrollmentAttestation`
 - `TmagKongaPageVisit`
+- `TmagKongaPageVisitMarker`
+- `TmagKongaPlacementClaim`
 - `TmagKongaReplayCompletion`
 - `TmagKongaReplayPointer`
 - `TmagOrientationSession`

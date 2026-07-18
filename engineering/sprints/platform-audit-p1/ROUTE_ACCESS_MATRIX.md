@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:58:49.032Z
+- Generated: 2026-07-18T02:41:38.218Z
 - Routes: 262
 - Findings: 0
 
@@ -236,13 +236,13 @@
 | POST | `/api/p/login/redeem` | prospect | valid_prospect_identity | magic_link_or_reentry_cookie | prospect_reentry | magic_link_or_reentry_cookie | none | not_applicable | none | none | prospect_reentry_cookie_or_link_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p-login.ts:202` |
 | POST | `/api/p/login/code` | prospect | valid_prospect_identity | magic_link_or_reentry_cookie | prospect_reentry | magic_link_or_reentry_cookie | none | not_applicable | none | none | prospect_reentry_cookie_or_link_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p-login.ts:264` |
 | POST | `/api/p/login/logout` | prospect | valid_prospect_identity | magic_link_or_reentry_cookie | prospect_reentry | magic_link_or_reentry_cookie | none | not_applicable | none | none | prospect_reentry_cookie_or_link_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p-login.ts:312` |
-| GET | `/api/p/:token` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:242` |
-| POST | `/api/p/:token/video-event` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:424` |
-| POST | `/api/p/:token/callback-request` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:627` |
-| GET | `/api/p/:token/replay` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:720` |
-| GET | `/api/p/:token/stream` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:790` |
-| POST | `/api/p/:token/webinar-reserve` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:942` |
-| GET | `/api/p/:token/team-stats` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:1042` |
+| GET | `/api/p/:token` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:245` |
+| POST | `/api/p/:token/video-event` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:427` |
+| POST | `/api/p/:token/callback-request` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:635` |
+| GET | `/api/p/:token/replay` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:728` |
+| GET | `/api/p/:token/stream` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:798` |
+| POST | `/api/p/:token/webinar-reserve` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:948` |
+| GET | `/api/p/:token/team-stats` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/p.ts:1048` |
 | GET | `/api/rvm/:token` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:117` |
 | POST | `/api/rvm/:token/activate` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:128` |
 | POST | `/api/rvm/:token/video-event` | prospect | valid_prospect_identity | token_in_path_or_magic_link | prospect_token | token_in_path_or_magic_link | none | not_applicable | none | none | path_token | none | no | no | global_256kb_json | none | none | `server/src/routes/rvm.ts:139` |

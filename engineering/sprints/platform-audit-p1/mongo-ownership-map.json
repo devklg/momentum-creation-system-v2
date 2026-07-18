@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T23:58:40.929Z",
+  "generatedAt": "2026-07-18T02:41:30.698Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 76,
   "unclassifiedCount": 0,
@@ -786,7 +786,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 22,
+      "sourceCount": 24,
       "sourceFiles": [
         "server/scripts/smoke-holding-tank.ts",
         "server/src/domain/adminMetrics.ts",
@@ -828,13 +828,14 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 9,
+      "sourceCount": 10,
       "sourceFiles": [
         "server/src/domain/adminBottlenecks.ts",
         "server/src/domain/cockpit.ts",
         "server/src/domain/reports/inviteFunnel.ts",
         "server/src/domain/tokenLifecyclePersistence.ts",
-        "server/src/domain/tokens.ts"
+        "server/src/domain/tokens.ts",
+        "server/src/domain/vmProviderQueue.ts"
       ]
     },
     {

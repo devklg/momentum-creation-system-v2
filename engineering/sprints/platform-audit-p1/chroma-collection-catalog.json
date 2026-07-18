@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T02:22:25.158Z",
+  "generatedAt": "2026-07-18T02:41:33.367Z",
   "sources": [
     "server/src/services/chromaCollections.ts",
     "server/scripts/provisioning/rev3-registry.mjs",
@@ -7,11 +7,11 @@
     "engineering/sprints/platform-audit-p1/schema-catalog.json"
   ],
   "summary": {
-    "collections": 58,
-    "schemaCatalogCollections": 57,
+    "collections": 59,
+    "schemaCatalogCollections": 59,
     "withObservedWrites": 33,
     "languageScopedCollections": 10,
-    "metadataContractRows": 58,
+    "metadataContractRows": 59,
     "observedUnregisteredTargets": 10
   },
   "byDomain": {
@@ -25,7 +25,7 @@
     "onboarding_training": 2,
     "operations": 1,
     "knowledge": 12,
-    "general": 8,
+    "general": 9,
     "knowledge_review": 1,
     "outcomes": 1,
     "crm": 2,
@@ -892,7 +892,7 @@
     {
       "collection": "mcs_konga_placement_claims",
       "registered": true,
-      "inSchemaCatalog": false,
+      "inSchemaCatalog": true,
       "domain": "general",
       "language": "not_language_scoped",
       "purpose": "Registered app Chroma collection.",
@@ -943,6 +943,32 @@
     },
     {
       "collection": "mcs_konga_replay_pointers",
+      "registered": true,
+      "inSchemaCatalog": true,
+      "domain": "general",
+      "language": "not_language_scoped",
+      "purpose": "Registered app Chroma collection.",
+      "source": "server/src/services/chromaCollections.ts",
+      "actions": [],
+      "sourceCount": 0,
+      "sources": [],
+      "metadataContract": {
+        "collectionMetadata": {
+          "project": "momentum_creation_system_v2",
+          "schema_rev": "REV",
+          "expected_dim": "384",
+          "embedding_model": "all-MiniLM-L6-v2",
+          "purpose": "rev3 canonical registry"
+        },
+        "observedMetadataKeys": [],
+        "observedFilterKeys": [],
+        "inferredRequiredKeys": [],
+        "embeddingDimension": 384,
+        "embeddingModel": "all-MiniLM-L6-v2"
+      }
+    },
+    {
+      "collection": "mcs_konga_visit_markers",
       "registered": true,
       "inSchemaCatalog": true,
       "domain": "general",
@@ -1409,7 +1435,7 @@
       "sources": [
         {
           "file": "server/src/domain/prospectAccount.ts",
-          "line": 238,
+          "line": 241,
           "action": "writeOperational"
         }
       ],
@@ -1425,18 +1451,19 @@
           "accountId",
           "createdAt",
           "expiresAt",
+          "invitationRecordId",
           "kind",
           "prospectId",
           "sponsorTmagId",
-          "tokenId"
+          "tokenHash"
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "accountId",
+          "invitationRecordId",
           "prospectId",
           "sponsorTmagId",
-          "tmagId",
-          "tokenId"
+          "tmagId"
         ],
         "embeddingDimension": 384,
         "embeddingModel": "all-MiniLM-L6-v2"
@@ -1515,17 +1542,17 @@
         },
         {
           "file": "server/src/domain/crm.ts",
-          "line": 769,
+          "line": 772,
           "action": "writeKnowledge"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 220,
+          "line": 222,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/invitations.ts",
-          "line": 370,
+          "line": 378,
           "action": "writeKnowledge"
         },
         {
@@ -1559,6 +1586,7 @@
           "createdAt",
           "disposition",
           "dueAt",
+          "invitationRecordId",
           "kind",
           "leadId",
           "ownerTmagId",
@@ -1567,11 +1595,12 @@
           "source",
           "sponsorTmagId",
           "stateOrRegion",
-          "token"
+          "tokenHash"
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "correlationId",
+          "invitationRecordId",
           "leadId",
           "ownerTmagId",
           "prospectId",
@@ -1643,7 +1672,7 @@
       "sources": [
         {
           "file": "server/src/domain/prospectCrm.ts",
-          "line": 223,
+          "line": 242,
           "action": "writeKnowledge"
         },
         {
@@ -2309,12 +2338,12 @@
       "sources": [
         {
           "file": "server/src/domain/bulkLeads.ts",
-          "line": 117,
+          "line": 119,
           "action": "writeGraphCritical"
         },
         {
           "file": "server/src/domain/bulkLeads.ts",
-          "line": 237,
+          "line": 242,
           "action": "writeGraphCritical"
         }
       ],
@@ -2329,18 +2358,20 @@
         "observedMetadataKeys": [
           "correlationId",
           "createdAt",
+          "invitationRecordId",
           "kind",
           "leadId",
           "leadOwnerId",
           "ownerTmagId",
           "prospectId",
           "sponsorTmagId",
-          "token",
+          "tokenHash",
           "vmCampaignId"
         ],
         "observedFilterKeys": [],
         "inferredRequiredKeys": [
           "correlationId",
+          "invitationRecordId",
           "leadId",
           "leadOwnerId",
           "ownerTmagId",
@@ -2394,27 +2425,27 @@
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 258,
+          "line": 259,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 320,
+          "line": 321,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 631,
+          "line": 632,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 964,
+          "line": 984,
           "action": "writeOperational"
         },
         {
           "file": "server/src/domain/vmProviderQueue.ts",
-          "line": 1015,
+          "line": 1035,
           "action": "writeOperational"
         }
       ],

@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-17T23:58:51.936Z
+- Generated: 2026-07-18T02:41:41.205Z
 - Mongo collections: 76
-- Neo4j labels: 88
+- Neo4j labels: 90
 - Neo4j relationships: 71
-- Chroma collections: 57
+- Chroma collections: 59
 - Route modules: 49
 - Route handlers: 300
-- Shared exports: 1228
+- Shared exports: 1229
 
 ## Mongo Collections
 
@@ -67,9 +67,9 @@
 | `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | permissive_mongoose_schema | yes | 8 |
 | `tmag_prospect_htank_counters` | permissive_mongoose_schema | yes | 8 |
-| `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 22 |
+| `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 24 |
 | `tmag_prospect_invitation_activity` | permissive_mongoose_schema | yes | 7 |
-| `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 9 |
+| `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 10 |
 | `tmag_prospect_magic_links` | permissive_mongoose_schema | yes | 5 |
 | `tmag_prospect_sessions` | permissive_mongoose_schema | yes | 3 |
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
@@ -106,7 +106,7 @@
 | `ENROLLED` | 2 |
 | `FOUNDER_PASSWORD` | 1 |
 | `HAS_FOLLOWUP` | 5 |
-| `IN_HOLDING_TANK` | 12 |
+| `IN_HOLDING_TANK` | 19 |
 | `INVITED_AS` | 1 |
 | `Knowledge` | 10 |
 | `KnowledgeCandidate` | 1 |
@@ -152,13 +152,15 @@
 | `TmagKnowledge` | 5 |
 | `TmagKongaEnrollmentAttestation` | 2 |
 | `TmagKongaPageVisit` | 2 |
+| `TmagKongaPageVisitMarker` | 2 |
+| `TmagKongaPlacementClaim` | 4 |
 | `TmagKongaReplayCompletion` | 2 |
 | `TmagKongaReplayPointer` | 2 |
 | `TmagLearningCandidate` | 4 |
 | `TmagOrientationSession` | 4 |
 | `TmagOutcome` | 4 |
-| `TmagPool` | 11 |
-| `TmagProspect` | 49 |
+| `TmagPool` | 18 |
+| `TmagProspect` | 56 |
 | `TmagProspectAccount` | 3 |
 | `TmagProspectCrmRecord` | 9 |
 | `TmagProspectMagicLink` | 1 |
@@ -288,8 +290,10 @@
 | `mcs_knowledge_sources` | `server/src/services/chromaCollections.ts` |
 | `mcs_konga_enrollment_attestations` | `server/src/services/chromaCollections.ts` |
 | `mcs_konga_page_visits` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_placement_claims` | `server/src/services/chromaCollections.ts` |
 | `mcs_konga_replay_completions` | `server/src/services/chromaCollections.ts` |
 | `mcs_konga_replay_pointers` | `server/src/services/chromaCollections.ts` |
+| `mcs_konga_visit_markers` | `server/src/services/chromaCollections.ts` |
 | `mcs_learning_candidates_review` | `server/src/services/chromaCollections.ts` |
 | `mcs_members` | `server/src/services/chromaCollections.ts` |
 | `mcs_new_member_orientation_reservations` | `server/src/services/chromaCollections.ts` |
@@ -1340,6 +1344,7 @@
 | `McsIvoryName` | interface | `packages/shared/src/types.ts` |
 | `McsIvoryNameResponse` | interface | `packages/shared/src/types.ts` |
 | `McsIvoryStatus` | type | `packages/shared/src/types.ts` |
+| `McsKongaInviteTokenRecord` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchFastStartState` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchFirstInvitationState` | interface | `packages/shared/src/types.ts` |
 | `McsLaunchMichaelState` | interface | `packages/shared/src/types.ts` |
