@@ -1,14 +1,14 @@
 # COM Prospect Compliance Scan
 
-Generated: 2026-07-18T04:17:26.800Z
+Generated: 2026-07-22T09:20:37.898Z
 
 ## Summary
 
 - Scope: `apps/com/src visible strings plus shared compliance constants`
-- Files scanned: 39
-- Visible strings scanned: 546
+- Files scanned: 42
+- Visible strings scanned: 606
 - Blocking violations: 0
-- Allowed signals: 84
+- Allowed signals: 87
 - Status: pass
 
 ## Blocking Rules
@@ -26,10 +26,10 @@ Generated: 2026-07-18T04:17:26.800Z
 
 | Signal | Count | Description |
 | --- | ---: | --- |
-| `glp_three_product_context` | 16 | GLP-THREE product naming is allowed when it does not name THREE International. |
+| `glp_three_product_context` | 17 | GLP-THREE product naming is allowed when it does not name THREE International. |
 | `public_market_or_cost_context` | 7 | Public market figures and product-category cost context are allowed when not tied to earnings. |
 | `team_goal_context` | 5 | The 100,000 team goal is allowed; current team head count is not. |
-| `pmv_language_context` | 29 | Prospect-facing PMV language is People, Momentum, Volume, and Checks. |
+| `pmv_language_context` | 31 | Prospect-facing PMV language is People, Momentum, Volume, and Checks. |
 | `placement_demo_context` | 25 | Queue, placement, and beneath-you language is allowed only as team activity demonstration. |
 | `canonical_disclaimer` | 2 | The canonical .com disclaimer is allowed only through packages/shared/src/compliance.ts. |
 
@@ -41,6 +41,7 @@ None.
 
 | Signal | Source | Text |
 | --- | --- | --- |
+| `glp_three_product_context` | `apps/com/src/routes/com-homepage.tsx:21` | Team Magnificent is a community of independent brand ambassadors sharing GLP-THREE, an all-natural wellness product — and a step-by-step system for people exploring work-from-home opportunities. |
 | `glp_three_product_context` | `apps/com/src/routes/legal/legal-documents.ts:115` | Team Magnificent provides informational presentations about the GLP-THREE product and the Team Magnificent business-building system, a personal dashboard including a live team activity display, and tools to request a conversation with the team member who invited you. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx:29` | GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point. |
 | `glp_three_product_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:118` | Does GLP-THREE actually work? |
@@ -69,6 +70,8 @@ None.
 | `team_goal_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx:83` | 100,000 |
 | `team_goal_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/05-TmAdvantage.tsx:85` | Qualified Brand Ambassadors on Team Magnificent |
 | `team_goal_context` | `packages/shared/src/compliance.ts:15` | A current head count of the team (the 100,000 goal is named, the current count is not) |
+| `pmv_language_context` | `apps/com/src/routes/com-homepage.tsx:21` | Team Magnificent is a community of independent brand ambassadors sharing GLP-THREE, an all-natural wellness product — and a step-by-step system for people exploring work-from-home opportunities. |
+| `pmv_language_context` | `apps/com/src/routes/com-homepage.tsx:50` | We believe the best businesses are built person to person. Our team supports people who want to build with honest effort, real products, and a team that shows up. Building a business takes consistent effort. |
 | `pmv_language_context` | `apps/com/src/routes/legal/legal-documents.ts:152` | Activity shown on the Service (names, cities, placements, joins) reflects real events from real people. Your first name and city/state may appear in this display; your contact information never does. |
 | `pmv_language_context` | `apps/com/src/routes/p-login.tsx:139` | We only text people whose phone was used to invite them and who have asked for their sponsor to reach out. If that's not you, ask whoever invited you for a fresh link. |
 | `pmv_language_context` | `apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx:51` | Two people. Then they find two. |
@@ -118,6 +121,3 @@ None.
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:232` | . The recording remains a content resource; completing it does not create a placement or promise an outcome. |
 | `placement_demo_context` | `apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx:242` | THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it. |
 | `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/presentationCopy.ts:43` | Here is something you may not have noticed. While you were watching, you were placed into our team's line. Not enrolled, not signed up - placed, so we could show you something real. |
-| `placement_demo_context` | `apps/com/src/routes/tm-video-presentation/sections/03-DrDanVideo.tsx:466` | When the video finishes, continue to your live team position. |
-| `placement_demo_context` | `packages/shared/src/compliance.ts:12` | Placement or queue-position-equals-leg-position promises |
-| `placement_demo_context` | `packages/shared/src/compliance.ts:22` | Queue positions and momentum displays demonstrate team activity in real time and |
