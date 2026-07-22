@@ -3,8 +3,9 @@ import { PTokenPage } from './routes/p-token';
 import { PLoginPage } from './routes/p-login';
 import { PLoginRedeemPage } from './routes/p-login-redeem';
 import { RvmTokenPage } from './routes/rvm-token';
-import { PrivacyPage } from './routes/legal/privacy';
-import { TermsPage } from './routes/legal/terms';
+import { ComHomepagePage } from './routes/com-homepage';
+import { ComPrivacyPage } from './routes/com-privacy';
+import { ComTermsPage } from './routes/com-terms';
 
 export function App() {
   return (
@@ -12,16 +13,17 @@ export function App() {
       {/*
         Login routes mount BEFORE /p/:token so the more specific paths
         win the match. /p/login and /p/login/r/:linkToken would
-        otherwise be swallowed as token="login" by the wildcard.
+        otherwise be swallowed as token=\ login\ by the wildcard.
         Locked-spec 3.17 (Chat #131 — prospect re-entry).
       */}
-      <Route path="/p/login" element={<PLoginPage />} />
-      <Route path="/p/login/r/:linkToken" element={<PLoginRedeemPage />} />
-      <Route path="/privacy" element={<PrivacyPage />} />
-      <Route path="/terms" element={<TermsPage />} />
-      <Route path="/p/:token" element={<PTokenPage />} />
-      <Route path="/rvm/:token" element={<RvmTokenPage />} />
-      <Route path="*" element={<Navigate to="/p/invalid" replace />} />
+      <Route path='/p/login' element={<PLoginPage />} />
+      <Route path='/p/login/r/:linkToken' element={<PLoginRedeemPage />} />
+      <Route path='/' element={<ComHomepagePage />} />
+      <Route path='/privacy' element={<ComPrivacyPage />} />
+      <Route path='/terms' element={<ComTermsPage />} />
+      <Route path='/p/:token' element={<PTokenPage />} />
+      <Route path='/rvm/:token' element={<RvmTokenPage />} />
+      <Route path='*' element={<Navigate to='/p/invalid' replace />} />
     </Routes>
   );
 }
