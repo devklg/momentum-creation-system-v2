@@ -19,8 +19,8 @@ export function ComHomepagePage() {
             </h1>
             <p className='max-w-2xl text-base text-cream-mute'>
               Team Magnificent is a community of independent brand ambassadors sharing
-              GLP-THREE, an all-natural wellness product — and a step-by-step system
-              for people exploring work-from-home opportunities.
+              health and wellness — physically and financially — with a step-by-step
+              system for people exploring work-from-home opportunities.
             </p>
           </div>
         </header>
@@ -30,8 +30,8 @@ export function ComHomepagePage() {
           <ol className='mt-4 space-y-4 text-cream-mute'>
             <li>1. A friend shares a link — everyone here was invited by someone they know.</li>
             <li>
-              2. Watch the presentation — a short video explains the product and the
-              opportunity, start to finish.
+              2. Watch the presentation — a short video explains the product, start
+              to finish.
             </li>
             <li>
               3. Talk it over — a real conversation with the person who invited you.
