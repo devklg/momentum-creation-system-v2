@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-22T10:13:49.113Z",
+  "generatedAt": "2026-07-22T14:00:00.913Z",
   "scope": "apps/com/src visible strings plus shared compliance constants",
   "summary": {
     "filesScanned": 42,
     "visibleStringsScanned": 606,
     "blockingViolations": 0,
-    "allowedSignals": 87,
+    "allowedSignals": 86,
     "status": "pass",
     "allowedSignalsByRule": {
-      "glp_three_product_context": 17,
+      "glp_three_product_context": 16,
       "public_market_or_cost_context": 7,
       "team_goal_context": 5,
       "pmv_language_context": 31,
@@ -76,14 +76,6 @@
   ],
   "violations": [],
   "allowedSignals": [
-    {
-      "ruleId": "glp_three_product_context",
-      "severity": "allowed",
-      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
-      "file": "apps/com/src/routes/com-homepage.tsx",
-      "line": 21,
-      "text": "Team Magnificent is a community of independent brand ambassadors sharing GLP-THREE, an all-natural wellness product — and a step-by-step system for people exploring work-from-home opportunities."
-    },
     {
       "ruleId": "glp_three_product_context",
       "severity": "allowed",
@@ -314,7 +306,7 @@
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/com-homepage.tsx",
       "line": 21,
-      "text": "Team Magnificent is a community of independent brand ambassadors sharing GLP-THREE, an all-natural wellness product — and a step-by-step system for people exploring work-from-home opportunities."
+      "text": "Team Magnificent is a community of independent brand ambassadors sharing health and wellness — physically and financially — with a step-by-step system for people exploring work-from-home opportunities."
     },
     {
       "ruleId": "pmv_language_context",
@@ -868,7 +860,7 @@
       "file": "apps/com/src/routes/com-homepage.tsx",
       "lineNumber": 21,
       "kind": "jsx_text",
-      "text": "Team Magnificent is a community of independent brand ambassadors sharing GLP-THREE, an all-natural wellness product — and a step-by-step system for people exploring work-from-home opportunities."
+      "text": "Team Magnificent is a community of independent brand ambassadors sharing health and wellness — physically and financially — with a step-by-step system for people exploring work-from-home opportunities."
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
@@ -886,7 +878,7 @@
       "file": "apps/com/src/routes/com-homepage.tsx",
       "lineNumber": 33,
       "kind": "jsx_text",
-      "text": "2. Watch the presentation — a short video explains the product and the opportunity, start to finish."
+      "text": "2. Watch the presentation — a short video explains the product, start to finish."
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
