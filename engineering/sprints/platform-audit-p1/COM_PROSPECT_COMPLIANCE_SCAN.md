@@ -1,6 +1,6 @@
 # COM Prospect Compliance Scan
 
-Generated: 2026-07-22T09:20:37.898Z
+Generated: 2026-07-22T10:13:49.113Z
 
 ## Summary
 
