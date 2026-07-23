@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23T09:32:47.144Z",
+  "generatedAt": "2026-07-23T17:50:06.919Z",
   "sources": [
     "engineering/sprints/platform-audit-p1/schema-catalog.json",
     "server/src/services/persistence/neo4j/phase7Constraints.ts",
@@ -278,7 +278,7 @@
       "label": "TeamMagnificent",
       "sourceCount": 6,
       "sources": [
-        "server/src/domain/graphrag.ts:217",
+        "server/src/domain/graphrag.ts:222",
         "server/src/domain/learningCandidates.ts:258",
         "server/src/domain/outcomes.ts:218",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142",
@@ -567,8 +567,8 @@
       "label": "TmagKnowledge",
       "sourceCount": 5,
       "sources": [
-        "server/src/domain/graphrag.ts:217",
-        "server/src/domain/graphrag.ts:238",
+        "server/src/domain/graphrag.ts:222",
+        "server/src/domain/graphrag.ts:243",
         "server/src/domain/graphragReadiness.ts:139",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:51",
         "server/src/services/persistence/neo4j/phase7Constraints.ts:86"
@@ -1463,7 +1463,7 @@
       "relationship": "SCOPED_TO",
       "sourceCount": 4,
       "sources": [
-        "server/src/domain/graphrag.ts:217",
+        "server/src/domain/graphrag.ts:222",
         "server/src/domain/learningCandidates.ts:258",
         "server/src/domain/outcomes.ts:218",
         "server/src/runtime/knowledge-evolution/graph/knowledgeEvolutionGraphMapper.ts:142"
