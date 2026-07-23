@@ -127,8 +127,13 @@ export async function appendGraphRagRecord(
 
   await writeKnowledge({
     id,
+    // `_id` is assigned by tieredWrite from `id` (the canonical shared id). Do
+    // NOT set `_id` here: tieredWrite builds `{ _id: input.id, ...mongoDoc }`, so
+    // an explicit `_id: undefined` on the doc would spread LAST and clobber the
+    // canonical id, producing an insert with no `_id` (Mongo: "Path `_id` is
+    // required"). The record itself carries no `_id` — only the envelope `id`.
     mongoCollection: MONGO_COLLECTION,
-    mongoDoc: { ...record, _id: undefined } as Record<string, unknown>,
+    mongoDoc: { ...record } as Record<string, unknown>,
     neo4j: buildGraphRagCypher(record),
     chroma: {
       collection,
