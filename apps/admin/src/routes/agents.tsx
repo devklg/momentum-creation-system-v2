@@ -2,9 +2,67 @@
  * /agents — Admin oversight for BA support agents and Success Profile memory.
  */
 
-import { useEffect, useState, type ReactNode } from 'react';
-import type { McsAdminAgentHealthResponse, McsAdminAgentOversightResponse, McsAdminOutboxHealthResponse } from '@momentum/shared';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
+import type {
+  McsAdminAgentHealthResponse,
+  McsAdminAgentOversightResponse,
+  McsAdminChatTranscriptDetail,
+  McsAdminChatTranscriptSummary,
+  McsAdminOutboxHealthResponse,
+} from '@momentum/shared';
 import { MichaelRuntimeObservabilityPanel } from '@/components/admin/MichaelRuntimeObservabilityPanel';
+
+interface TranscriptsListResponse {
+  ok: boolean;
+  transcripts?: McsAdminChatTranscriptSummary[];
+  total?: number;
+  nextCursor?: string | null;
+  error?: string;
+}
+
+interface TranscriptDetailResponse {
+  ok: boolean;
+  transcript?: McsAdminChatTranscriptDetail;
+  error?: string;
+}
+
+interface HarvesterStatus {
+  started: boolean;
+  inFlight: boolean;
+  lastRequestedBy: 'manual' | 'scheduled' | null;
+  lastRunWindow: string | null;
+  lastRunAt: string | null;
+  lastSuccessAt: string | null;
+  nextRunAt: string | null;
+  totalRuns: number;
+  lastError: string | null;
+  lastResult: {
+    requested: number;
+    written: number;
+    skipped: number;
+    sourceSessionCount: number;
+    runWindow: string | null;
+  } | null;
+}
+
+interface HarvesterStatusResponse {
+  ok: boolean;
+  status: HarvesterStatus;
+  error?: string;
+}
+
+interface HarvesterRunResponse {
+  ok: boolean;
+  source: string;
+  requested: number;
+  written: number;
+  skipped: number;
+  sourceSessionCount: number;
+  sourceSessionIds: string[];
+  initiatedBy: 'manual' | 'scheduled';
+  runWindow: string | null;
+  errors: string[];
+}
 
 export function AgentsPage() {
   const [data, setData] = useState<McsAdminAgentOversightResponse | null>(null);
@@ -12,16 +70,30 @@ export function AgentsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [health, setHealth] = useState<McsAdminAgentHealthResponse | null>(null);
   const [outbox, setOutbox] = useState<McsAdminOutboxHealthResponse | null>(null);
+  const [transcriptList, setTranscriptList] = useState<McsAdminChatTranscriptSummary[]>([]);
+  const [transcriptTotal, setTranscriptTotal] = useState<number>(0);
+  const [transcriptCursor, setTranscriptCursor] = useState<string | null>(null);
+  const [transcriptsLoading, setTranscriptsLoading] = useState(true);
+  const [transcriptsErr, setTranscriptsErr] = useState<string | null>(null);
+  const [transcriptDetails, setTranscriptDetails] = useState<Record<string, McsAdminChatTranscriptDetail>>({});
+  const [openTranscriptId, setOpenTranscriptId] = useState<string | null>(null);
+  const [transcriptDetailLoading, setTranscriptDetailLoading] = useState(false);
+  const [transcriptDetailErr, setTranscriptDetailErr] = useState<string | null>(null);
+  const [harvesterStatus, setHarvesterStatus] = useState<HarvesterStatus | null>(null);
+  const [harvesterStatusErr, setHarvesterStatusErr] = useState<string | null>(null);
+  const [harvestRunning, setHarvestRunning] = useState(false);
+  const [harvestRunMsg, setHarvestRunMsg] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
       setLoading(true);
       setErr(null);
       try {
-        const [res, healthRes, outboxRes] = await Promise.all([
+        const [res, healthRes, outboxRes, harvesterRes] = await Promise.all([
           fetch('/api/admin/agents/overview', { credentials: 'include' }),
           fetch('/api/admin/agents/health', { credentials: 'include' }),
           fetch('/api/admin/agents/outbox-health', { credentials: 'include' }),
+          fetch('/api/admin/agents/transcripts/harvest/status', { credentials: 'include' }),
         ]);
         const body = (await res.json()) as McsAdminAgentOversightResponse & {
           error?: string;
@@ -33,6 +105,12 @@ export function AgentsPage() {
         setData(body);
         if (healthRes.ok) setHealth((await healthRes.json()) as McsAdminAgentHealthResponse);
         if (outboxRes.ok) setOutbox((await outboxRes.json()) as McsAdminOutboxHealthResponse);
+        const harvesterBody = (await harvesterRes.json()) as HarvesterStatusResponse;
+        if (!harvesterRes.ok || harvesterBody.ok === false || !harvesterBody.status) {
+          setHarvesterStatusErr(harvesterBody.error ?? 'Could not load transcript harvest status.');
+        } else {
+          setHarvesterStatus(harvesterBody.status);
+        }
       } catch (e) {
         setErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
       } finally {
@@ -40,6 +118,101 @@ export function AgentsPage() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    void loadTranscripts();
+  }, []);
+
+  async function loadHarvesterStatus(): Promise<void> {
+    try {
+      const statusRes = await fetch('/api/admin/agents/transcripts/harvest/status', { credentials: 'include' });
+      const statusBody = (await statusRes.json()) as HarvesterStatusResponse;
+      if (!statusRes.ok || statusBody.ok === false || !statusBody.status) {
+        setHarvesterStatusErr(statusBody.error ?? 'Could not load transcript harvest status.');
+        return;
+      }
+      setHarvesterStatus(statusBody.status);
+      setHarvesterStatusErr(null);
+    } catch (e) {
+      setHarvesterStatusErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+    }
+  }
+
+  async function runAutoHarvestNow(): Promise<void> {
+    try {
+      setHarvestRunning(true);
+      setHarvestRunMsg(null);
+      const res = await fetch('/api/admin/agents/transcripts/harvest/run', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const payload = (await res.json()) as HarvesterRunResponse & { error?: string };
+      if (!res.ok || payload.ok === false) {
+        setHarvestRunMsg(payload.error ?? 'Auto harvest failed.');
+        return;
+      }
+      setHarvestRunMsg(
+        `Auto-harvest complete: ${payload.written} written, ${payload.skipped} skipped, ${payload.sourceSessionCount} sessions checked.`,
+      );
+      await Promise.all([loadHarvesterStatus(), loadTranscripts()]);
+    } catch (e) {
+      setHarvestRunMsg(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+    } finally {
+      setHarvestRunning(false);
+    }
+  }
+
+  async function loadTranscripts(cursor: string | null = null, append = false): Promise<void> {
+    const query = new URLSearchParams({ limit: '20' });
+    if (cursor) query.set('cursor', cursor);
+    if (!append) {
+      setTranscriptsLoading(true);
+      setTranscriptsErr(null);
+    }
+    try {
+      const res = await fetch(`/api/admin/agents/transcripts?${query.toString()}`, { credentials: 'include' });
+      const payload = (await res.json()) as TranscriptsListResponse;
+      if (!res.ok || !payload.ok) {
+        setTranscriptsErr(payload.error ?? 'Could not load chat transcripts.');
+        return;
+      }
+      const nextItems = payload.transcripts ?? [];
+      setTranscriptTotal(payload.total ?? nextItems.length);
+      setTranscriptCursor(payload.nextCursor ?? null);
+      setTranscriptList((current) => (append ? [...current, ...nextItems.filter((row) => !current.some((existing) => existing.transcriptId === row.transcriptId))] : nextItems));
+    } catch (e) {
+      setTranscriptsErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+    } finally {
+      setTranscriptsLoading(false);
+    }
+  }
+
+  async function openTranscript(transcriptId: string): Promise<void> {
+    if (openTranscriptId === transcriptId) {
+      setOpenTranscriptId(null);
+      return;
+    }
+    setOpenTranscriptId(transcriptId);
+    setTranscriptDetailErr(null);
+    setTranscriptDetailLoading(true);
+    try {
+      if (transcriptDetails[transcriptId]) {
+        setTranscriptDetailLoading(false);
+        return;
+      }
+      const res = await fetch(`/api/admin/agents/transcripts/${encodeURIComponent(transcriptId)}`, { credentials: 'include' });
+      const payload = (await res.json()) as TranscriptDetailResponse;
+      if (!res.ok || !payload.ok || !payload.transcript) {
+        setTranscriptDetailErr(payload.error ?? 'Could not load this transcript.');
+        return;
+      }
+      setTranscriptDetails((current) => ({ ...current, [transcriptId]: payload.transcript! }));
+    } catch (e) {
+      setTranscriptDetailErr(e instanceof Error ? `Network error: ${e.message}` : 'Network error.');
+    } finally {
+      setTranscriptDetailLoading(false);
+    }
+  }
 
   return (
     <div className="max-w-7xl">
@@ -213,10 +386,149 @@ export function AgentsPage() {
               </div>
             </Panel>
           </section>
+
+          <section className="border border-line bg-cream/[0.025] p-5 mb-8">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h2 className="font-mono text-[11px] tracking-label uppercase text-gold">
+                Cross-tool Chat Transcript Index
+              </h2>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => void runAutoHarvestNow()}
+                  className="font-mono text-[10px] uppercase tracking-label text-gold hover:underline"
+                  disabled={harvestRunning || harvesterStatus?.inFlight}
+                >
+                  {harvestRunning ? 'Running harvest…' : 'Run auto harvest now'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void Promise.all([loadTranscripts(), loadHarvesterStatus()])}
+                  className="font-mono text-[10px] uppercase tracking-label text-gold hover:underline"
+                >
+                  Refresh
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-cream-mute mb-4">
+              1-0001 style index with model/provider, timestamp, and semantic keyword.
+              Open rows for the full role-by-role transcript.
+            </p>
+            {harvestRunMsg && <p className="text-xs text-cream-mute mb-3">{harvestRunMsg}</p>}
+            {harvesterStatusErr && <p className="text-xs text-red-300 mb-3">{harvesterStatusErr}</p>}
+            {harvesterStatus && (
+              <p className="text-xs text-cream-mute mb-3">
+                Auto-harvester worker: {harvesterStatus.started ? (harvesterStatus.inFlight ? 'running now' : 'active') : 'stopped'}
+                {harvesterStatus.nextRunAt ? ` · next run ${formatDateTime(harvesterStatus.nextRunAt)}` : ''}
+                {harvesterStatus.lastRunAt ? ` · last run ${formatDateTime(harvesterStatus.lastRunAt)}` : ''}
+                {harvesterStatus.lastRequestedBy ? ` · last requested by ${harvesterStatus.lastRequestedBy}` : ''}
+              </p>
+            )}
+            {harvesterStatus?.lastError && (
+              <p className="text-xs text-red-300 mb-3">Last harvest error: {harvesterStatus.lastError}</p>
+            )}
+            {transcriptList.length === 0 ? (
+              <p className="text-sm text-cream-mute">
+                {transcriptsLoading ? 'Loading transcripts…' : 'No transcript index rows yet.'}
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-xs">
+                  <thead className="text-cream-faint font-mono uppercase tracking-label">
+                    <tr>
+                      <Th>Chat</Th>
+                      <Th>Model</Th>
+                      <Th>Keyword</Th>
+                      <Th>Source</Th>
+                      <Th>Captured</Th>
+                      <Th>Turns</Th>
+                      <Th>Words</Th>
+                      <Th></Th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transcriptList.map((transcript) => (
+                      <Fragment key={transcript.transcriptId}>
+                        <tr key={transcript.transcriptId} className="border-t border-line/70">
+                          <td className="py-2 pr-4 text-cream">{transcript.chatIndex}</td>
+                          <td className="py-2 pr-4 text-cream-mute">{transcript.model}</td>
+                          <td className="py-2 pr-4 text-cream-mute">{transcript.semanticKeyword}</td>
+                          <td className="py-2 pr-4 text-cream-mute">{transcript.source}</td>
+                          <td className="py-2 pr-4 text-cream-mute whitespace-nowrap">{formatDateTime(transcript.capturedAt)}</td>
+                          <td className="py-2 pr-4 text-cream-mute">{transcript.turnCount}</td>
+                          <td className="py-2 pr-4 text-cream-mute">{transcript.wordCount}</td>
+                          <td className="py-2 pr-4">
+                            <button
+                              type="button"
+                              onClick={() => void openTranscript(transcript.transcriptId)}
+                              className="font-mono text-[10px] uppercase tracking-label text-gold hover:underline"
+                              disabled={transcriptDetailLoading}
+                            >
+                              {openTranscriptId === transcript.transcriptId ? 'Close' : 'Open full transcript'}
+                            </button>
+                          </td>
+                        </tr>
+                        {openTranscriptId === transcript.transcriptId && (
+                          <tr className="border-t border-line/70 bg-cream/[0.03]">
+                            <td colSpan={8} className="py-3">
+                              {transcriptDetails[transcript.transcriptId] ? (
+                                <div className="space-y-2">
+                                  <div className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
+                                    {transcriptDetails[transcript.transcriptId].title}
+                                  </div>
+                                  <pre className="overflow-x-auto whitespace-pre-wrap text-[11px] border border-line bg-ink p-3">
+                                    {transcriptToText(transcriptDetails[transcript.transcriptId].transcript)}
+                                  </pre>
+                                </div>
+                              ) : (
+                                <p className="font-mono text-xs text-cream-mute">
+                                  {transcriptDetailLoading ? 'Loading full transcript…' : (transcriptDetailErr ?? 'Could not load full transcript.')}
+                                </p>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {transcriptsErr && <p className="font-mono text-[11px] text-red-300 mt-3">{transcriptsErr}</p>}
+            {transcriptCursor && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => void loadTranscripts(transcriptCursor, true)}
+                  className="font-mono text-[10px] uppercase tracking-label text-gold hover:underline"
+                  disabled={transcriptsLoading}
+                >
+                  {transcriptsLoading ? 'Loading…' : 'Load more transcripts'}
+                </button>
+              </div>
+            )}
+            <p className="font-mono text-[10px] uppercase tracking-label text-cream-faint mt-3">
+              Loaded {transcriptList.length} of {transcriptTotal}
+            </p>
+          </section>
         </>
       )}
     </div>
   );
+}
+
+function Th({ children }: { children: React.ReactNode }) {
+  return (
+    <th className="border-b border-line py-2 pr-4 font-normal">
+      {children}
+    </th>
+  );
+}
+
+function transcriptToText(turns: McsAdminChatTranscriptDetail['transcript']): string {
+  return turns
+    .map((turn) => `${turn.role} ${turn.speaker}: ${turn.text} (${turn.timestamp ? formatDateTime(turn.timestamp) : 'no time'})`)
+    .join('\n');
 }
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {

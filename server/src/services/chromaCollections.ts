@@ -50,6 +50,7 @@ export const CHROMA_COLLECTIONS: readonly string[] = [
   'mcs_konga_enrollment_attestations', // domain/kongaEnrollment.ts
   'mcs_ivory_prospect_names', // domain/ivory.ts, domain/generator.ts
   'mcs_audit_log', // domain/auditLog.ts + domain/adminBaOversight.ts (sponsor-override audit)
+  'chat_transcripts', // domain/adminChatTranscripts.ts (cross-tool admin transcript index)
   'mcs_admin_prospect_notes', // domain/adminProspectOversight.ts
   'mcs_steve_success_interview', // domain/steve-success-interview.ts (Steve discovery + success profiles)
   'mcs_recruiting_cycles', // domain/recruitingCycle.ts (ACR-0011 — cycle twin + BA why_statement + Michael touches for why-replay)
