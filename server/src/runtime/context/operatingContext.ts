@@ -37,6 +37,13 @@ export const DEFAULT_OPERATING_CONTEXT_HANDLE = 'boot';
 /** Greppable marker. One line per degrade, stable prefix, never suppressed. */
 const DEGRADED_LOG_PREFIX = '[operating-context] DEGRADED —';
 
+/** Operating context is never truncated. A partial world silently reported as
+ *  'loaded' is the failure this module exists to end. */
+export const OPERATING_CONTEXT_MAX_CHARS = 100_000;
+
+/** The character the compiler appends when it cuts a body short. */
+const TRUNCATION_MARK = '…';
+
 export interface LoadOperatingContextOptions {
   /** Call phrase to retrieve. Defaults to `boot`. */
   handle?: string;
@@ -62,6 +69,11 @@ function degraded(reason: string, loadedAt: string): McsOperatingContext {
   };
 }
 
+/** Did the compiler clip this body short? */
+function isTruncated(value: string | undefined): boolean {
+  return (value?.trimEnd() ?? '').endsWith(TRUNCATION_MARK);
+}
+
 /** The body an agent should read, plus the instruction that travels with it. */
 function contentOf(hit: McsContextGuardHit): string {
   const parts = [hit.summary?.trim() ?? ''];
@@ -84,6 +96,11 @@ export async function loadOperatingContext(
   try {
     const packet = await compileContextPacket(handle, null, {
       audience: options.audience ?? 'app_agents',
+      // Ask the compiler for the WHOLE body. The default per-hit summary
+      // budget is sized for guard listings; an operating context clipped to
+      // it arrives as a fifth of the world with an ellipsis where the rest
+      // of the architecture used to be.
+      maxSummaryChars: OPERATING_CONTEXT_MAX_CHARS,
       ...(options.gatewayUrl ? { gatewayUrl: options.gatewayUrl } : {}),
     });
 
@@ -105,6 +122,13 @@ export async function loadOperatingContext(
         `empty_operating_context:${handle} (recordId=${canonical.provenance.recordId})`,
         loadedAt,
       );
+    }
+
+    // Belt and braces. OPERATING_CONTEXT_MAX_CHARS is a guess about a body
+    // that will keep growing; if the compiler cut it anyway, the world is
+    // partial and a partial world must never report `loaded`.
+    if (isTruncated(content) || isTruncated(canonical.summary)) {
+      return degraded(`truncated_operating_context:${handle} (len=${content.length})`, loadedAt);
     }
 
     const load: McsOperatingContextLoad = {

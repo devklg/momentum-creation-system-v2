@@ -123,6 +123,7 @@ export type { ContextManagerTraceValidationIssue } from './contextManagerTraceCo
 // production caller of compileContextPacket().
 export {
   DEFAULT_OPERATING_CONTEXT_HANDLE,
+  OPERATING_CONTEXT_MAX_CHARS,
   composeAgentContext,
   loadOperatingContext,
 } from './operatingContext.js';

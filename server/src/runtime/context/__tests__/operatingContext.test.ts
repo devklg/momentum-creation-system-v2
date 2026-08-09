@@ -8,7 +8,9 @@ vi.mock('../../../lib/contextPacket.js', () => ({
   compileContextPacket: mocks.compileContextPacket,
 }));
 
-const { composeAgentContext, loadOperatingContext } = await import('../operatingContext.js');
+const { OPERATING_CONTEXT_MAX_CHARS, composeAgentContext, loadOperatingContext } = await import(
+  '../operatingContext.js'
+);
 
 const BOOT_BODY = 'The world you are working in: Momentum is a Knowledge Operating System.';
 
@@ -140,6 +142,43 @@ describe('loadOperatingContext — the boot sector', () => {
     const context = await loadOperatingContext();
 
     expect(context.loads[0]?.content).toBe(long);
+  });
+
+  it('asks the compiler for the WHOLE body, not the default hit summary budget', async () => {
+    mocks.compileContextPacket.mockResolvedValue(packet());
+
+    await loadOperatingContext();
+
+    // The defect this pins: the compiler's default clips every hit to 1200
+    // chars. The boot record is ~6,000. Assert the ACTUAL argument.
+    const options = mocks.compileContextPacket.mock.calls[0]?.[2] as { maxSummaryChars?: number };
+    expect(options.maxSummaryChars).toBe(OPERATING_CONTEXT_MAX_CHARS);
+    expect(OPERATING_CONTEXT_MAX_CHARS).toBeGreaterThanOrEqual(100_000);
+  });
+
+  it('degrades rather than reporting a truncated world as loaded', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const clipped = `${'x'.repeat(1_200)}…`;
+    mocks.compileContextPacket.mockResolvedValue(packet({ canonicalRecord: guardHit({ summary: clipped }) }));
+
+    const context = await loadOperatingContext();
+
+    expect(context.status).toBe('degraded');
+    expect(context.loads).toEqual([]);
+    expect(context.degradedReason?.startsWith('truncated_operating_context:')).toBe(true);
+    expect(context.degradedReason).toContain('boot');
+  });
+
+  it('delivers a ~6,000-character boot body whole, with no clipping anywhere in the path', async () => {
+    const body = 'LOAD 1 — the world. '.repeat(300).trim(); // ~6,000 chars
+    expect(body.length).toBeGreaterThan(5_500);
+    mocks.compileContextPacket.mockResolvedValue(packet({ canonicalRecord: guardHit({ summary: body }) }));
+
+    const context = await loadOperatingContext();
+
+    expect(context.status).toBe('loaded');
+    expect(context.loads[0]?.content.length).toBe(body.length);
+    expect(context.loads[0]?.content).toBe(body);
   });
 });
 
