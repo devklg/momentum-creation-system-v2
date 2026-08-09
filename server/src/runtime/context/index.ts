@@ -118,6 +118,22 @@ export {
   validateContextManagerExecutionTraceV1,
 } from './contextManagerTraceContract.js';
 export type { ContextManagerTraceValidationIssue } from './contextManagerTraceContract.js';
+// The boot sector — operating context loaded BEFORE any topical retrieval, and
+// the composer that keeps that order. Fail-closed, read-path only; the first
+// production caller of compileContextPacket().
+export {
+  DEFAULT_OPERATING_CONTEXT_HANDLE,
+  OPERATING_CONTEXT_MAX_CHARS,
+  composeAgentContext,
+  loadOperatingContext,
+} from './operatingContext.js';
+export type { LoadOperatingContextOptions } from './operatingContext.js';
+export type {
+  McsOperatingContext,
+  McsOperatingContextLoad,
+  McsOperatingContextStatus,
+} from '@momentum/shared';
+
 export type {
   ContextManagerExecutionTrace,
   ContextManagerPlan,

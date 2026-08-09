@@ -78,6 +78,9 @@ export const VERB_QUESTION_KEYS: Record<McsMemoryContextGraphVerb, McsMemoryCont
 };
 
 const MAX_PACKET_CHARS = 24_000;
+/** Per-hit summary budget. Historic default — every existing caller depends
+ *  on this exact value; change it and you change every packet on disk. */
+const DEFAULT_SUMMARY_CHARS = 1200;
 const MAX_SEMANTIC_NEIGHBOURS = 5;
 const MAX_FALLBACK_HITS = 12;
 const MAX_GRAPH_HOPS = 3;
@@ -92,6 +95,10 @@ export interface CompilePacketOptions {
   maxChars?: number;
   /** Who the packet is FOR. Fail closed: default `dev_agents`. */
   audience?: McsMemoryAudience;
+  /** Max characters for hit summaries. Default 1200 preserves existing
+   *  behaviour for every current caller. The operating-context boot passes a
+   *  large value because a truncated world is worse than no world. */
+  maxSummaryChars?: number;
 }
 
 function normalize(text: string): string {
@@ -109,7 +116,12 @@ function toCanonicalVerb(edgeType: string): McsMemoryContextGraphVerb | null {
   return (EXPANSION_VERBS as readonly string[]).includes(lower) ? lower : null;
 }
 
-function toGuardHit(store: MemoryStoreDef, doc: Record<string, unknown>, matchKind: McsContextGuardHit['matchKind']): McsContextGuardHit {
+function toGuardHit(
+  store: MemoryStoreDef,
+  doc: Record<string, unknown>,
+  matchKind: McsContextGuardHit['matchKind'],
+  maxSummaryChars: number = DEFAULT_SUMMARY_CHARS,
+): McsContextGuardHit {
   const supersededBy =
     typeof doc.superseded_by === 'string' ? doc.superseded_by : typeof doc.supersededBy === 'string' ? doc.supersededBy : undefined;
   const status = typeof doc.status === 'string' ? doc.status.toLowerCase() : undefined;
@@ -123,7 +135,7 @@ function toGuardHit(store: MemoryStoreDef, doc: Record<string, unknown>, matchKi
       statedBy: statedBy(doc),
     },
     title: recordTitle(doc),
-    summary: recordSummary(doc, 1200),
+    summary: recordSummary(doc, maxSummaryChars),
     matchKind,
     superseded: status === 'superseded' || supersededBy != null,
     audience: audienceOf(doc),
@@ -337,7 +349,13 @@ export async function measureVerbCoverage(
 }
 
 /** Rung 2 — capped Chroma neighbours from the handle's own collection. */
-async function semanticNeighbours(match: HandleMatch, query: string, gatewayUrl: string, warnings: string[]): Promise<McsContextGuardHit[]> {
+async function semanticNeighbours(
+  match: HandleMatch,
+  query: string,
+  gatewayUrl: string,
+  warnings: string[],
+  maxSummaryChars: number = DEFAULT_SUMMARY_CHARS,
+): Promise<McsContextGuardHit[]> {
   const chroma = match.store.chroma;
   if (!chroma) return [];
   try {
@@ -360,7 +378,7 @@ async function semanticNeighbours(match: HandleMatch, query: string, gatewayUrl:
       const idValue = ids[i];
       if (idValue === undefined || idValue === selfId) continue;
       const meta = (metadatas[i] ?? {}) as Record<string, unknown>;
-      hits.push({ ...toGuardHit(match.store, { _id: idValue, ...meta }, 'semantic'), distance: distances[i] });
+      hits.push({ ...toGuardHit(match.store, { _id: idValue, ...meta }, 'semantic', maxSummaryChars), distance: distances[i] });
     }
     return hits;
   } catch (error) {
@@ -423,6 +441,7 @@ export async function compileContextPacket(
   const gatewayUrl = options.gatewayUrl ?? DEFAULT_GATEWAY_URL;
   const maxChars = options.maxChars ?? MAX_PACKET_CHARS;
   const audience = options.audience ?? 'dev_agents';
+  const maxSummaryChars = options.maxSummaryChars ?? DEFAULT_SUMMARY_CHARS;
   const warnings: string[] = [];
   const compiledAt = new Date().toISOString();
   const excluded = { count: 0 };
@@ -438,10 +457,10 @@ export async function compileContextPacket(
   }
   if (match) {
     match = await resolveAliasTarget(match, gatewayUrl);
-    const canonical = toGuardHit(match.store, match.doc, match.matchKind);
+    const canonical = toGuardHit(match.store, match.doc, match.matchKind, maxSummaryChars);
     const [expansion, neighboursRaw] = await Promise.all([
       expandGraph(match, verbs, audience, gatewayUrl, warnings),
-      semanticNeighbours(match, callPhraseOrQuery, gatewayUrl, warnings),
+      semanticNeighbours(match, callPhraseOrQuery, gatewayUrl, warnings, maxSummaryChars),
     ]);
     const neighbours = filterByAudience(neighboursRaw, audience, excluded);
     const superseded = [canonical, ...neighbours].filter((h) => h.superseded);
