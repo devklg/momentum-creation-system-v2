@@ -12,6 +12,17 @@
 > committed in Chat #135; verify current continuity through the registry first,
 > then read the linked handoff when needed.
 
+**Canonical KB Storage Standard Version:** `KB-CANON-v1.0` (2026-07-30)
+
+## KB Source-of-Truth Rule
+
+- Canonical knowledge storage is MCS v2 only:
+  - `mcs_knowledge_sources`
+  - `mcs_knowledge_chunks`
+  - `mcs_knowledge_corrections`
+- `sourceRef` values are source ingestion pointers only (for example `file:`, `url:`, `repo:`, `github:`).
+- Active training knowledge comes only from `status: active` versions in `mcs_knowledge_sources`.
+
 ---
 
 ## 1. Team Magnificent's own comp training — "Power in Numbers"
