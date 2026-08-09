@@ -38,8 +38,22 @@ const BLOCKING_RULES = [
   {
     id: 'income_or_compensation_claim',
     severity: 'blocker',
-    description: 'No income, earnings, compensation, commission, rank, cycle, CV, bonus, or payout claims.',
-    pattern: /\b(?:income|earnings?|compensation|commissions?|rank\s+advancement|cycle\s+math|CV|bonus(?:es)?|payouts?)\b/i,
+    description:
+      'No guaranteed, projected, or quantified income claims; no comp-plan mechanics. ' +
+      'Saying this is a business people earn from is allowed; promising an amount is not.',
+    // Kevin's ruling 2026-08-08: "I want to be able to talk about compensation
+    // responsibly and not be told we cannot talk about making money in this
+    // business. It is a business. I understand we cannot guarantee anything or
+    // make exaggerated claims."
+    //
+    // Claim-shaped, not word-shaped — matching the other five rules in this file.
+    // The prior pattern matched bare nouns (income|earnings|bonus|CV), so it fired
+    // on the canonical disclaimer itself: "no income or outcome is guaranteed" was
+    // a violation of the income-claim rule. A rule that cannot tell a claim from a
+    // denial of one gets routed around, and then it is not there on the day it
+    // matters.
+    pattern:
+      /\b(?:(?:guarantee[sd]?|projected|expected|potential|residual|passive|unlimited|six[-\s]figure|seven[-\s]figure|life[-\s]changing|full[-\s]time)\s+(?:income|earnings|compensation|pay(?:check)?s?|money)|(?:income|earnings|compensation|paycheck)\s+(?:is\s+)?(?:guaranteed|projected|expected)|(?:earn|make|making|paid)\s+(?:\$|\d|up\s+to|as\s+much\s+as|thousands|millions)|income\s+(?:claim|projection|potential|opportunity|replacement)|replace\s+(?:your|their)\s+(?:income|salary|job|paycheck)|quit\s+(?:your|their)\s+job|commissions?\s+(?:of|up\s+to)|\d+\s*%\s+(?:commission|payout|bonus|match)|\$\s*[\d,]+\s*(?:per|a|\/)\s*(?:week|month|year|day)|cycle\s+math|rank\s+advancement|\bCV\b)/i,
   },
   {
     id: 'placement_or_spillover_promise',

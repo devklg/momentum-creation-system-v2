@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-23T17:50:29.779Z",
+  "generatedAt": "2026-08-09T02:32:33.162Z",
   "scope": "apps/com/src visible strings plus shared compliance constants",
   "summary": {
     "filesScanned": 42,
-    "visibleStringsScanned": 606,
+    "visibleStringsScanned": 607,
     "blockingViolations": 0,
-    "allowedSignals": 86,
+    "allowedSignals": 92,
     "status": "pass",
     "allowedSignalsByRule": {
-      "glp_three_product_context": 16,
-      "public_market_or_cost_context": 7,
+      "glp_three_product_context": 19,
+      "public_market_or_cost_context": 8,
       "team_goal_context": 5,
-      "pmv_language_context": 31,
-      "placement_demo_context": 25,
+      "pmv_language_context": 34,
+      "placement_demo_context": 24,
       "canonical_disclaimer": 2
     }
   },
@@ -20,7 +20,7 @@
     {
       "id": "income_or_compensation_claim",
       "severity": "blocker",
-      "description": "No income, earnings, compensation, commission, rank, cycle, CV, bonus, or payout claims."
+      "description": "No guaranteed, projected, or quantified income claims; no comp-plan mechanics. Saying this is a business people earn from is allowed; promising an amount is not."
     },
     {
       "id": "placement_or_spillover_promise",
@@ -89,8 +89,8 @@
       "severity": "allowed",
       "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
-      "line": 29,
-      "text": "GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point."
+      "line": 28,
+      "text": "GLP-THREE is part of one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re here to show what they mean."
     },
     {
       "ruleId": "glp_three_product_context",
@@ -107,6 +107,30 @@
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "line": 122,
       "text": "GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 168,
+      "text": "GLP-THREE launched in January 2026. You&rsquo;re seeing it at a moment when many people are only just hearing about it."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 172,
+      "text": "GLP-1 is a $54–63B category today, projected to more than $200B by 2030. About 1 in 8 U.S. adults already use a GLP-1 product, Ozempic and Mounjaro made this category familiar, but 74% won&rsquo;t use injectables. Synthetic options run about $969–$1,349 per month; GLP-THREE is $76.50–$85."
+    },
+    {
+      "ruleId": "glp_three_product_context",
+      "severity": "allowed",
+      "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 188,
+      "text": "About half of people using GLP-1 drugs report nausea; 20–30% of weight loss in those groups can be lean mass; 1 in 4 adults avoids needles; and 50–75% stop within a year. GLP-THREE is a gentle, natural dropper option that supports healthy weight management."
     },
     {
       "ruleId": "glp_three_product_context",
@@ -203,6 +227,14 @@
       "file": "apps/com/src/routes/tm-video-presentation/sections/09-Timing.tsx",
       "line": 49,
       "text": "GLP-THREE launched in the third week of January 2026 with trademark and patent pending. The first all-natural GLP-1 replacement on the market. The window is opening, not closing."
+    },
+    {
+      "ruleId": "public_market_or_cost_context",
+      "severity": "allowed",
+      "description": "Public market figures and product-category cost context are allowed when not tied to earnings.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 172,
+      "text": "GLP-1 is a $54–63B category today, projected to more than $200B by 2030. About 1 in 8 U.S. adults already use a GLP-1 product, Ozempic and Mounjaro made this category familiar, but 74% won&rsquo;t use injectables. Synthetic options run about $969–$1,349 per month; GLP-THREE is $76.50–$85."
     },
     {
       "ruleId": "public_market_or_cost_context",
@@ -314,7 +346,7 @@
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/com-homepage.tsx",
       "line": 50,
-      "text": "We believe the best businesses are built person to person. Our team supports people who want to build with honest effort, real products, and a team that shows up. Building a business takes consistent effort."
+      "text": "We believe the best businesses are built person to person. Our team supports people who want to earn from real work with honest effort, real products, and a team that shows up. Building a business takes consistent effort; no income or outcome is guaranteed."
     },
     {
       "ruleId": "pmv_language_context",
@@ -409,15 +441,39 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 176,
-      "text": "You are not being asked to evaluate a business without the people and support around it."
+      "line": 168,
+      "text": "GLP-THREE launched in January 2026. You&rsquo;re seeing it at a moment when many people are only just hearing about it."
     },
     {
       "ruleId": "pmv_language_context",
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 180,
+      "line": 182,
+      "text": "Team Magnificent gives you leadership and real training from people who have done this work in public, so you are never asked to figure it out alone."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 186,
+      "text": "WHY PEOPLE WANT ANOTHER WAY"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 188,
+      "text": "About half of people using GLP-1 drugs report nausea; 20–30% of weight loss in those groups can be lean mass; 1 in 4 adults avoids needles; and 50–75% stop within a year. GLP-THREE is a gentle, natural dropper option that supports healthy weight management."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 193,
       "text": "People Momentum Volume Checks"
     },
     {
@@ -425,7 +481,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 194,
       "text": "Checks"
     },
     {
@@ -433,7 +489,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 194,
       "text": "Momentum"
     },
     {
@@ -441,7 +497,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 194,
       "text": "People"
     },
     {
@@ -449,7 +505,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 194,
       "text": "Volume"
     },
     {
@@ -457,7 +513,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 242,
+      "line": 255,
       "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
@@ -465,7 +521,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 250,
+      "line": 263,
       "text": "Building alone is why most people quit. So nobody here builds alone."
     },
     {
@@ -473,7 +529,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 258,
+      "line": 271,
       "text": "Built by magnificent people. Driven by purpose."
     },
     {
@@ -665,15 +721,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 172,
-      "text": "The working method is visible here: share, real response, live placement, and human follow-up."
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 197,
+      "line": 210,
       "text": "Completing the presentation created the pinned position you see. It represents a real placement in this shared line."
     },
     {
@@ -681,7 +729,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 222,
+      "line": 235,
       "text": "added since your placement"
     },
     {
@@ -689,7 +737,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 232,
+      "line": 245,
       "text": ". The recording remains a content resource; completing it does not create a placement or promise an outcome."
     },
     {
@@ -697,7 +745,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 242,
+      "line": 255,
       "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
@@ -902,53 +950,53 @@
       "file": "apps/com/src/routes/com-homepage.tsx",
       "lineNumber": 50,
       "kind": "jsx_text",
-      "text": "We believe the best businesses are built person to person. Our team supports people who want to build with honest effort, real products, and a team that shows up. Building a business takes consistent effort."
-    },
-    {
-      "file": "apps/com/src/routes/com-homepage.tsx",
-      "lineNumber": 57,
-      "kind": "jsx_text",
-      "text": "Contact"
+      "text": "We believe the best businesses are built person to person. Our team supports people who want to earn from real work with honest effort, real products, and a team that shows up. Building a business takes consistent effort; no income or outcome is guaranteed."
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
       "lineNumber": 58,
       "kind": "jsx_text",
-      "text": "Team Magnificent"
+      "text": "Contact"
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
       "lineNumber": 59,
       "kind": "jsx_text",
-      "text": "support@teammagnificent.com"
+      "text": "Team Magnificent"
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
       "lineNumber": 60,
       "kind": "jsx_text",
+      "text": "support@teammagnificent.com"
+    },
+    {
+      "file": "apps/com/src/routes/com-homepage.tsx",
+      "lineNumber": 61,
+      "kind": "jsx_text",
       "text": "1770 Litchfield Dr, Banning, CA 92220"
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
-      "lineNumber": 64,
+      "lineNumber": 65,
       "kind": "jsx_text",
       "text": "·"
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
-      "lineNumber": 64,
+      "lineNumber": 65,
       "kind": "jsx_text",
       "text": "© Team Magnificent ·"
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
-      "lineNumber": 64,
+      "lineNumber": 65,
       "kind": "jsx_text",
       "text": "Privacy Policy"
     },
     {
       "file": "apps/com/src/routes/com-homepage.tsx",
-      "lineNumber": 64,
+      "lineNumber": 65,
       "kind": "jsx_text",
       "text": "Terms of Service"
     },
@@ -2064,45 +2112,45 @@
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
-      "lineNumber": 24,
+      "lineNumber": 23,
       "kind": "jsx_text",
       "text": "The market you just stepped into"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
-      "lineNumber": 25,
+      "lineNumber": 24,
       "kind": "jsx_text",
       "text": "This isn&rsquo;t a small room."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
-      "lineNumber": 29,
+      "lineNumber": 28,
       "kind": "jsx_text",
-      "text": "GLP-THREE is a natural alternative in one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re just standing where they point."
+      "text": "GLP-THREE is part of one of the fastest-expanding wellness categories on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re here to show what they mean."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
+      "lineNumber": 36,
+      "kind": "jsx_attribute:label",
+      "text": "GLP-1 category (2024)"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
       "lineNumber": 37,
       "kind": "jsx_attribute:label",
-      "text": "Global wellness market"
+      "text": "Projected GLP-1 alternatives by 2030"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
       "lineNumber": 38,
       "kind": "jsx_attribute:label",
-      "text": "GLP-1 alternatives by 2033"
+      "text": "U.S. adults already using GLP-1"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
       "lineNumber": 39,
       "kind": "jsx_attribute:label",
-      "text": "Americans overweight"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/sections/02-Opportunity.tsx",
-      "lineNumber": 40,
-      "kind": "jsx_attribute:label",
-      "text": "Cost of synthetic alternatives"
+      "text": "Adults say they won&rsquo;t use injectables"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/sections/03-Mechanic.tsx",
@@ -2966,395 +3014,401 @@
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 162,
       "kind": "jsx_text",
-      "text": "Rewatch the presentation, then ask"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 162,
-      "kind": "jsx_text",
-      "text": "what they use and what they have personally observed."
+      "text": "The patented MBC-267 complex — 267 all-natural peptides from wild-caught salmon and plants — drops, not needles; gentle, natural ingredients; highest quality, clinically tested, and listed in the PDR. Rewatch the presentation, then ask"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 165,
+      "kind": "jsx_text",
+      "text": "what they use and what they&rsquo;ve seen."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 167,
       "kind": "jsx_attribute:title",
       "text": "Timing"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 166,
-      "kind": "jsx_text",
-      "text": "Ask why"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 166,
-      "kind": "jsx_text",
-      "text": "chose to share this with you now."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 168,
-      "kind": "jsx_attribute:title",
-      "text": "Market"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 169,
       "kind": "jsx_text",
-      "text": "Bring the category questions and source questions to the conversation."
+      "text": "GLP-THREE launched in January 2026. You&rsquo;re seeing it at a moment when many people are only just hearing about it."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 171,
       "kind": "jsx_attribute:title",
-      "text": "Method"
+      "text": "Market"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
       "lineNumber": 172,
       "kind": "jsx_text",
-      "text": "The working method is visible here: share, real response, live placement, and human follow-up."
+      "text": "GLP-1 is a $54–63B category today, projected to more than $200B by 2030. About 1 in 8 U.S. adults already use a GLP-1 product, Ozempic and Mounjaro made this category familiar, but 74% won&rsquo;t use injectables. Synthetic options run about $969–$1,349 per month; GLP-THREE is $76.50–$85."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 175,
+      "lineNumber": 177,
+      "kind": "jsx_attribute:title",
+      "text": "Method"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 178,
+      "kind": "jsx_text",
+      "text": "The marketing system here is unique to Team Magnificent: MCS v2, the AI-and-technology stack this page runs on, built with one intention — to aid your success."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 181,
       "kind": "jsx_attribute:title",
       "text": "Team & training"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 176,
+      "lineNumber": 182,
       "kind": "jsx_text",
-      "text": "You are not being asked to evaluate a business without the people and support around it."
+      "text": "Team Magnificent gives you leadership and real training from people who have done this work in public, so you are never asked to figure it out alone."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 180,
+      "lineNumber": 186,
+      "kind": "jsx_text",
+      "text": "WHY PEOPLE WANT ANOTHER WAY"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 188,
+      "kind": "jsx_text",
+      "text": "About half of people using GLP-1 drugs report nausea; 20–30% of weight loss in those groups can be lean mass; 1 in 4 adults avoids needles; and 50–75% stop within a year. GLP-THREE is a gentle, natural dropper option that supports healthy weight management."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 193,
       "kind": "jsx_attribute:aria-label",
       "text": "People Momentum Volume Checks"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 194,
       "kind": "jsx_text",
       "text": "Checks"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 194,
       "kind": "jsx_text",
       "text": "Momentum"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 194,
       "kind": "jsx_text",
       "text": "People"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 194,
       "kind": "jsx_text",
       "text": "Volume"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 187,
+      "lineNumber": 200,
       "kind": "jsx_attribute:title",
       "text": "Three steps — and two already happened."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 190,
+      "lineNumber": 203,
       "kind": "jsx_text",
       "text": "01"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 191,
+      "lineNumber": 204,
       "kind": "jsx_text",
       "text": "Shared"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 192,
+      "lineNumber": 205,
       "kind": "jsx_text",
       "text": "shared a private presentation with you. That invitation fixed the person connected to your experience."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 195,
+      "lineNumber": 208,
       "kind": "jsx_text",
       "text": "02"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 196,
+      "lineNumber": 209,
       "kind": "jsx_text",
       "text": "Watched"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 197,
+      "lineNumber": 210,
       "kind": "jsx_text",
       "text": "Completing the presentation created the pinned position you see. It represents a real placement in this shared line."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 200,
+      "lineNumber": 213,
       "kind": "jsx_text",
       "text": "03"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 201,
+      "lineNumber": 214,
       "kind": "jsx_text",
       "text": "Deciding"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 202,
+      "lineNumber": 215,
       "kind": "jsx_text",
       "text": "When a person decides to build, a verified join exits at the front in gold. The system never invents that moment."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 208,
+      "lineNumber": 221,
       "kind": "jsx_attribute:title",
       "text": "What am I watching?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 210,
+      "lineNumber": 223,
       "kind": "jsx_text",
       "text": "Each circle is a real person added by someone on the team. New arrivals enter at the bottom. Verified joins leave at the destination above. The marker that stays fixed is you."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 222,
+      "lineNumber": 235,
       "kind": "jsx_attribute:label",
       "text": "added since your placement"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 223,
+      "lineNumber": 236,
       "kind": "jsx_attribute:label",
       "text": "placements this week"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 224,
+      "lineNumber": 237,
       "kind": "jsx_attribute:label",
       "text": "cities & states represented"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 227,
+      "lineNumber": 240,
       "kind": "jsx_text",
       "text": "Every value above comes from the live Konga contract. Empty means the system did not supply a trustworthy number."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 232,
+      "lineNumber": 245,
       "kind": "jsx_text",
       "text": ". The recording remains a content resource; completing it does not create a placement or promise an outcome."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 232,
+      "lineNumber": 245,
       "kind": "jsx_text",
       "text": "Last live conversation: recording dated"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 240,
+      "lineNumber": 253,
       "kind": "jsx_attribute:title",
       "text": "Could someone like me actually do this?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 242,
+      "lineNumber": 255,
       "kind": "jsx_text",
       "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 250,
+      "lineNumber": 263,
       "kind": "jsx_attribute:title",
       "text": "Building alone is why most people quit. So nobody here builds alone."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 254,
+      "lineNumber": 267,
       "kind": "jsx_text",
       "text": "Team Magnificent pairs you with the person who shared this with you — someone who was once exactly where you are — plus a team already in motion. The line on this page is their daily work, made visible."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 258,
+      "lineNumber": 271,
       "kind": "jsx_text",
       "text": "Built by magnificent people. Driven by purpose."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 269,
+      "lineNumber": 282,
       "kind": "jsx_text",
       "text": "Team Magnificent"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 272,
+      "lineNumber": 285,
       "kind": "jsx_attribute:aria-label",
       "text": "Legal links"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 273,
+      "lineNumber": 286,
       "kind": "jsx_text",
       "text": "Privacy Policy"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 274,
+      "lineNumber": 287,
       "kind": "jsx_text",
       "text": "•"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 275,
+      "lineNumber": 288,
       "kind": "jsx_text",
       "text": "Terms of Service"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 302,
+      "lineNumber": 315,
       "kind": "jsx_text",
       "text": "Request a call from"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 308,
+      "lineNumber": 321,
       "kind": "jsx_text",
       "text": "—"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 339,
+      "lineNumber": 352,
       "kind": "literal",
       "text": "This invitation has expired. Ask your inviter for a fresh one."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 340,
+      "lineNumber": 353,
       "kind": "literal",
       "text": "Your request did not land. Please try again."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 346,
+      "lineNumber": 359,
       "kind": "jsx_attribute:title",
       "text": "The next step is a conversation — not a commitment."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 348,
+      "lineNumber": 361,
       "kind": "jsx_text",
       "text": "— the person who thought of you. Ask the money question. Ask the time question. Ask what a bad week looks like. This starts a real conversation with a real person."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 348,
+      "lineNumber": 361,
       "kind": "jsx_text",
       "text": "Talk to"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 355,
+      "lineNumber": 368,
       "kind": "jsx_text",
       "text": "Request received"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 356,
+      "lineNumber": 369,
       "kind": "jsx_text",
       "text": "will reach out."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 357,
+      "lineNumber": 370,
       "kind": "jsx_text",
       "text": "Keep an eye on the number where you received this invitation."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 362,
+      "lineNumber": 375,
       "kind": "jsx_text",
       "text": "What would you like to talk about?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 364,
+      "lineNumber": 377,
       "kind": "jsx_text",
       "text": "I&rsquo;m interested — help me understand more."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 367,
+      "lineNumber": 380,
       "kind": "jsx_text",
       "text": "I have specific questions."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 370,
+      "lineNumber": 383,
       "kind": "jsx_text",
       "text": "I&rsquo;m ready to discuss joining Team Magnificent."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 377,
+      "lineNumber": 390,
       "kind": "jsx_text",
       "text": "/ Team Magnificent may call or text you about your request. Message &amp; data rates may apply. Message frequency varies. Reply STOP to end texts, HELP for help. Review the"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 377,
+      "lineNumber": 390,
       "kind": "jsx_text",
       "text": "By sharing your number, you agree that"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 393,
       "kind": "jsx_text",
       "text": "."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 393,
       "kind": "jsx_text",
       "text": "and"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 393,
       "kind": "jsx_text",
       "text": "Privacy Policy"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 393,
       "kind": "jsx_text",
       "text": "Terms of Service"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 386,
+      "lineNumber": 399,
       "kind": "literal",
       "text": "Request a call from"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 386,
+      "lineNumber": 399,
       "kind": "literal",
       "text": "Sending…"
     },
