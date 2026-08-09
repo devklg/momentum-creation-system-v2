@@ -77,6 +77,7 @@ import {
   readMasterTemplate,
   interpolateMasterContent,
 } from '../services/masterContent.js';
+import { normalizeTenantHost, resolveTenantIdForComHost } from '../domain/adminTenantArchitecture.js';
 import type {
   McsComProspectCopy,
   McsHoldingTankSnapshot,
@@ -202,6 +203,7 @@ async function resolveComProspectCopy(args: {
   baFirstName: string;
   baFullName: string;
   positionNumber: number | null;
+  tenantId: string;
 }): Promise<McsComProspectCopy | null> {
   const values: Record<string, string | number | null | undefined> = {
     prospectFirstName: args.prospectFirstName,
@@ -212,13 +214,13 @@ async function resolveComProspectCopy(args: {
   try {
     const [hero, arrival, opportunity, mechanic, livePlace, advantage, callbackCta] =
       await Promise.all([
-        readMasterTemplate('com.presentation.hero'),
-        readMasterContent('com.dashboard.arrival'),
-        readMasterContent('com.dashboard.opportunity'),
-        readMasterContent('com.dashboard.mechanic'),
-        readMasterContent('com.dashboard.live_place'),
-        readMasterContent('com.dashboard.advantage'),
-        readMasterContent('com.dashboard.callback_cta'),
+        readMasterTemplate('com.presentation.hero', args.tenantId),
+        readMasterContent('com.dashboard.arrival', args.tenantId),
+        readMasterContent('com.dashboard.opportunity', args.tenantId),
+        readMasterContent('com.dashboard.mechanic', args.tenantId),
+        readMasterContent('com.dashboard.live_place', args.tenantId),
+        readMasterContent('com.dashboard.advantage', args.tenantId),
+        readMasterContent('com.dashboard.callback_cta', args.tenantId),
       ]);
 
     return {
@@ -239,6 +241,12 @@ async function resolveComProspectCopy(args: {
     console.error('[resolveComProspectCopy] failed (non-fatal)', err);
     return null;
   }
+}
+
+function comHostFromRequest(req: import('express').Request): string | null {
+  const host = req.headers['x-forwarded-host'] ?? req.get('host');
+  if (Array.isArray(host)) return normalizeTenantHost(host[0]);
+  return normalizeTenantHost(host);
 }
 
 
@@ -343,11 +351,13 @@ prospectTokenRoutes.get('/:token', async (req, res) => {
     // payload. `copy` is additive (never part of ResolvedTokenPayload's locked
     // shape) so the .com renderers consume Kevin's overrides while old/absent
     // clients keep working off their built-in copy. Null on any read failure.
+    const tenantId = await resolveTenantIdForComHost(comHostFromRequest(req));
     const copy = await resolveComProspectCopy({
       prospectFirstName: prospect.firstName,
       baFirstName: ba.firstName,
       baFullName: `${ba.firstName} ${ba.lastName}`,
       positionNumber: prospect.positionNumber,
+      tenantId,
     });
 
     if (pageVisitId) {
