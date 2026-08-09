@@ -443,7 +443,7 @@ export function AgentsPage() {
                       <Th>Captured</Th>
                       <Th>Turns</Th>
                       <Th>Words</Th>
-                      <Th></Th>
+                      <Th> </Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -474,10 +474,10 @@ export function AgentsPage() {
                               {transcriptDetails[transcript.transcriptId] ? (
                                 <div className="space-y-2">
                                   <div className="font-mono text-[10px] uppercase tracking-label text-cream-faint">
-                                    {transcriptDetails[transcript.transcriptId].title}
+                                    {transcriptDetails[transcript.transcriptId]?.title}
                                   </div>
                                   <pre className="overflow-x-auto whitespace-pre-wrap text-[11px] border border-line bg-ink p-3">
-                                    {transcriptToText(transcriptDetails[transcript.transcriptId].transcript)}
+                                    {transcriptToText(transcriptDetails[transcript.transcriptId]?.transcript ?? [])}
                                   </pre>
                                 </div>
                               ) : (

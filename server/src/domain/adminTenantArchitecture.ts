@@ -601,7 +601,7 @@ export async function resolveTenantIdForComHost(rawHost: string | null | undefin
 
 export function normalizeTenantHost(rawHost: string | null | undefined): string {
   if (!rawHost) return '';
-  const base = (rawHost.includes(',') ? rawHost.split(',')[0] : rawHost).trim().toLowerCase();
+  const base = (rawHost.includes(',') ? (rawHost.split(',')[0] ?? '') : rawHost).trim().toLowerCase();
   if (!base) return '';
   return base.replace(/:\d+$/, '').replace(/^www\./, '');
 }

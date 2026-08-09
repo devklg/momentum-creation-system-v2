@@ -117,7 +117,9 @@ export interface RawChatTurn {
   when?: unknown;
 }
 
-interface SessionMirrorRow {
+// Shape of a session-mirror row as returned by the store. Exported as the
+// documented upstream contract; not consumed internally yet.
+export interface SessionMirrorRow {
   session_id?: unknown;
   _id?: unknown;
   source?: unknown;
@@ -284,7 +286,7 @@ function asSafeDateIso(value: unknown): string | null {
     return Number.isNaN(numericDate.getTime()) ? null : numericDate.toISOString();
   }
   if (typeof value === 'string' || typeof value === 'bigint') {
-    const parsed = new Date(value);
+    const parsed = new Date(typeof value === 'bigint' ? Number(value) : value);
     return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
   }
   return null;
@@ -303,8 +305,8 @@ function normalizeHarvestSource(raw: unknown): string {
 
 function isAllowedHarvestSource(rawSource: unknown): boolean {
   const source = normalizeHarvestSource(rawSource);
-  if (!source) return AUTO_HARVEST_SOURCE_ALL || HARVEST_SOURCE_FILTER.length === 0;
-  if (AUTO_HARVEST_SOURCE_ALL) return true;
+  if (!source) return HARVEST_SOURCE_ALL || HARVEST_SOURCE_FILTER.length === 0;
+  if (HARVEST_SOURCE_ALL) return true;
   if (HARVEST_SOURCE_FILTER.length === 0) return true;
   return HARVEST_SOURCE_FILTER.some((value) => source.includes(value));
 }
@@ -598,7 +600,7 @@ function parseConversationTextBlock(block: unknown): NormalizedChatTurn[] {
     );
 
   return lines
-    .map((line, index) => {
+    .map((line, index): NormalizedChatTurn => {
       const match = /^(?:\\[[^\\]]+\\]\\s*)?\\(([^)]+)\\)\\s*(.+)$/.exec(line);
       if (match && match[1] && match[2]) {
         return {
@@ -617,7 +619,7 @@ function parseConversationTextBlock(block: unknown): NormalizedChatTurn[] {
         timestamp: null,
       };
     })
-    .filter((turn): turn is NormalizedChatTurn => Boolean(turn.text));
+    .filter((turn) => Boolean(turn.text));
 }
 
 function normalizeInput(item: HarvesterTurnInput, fallbackSource: string): {
@@ -677,7 +679,7 @@ async function listAutoHarvesterSessions(gatewayUrl = GATEWAY_URL): Promise<Auto
   });
   return (result.documents ?? [])
     .filter((row) => hasMessagesInSession(row))
-    .filter((row) => AUTO_HARVEST_SOURCE_ALL || isAllowedHarvestSource(row.source));
+    .filter((row) => HARVEST_SOURCE_ALL || isAllowedHarvestSource(row.source));
 }
 
 async function loadHarvesterSessionDocument(
@@ -879,7 +881,7 @@ function transcriptLookupFilter(item: {
     orFilters.push({ sourceSessionId: item.sourceSessionId, sourceExternalId: item.sourceExternalId });
   }
   if (orFilters.length === 0) return {};
-  if (orFilters.length === 1) return orFilters[0];
+  if (orFilters.length === 1) return orFilters[0] ?? {};
   return { $or: orFilters };
 }
 
@@ -1148,7 +1150,7 @@ export async function ingestChatTranscripts(
       modelPrefix,
       indexSequence: nextSequence,
       title: normalized.title,
-      semanticKeyword: normalized.semanticKeyword,
+      semanticKeyword: normalized.semanticKeyword ?? '',
       source: normalized.source,
       sourceSessionId: normalized.sourceSessionId,
       sourceExternalId: normalized.sourceExternalId,
