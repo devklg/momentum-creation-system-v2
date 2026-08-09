@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-07-23T17:50:24.498Z
+- Generated: 2026-08-09T02:29:31.542Z
 - Mongo collections: 76
 - Neo4j labels: 90
 - Neo4j relationships: 71
 - Chroma collections: 59
 - Route modules: 49
 - Route handlers: 303
-- Shared exports: 1234
+- Shared exports: 1237
 
 ## Mongo Collections
 
@@ -1403,6 +1403,9 @@
 | `McsMichaelTranscriptChunk` | interface | `packages/shared/src/types.ts` |
 | `McsMichaelTranscriptChunkIngestPayload` | interface | `packages/shared/src/types.ts` |
 | `McsMyInvitesResponse` | interface | `packages/shared/src/types.ts` |
+| `McsOperatingContext` | interface | `packages/shared/src/types.ts` |
+| `McsOperatingContextLoad` | interface | `packages/shared/src/types.ts` |
+| `McsOperatingContextStatus` | type | `packages/shared/src/types.ts` |
 | `McsOrientationCancelResponse` | interface | `packages/shared/src/types.ts` |
 | `McsOrientationReservationRecord` | interface | `packages/shared/src/types.ts` |
 | `McsOrientationReserveResponse` | interface | `packages/shared/src/types.ts` |

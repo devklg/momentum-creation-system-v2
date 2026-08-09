@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23T17:50:24.498Z",
+  "generatedAt": "2026-08-09T02:29:31.542Z",
   "sourceGlobs": [
     "server/src/**/*.ts",
     "server/scripts/**/*.ts",
@@ -11819,6 +11819,21 @@
       "file": "packages/shared/src/types.ts"
     },
     {
+      "name": "McsOperatingContext",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsOperatingContextLoad",
+      "kind": "interface",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
+      "name": "McsOperatingContextStatus",
+      "kind": "type",
+      "file": "packages/shared/src/types.ts"
+    },
+    {
       "name": "McsOrientationCancelResponse",
       "kind": "interface",
       "file": "packages/shared/src/types.ts"
@@ -12921,6 +12936,6 @@
     "chromaCollections": 59,
     "routeModules": 49,
     "routeHandlers": 303,
-    "sharedExports": 1234
+    "sharedExports": 1237
   }
 }
