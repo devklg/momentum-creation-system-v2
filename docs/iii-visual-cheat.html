@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>III International Compensation Visual Cheat Sheet</title>
+  <style>
+    :root {
+      --bg:#f6f8ff;
+      --ink:#13233a;
+      --muted:#50627d;
+      --card:#ffffff;
+      --accent:#2f6bff;
+      --accent-2:#0da58f;
+      --line:#d8e1f0;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Arial, Helvetica, sans-serif; color:var(--ink); background:var(--bg); }
+    .sheet { width: 920px; margin: 18px auto; padding: 24px; background: var(--card); border-radius: 14px; border:1px solid var(--line); }
+    h1, h2, h3 { margin: 0 0 12px; }
+    h1 { font-size: 30px; }
+    h2 { font-size: 22px; margin-top: 16px; }
+    p { color: var(--muted); line-height: 1.55; }
+    .sub { font-size: 13px; color:#73859f; margin-top:-6px; margin-bottom: 20px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+    .card { border:1px solid var(--line); border-radius:10px; padding:12px; background:#fff; }
+    .badge { display:inline-block; padding:4px 10px; background:#eef3ff; color:#244bba; border-radius:999px; font-weight:bold; font-size:12px; }
+    table { width:100%; border-collapse: collapse; margin-top:10px; }
+    th, td { border:1px solid var(--line); padding:7px; font-size: 12px; text-align:left; vertical-align: top; }
+    th { background:#f2f6ff; }
+    .big { font-size: 34px; font-weight: 800; color: var(--accent-2); }
+    .note { padding: 10px; background:#fffcf0; border:1px dashed #dfcf8b; border-radius: 8px; }
+    .flow { margin-top: 10px; border-left: 4px solid var(--accent); padding-left: 12px; }
+    .pill-list li { margin: 5px 0; }
+    ul { margin-top: 6px; }
+    .muted-small { color: #627087; font-size: 11px; }
+
+    @media print {
+      body { background: #fff; }
+      .sheet { width: 100%; max-width: 100%; margin: 0; border: 0; }
+      .no-print { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>III International Compensation Visual Cheat Sheet</h1>
+    <div class="sub">Version for training only — Based on 2026 iii International, LLC 2602.V12.1.NAM-ENG</div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Fast Way to Explain It</h2>
+        <p><span class="badge">Core Rule</span> You make money from customer sales + team cycles. A cycle is paid when the two sides of your binary are balanced enough.</p>
+        <div class="flow">
+          <strong>Cycle formula:</strong> 300 CV on weaker side + 600 CV on stronger side = <strong>1 cycle</strong><br/>
+          <strong>Payout per cycle:</strong> <span class="big">$35</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>4-Bucket Earnings</h2>
+        <ul class="pill-list">
+          <li><strong>Customer Commission</strong>: 25% on customer net purchases (no shipping/tax)</li>
+          <li><strong>Cycle Commission</strong>: $35 per cycle (weekly)</li>
+          <li><strong>Matching</strong>: % by paid rank, from 20% to 65% combined levels</li>
+          <li><strong>Rank Rewards</strong>: one-time cash at rank milestones</li>
+          <li><strong>PIB</strong>: 25/28/33% depending on pack CV</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Matching % by Paid Rank</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Paid Rank</th><th>Matching Mix</th><th>Total %</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1 Star</td><td>L1</td><td>20%</td></tr>
+        <tr><td>2 Star</td><td>L1 + L2</td><td>35%</td></tr>
+        <tr><td>3 Star</td><td>L1 + L2 + L3</td><td>45%</td></tr>
+        <tr><td>4 Star Director</td><td>L1-L4</td><td>50%</td></tr>
+        <tr><td>5 Star Director</td><td>L1-L5</td><td>55%</td></tr>
+        <tr><td>6 Star Director</td><td>L1-L6</td><td>60%</td></tr>
+        <tr><td>7 Star Director</td><td>L1-L7</td><td>65%</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Rank Roadmap (Quick Reference, $60 per BA assumption)</h2>
+    <p class="muted-small">Approximate person-count and minimum income examples for training only.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th><th>Plan Minimum (from document)</th><th>$60/BA estimate</th><th>Min cycle earn example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1 Star</td><td>100 PV, 1 left/1 right, 800 PGV</td><td>~14 BAs to hit 800 PGV</td><td>—</td></tr>
+        <tr><td>2 Star</td><td>1,200 PGV</td><td>~20 BAs</td><td>—</td></tr>
+        <tr><td>3 Star</td><td>3,600 PGV</td><td>~60 BAs</td><td>—</td></tr>
+        <tr><td>3 Star Pro</td><td>50 binary cycles / 4 weeks</td><td>—</td><td>50 × $35 = $1,750</td></tr>
+        <tr><td>3 Star Elite</td><td>100 cycles / 4 weeks + 120 PV + 2 qualified 3-Star legs</td><td>—</td><td>$3,500</td></tr>
+        <tr><td>4 Star Director</td><td>200 cycles + 120 PV + 2 qualified 3-Star legs</td><td>—</td><td>$7,000</td></tr>
+        <tr><td>5 Star Director</td><td>500 cycles + 120 PV + 4 qualified 3-Star legs</td><td>—</td><td>$17,500</td></tr>
+        <tr><td>6 Star Director</td><td>1,000 cycles + 120 PV + 6 qualified 3-Star legs</td><td>—</td><td>$35,000</td></tr>
+        <tr><td>7 Star Director</td><td>1,500 cycles + 120 PV + 2 qualified 6-Star legs</td><td>—</td><td>$52,500</td></tr>
+        <tr><td>Gold Diamond</td><td>4,000,000 PGV + 4 qualified 6-Star legs</td><td>~66,667 BAs</td><td>—</td></tr>
+        <tr><td>Crown Diamond</td><td>6,000,000 PGV + 6 qualified 6-Star legs</td><td>~100,000 BAs</td><td>—</td></tr>
+        <tr><td>Royal Crown Diamond</td><td>8,000,000 PGV + 8 qualified 6-Star legs</td><td>~133,334 BAs</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Quick Teach Script (copy/paste for your teams)</h2>
+    <div class="card">
+      “Imagine your business like a two-sided seesaw. If both sides have product movement, you get paid for customer sales and then each cycle your sides create (300/600 CV). Cycles pay $35 each, and as you rank up, you earn matching percentages from more team levels plus rank rewards. The faster your team becomes active and balanced, the faster your income grows.”
+    </div>
+
+    <div class="note">
+      <strong>Compliance notes:</strong> Cycle rules, matching %, and rank progression are tied to active status and detailed time windows. This cheat sheet is a training starter, not legal/compliance language. Use the official plan and current policy notes for final compensation promises.
+    </div>
+
+    <div class="sub" style="margin-top:16px">Print tip: Use browser Print → "Save as PDF" for an easy emailing attachment.</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>III Compensation Visual Cheat Sheet — Total Guide</title>
+  <style>
+    :root {
+      --bg: #eef5ff;
+      --ink: #102a44;
+      --muted: #5d6d84;
+      --line: #ccd8ef;
+      --blue: #274dc8;
+      --blue2: #1f7cf8;
+      --green: #0ea37a;
+      --amber: #ef7b14;
+      --card: #ffffff;
+      --shadow: 0 12px 30px rgba(16, 42, 68, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(120deg, #f2f6ff 0%, #edf2ff 100%);
+      color: var(--ink);
+    }
+
+    .sheet {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 34px;
+      letter-spacing: 0.2px;
+    }
+
+    .sub {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    .version-pill {
+      display: inline-block;
+      margin-left: 10px;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #22447f;
+      background: #e8efff;
+      border: 1px solid #c2d2f0;
+      vertical-align: middle;
+    }
+
+    .headline {
+      border: 1px dashed var(--blue2);
+      border-radius: 12px;
+      padding: 12px;
+      background: #f5f9ff;
+      font-weight: 700;
+      color: #1c3f7e;
+      margin-bottom: 12px;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      padding: 12px;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 999px;
+      border: 1px solid #cce0ff;
+      background: #eef3ff;
+      color: #23458f;
+      padding: 4px 10px;
+      margin-bottom: 6px;
+    }
+
+    .seesaw {
+      border: 1px solid #cad9ff;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #e9f1ff 0%, #f8fbff 100%);
+      padding: 16px;
+      margin: 8px 0;
+    }
+
+    .legs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .leg {
+      width: 50%;
+      border-radius: 10px;
+      border: 1px solid #bfd1f4;
+      padding: 10px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .leg.weak { border-left: 8px solid #f3a43d; }
+    .leg.strong { border-left: 8px solid var(--green); }
+
+    .leg span { display: inline-block; margin-bottom: 6px; }
+    .weak span { color: #d47a17; font-weight: 700; }
+    .strong span { color: #0e9c78; font-weight: 700; }
+    .leg strong { font-size: 34px; line-height: 1; }
+
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 3px 10px;
+      margin-bottom: 6px;
+      border: 1px solid #aed1ff;
+      background: #ecf4ff;
+      color: #1b4d9a;
+    }
+
+    .pill.red { background: #ffece8; border-color: #ffb8ab; color: #a83823; }
+
+    .big {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--green);
+      margin: 6px 0;
+    }
+
+    .big.small { font-size: 28px; }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .mini {
+      flex: 1 1 120px;
+      min-width: 120px;
+      border: 1px solid #d5e1f8;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .mini .k {
+      font-size: 22px;
+      color: var(--blue2);
+      font-weight: 800;
+      line-height: 1;
+    }
+    .mini .l {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    th, td {
+      border: 1px solid #d2def5;
+      padding: 7px;
+      vertical-align: top;
+    }
+
+    th {
+      text-align: left;
+      background: #eff4ff;
+      color: #223f79;
+    }
+
+    .num { text-align: right; }
+    .center { text-align: center; }
+
+    .timeline {
+      border-left: 3px solid var(--blue2);
+      padding-left: 10px;
+      margin: 8px 0 0;
+    }
+
+    .step {
+      position: relative;
+      padding: 0 0 12px 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .step::before {
+      content: "";
+      position: absolute;
+      left: -8px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--blue2);
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .glossary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .g {
+      border: 1px solid #d7e3f7;
+      border-radius: 10px;
+      background: #f8fafe;
+      padding: 10px;
+    }
+
+    .g dt {
+      margin: 0 0 4px;
+      color: #1d4d96;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .g dd {
+      margin: 0 0 8px;
+      color: #54657a;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .script {
+      border: 1px solid #f0d8a6;
+      background: #fffbf1;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 15px;
+      line-height: 1.55;
+      margin-top: 8px;
+    }
+
+    .qna {
+      margin-top: 12px;
+    }
+
+    .qna li {
+      margin-bottom: 6px;
+      line-height: 1.45;
+      color: #4b5b72;
+    }
+
+    .footer {
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px dashed #c2d1ea;
+      color: #697a92;
+      font-size: 11px;
+    }
+
+    @media print {
+      body { padding: 0; background: #fff; }
+      .sheet {
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .grid2, .split, .glossary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>THREE Compensation Visual Cheat Sheet <span class="version-pill">Version 1.2 (2026-07-30)</span></h1>
+    <p class="sub">Total beginner guide for new Brand Ambassadors • No prior network-marketing knowledge required.</p>
+
+    <div class="headline">
+      One line explanation for a 12-year-old:
+      Build two team legs (Left + Right), make volume flow in both, turn that into cycles, and get paid.
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <span class="eyebrow">What is the binary?</span>
+        <h2>2-sided team structure</h2>
+        <p class="muted">
+          Every downline order goes into either your Left or Right side.
+          Think of a seesaw: when one side fills enough, you can pay a cycle.
+          You do not place people into specific people by “position.”
+        </p>
+        <div class="seesaw">
+          <div class="legs">
+            <div class="leg weak">
+              <span>LESSER LEG</span>
+              <strong>300 CV</strong>
+              <p class="muted" style="margin:4px 0 0;font-size:12px;">minimum needed to trigger</p>
+            </div>
+            <div class="leg strong">
+              <span>GREATER LEG</span>
+              <strong>600 CV</strong>
+              <p class="muted" style="margin:4px 0 0;font-size:12px;">minimum needed to trigger</p>
+            </div>
+          </div>
+        </div>
+        <p class="muted">
+          Cycle formula = <strong>300 CV (weak) + 600 CV (strong) = 1 paid cycle</strong> in the same bonus week.
+        </p>
+      </div>
+
+      <div class="card">
+        <span class="eyebrow">Important timing</span>
+        <h2>Cycles are weekly, not monthly</h2>
+        <p class="muted">
+          <strong>Bonus period:</strong> Monday 12:00 AM MT through Sunday 11:59 PM MT.
+          “How many cycles per week” is the official question.
+        </p>
+        <div class="stats">
+          <div class="mini">
+            <div class="pill">base cap</div>
+            <div class="k">500</div>
+            <div class="l">Maximum / week</div>
+          </div>
+          <div class="mini">
+            <div class="pill red">qualified cap</div>
+            <div class="k">600</div>
+            <div class="l">Possible / week if 4 conditions met</div>
+          </div>
+        </div>
+        <p class="muted">
+          <strong>At $35 per paid cycle:</strong> 500 × $35 = $17,500 and 600 × $35 = $21,000.
+          (This is total pool bonus movement before matching shares.)
+        </p>
+      </div>
+    </div>
+
+    <h2>Simple $60 BA examples (for teaching)</h2>
+    <div class="split">
+      <div class="card">
+        <h3>1 cycle math with $60 orders</h3>
+        <div class="script">
+          If each new person brings <strong>~60 CV</strong>:
+          <ul>
+            <li class="muted">5 people on weak side = 300 CV</li>
+            <li class="muted">10 people on strong side = 600 CV</li>
+            <li class="muted">15 people combined = 1 cycle</li>
+          </ul>
+          This is a teaching shortcut only. Actual plan values are CV/PV amounts.
+        </div>
+      </div>
+      <div class="card">
+        <h3>Cycle + your rank = your check</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Paid Rank</th>
+              <th class="center">Matching %</th>
+              <th class="num">$ per 1 cycle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1 Star</td><td class="center">20%</td><td class="num">$7.00</td></tr>
+            <tr><td>2 Star</td><td class="center">35%</td><td class="num">$12.25</td></tr>
+            <tr><td>3 Star</td><td class="center">45%</td><td class="num">$15.75</td></tr>
+            <tr><td>4 Star Director</td><td class="center">50%</td><td class="num">$17.50</td></tr>
+            <tr><td>5 Star Director</td><td class="center">55%</td><td class="num">$19.25</td></tr>
+            <tr><td>6 Star Director</td><td class="center">60%</td><td class="num">$21.00</td></tr>
+            <tr><td>7 Star Director</td><td class="center">65%</td><td class="num">$22.75</td></tr>
+          </tbody>
+        </table>
+        <p class="muted">
+          Matching is based on your <strong>single paid-as rank for that bonus week</strong>.
+        </p>
+        <ul class="muted">
+          <li>1 cycle: 1 Star = $7.00, 2 Star = $12.25, 3 Star = $15.75, 4 Star = $17.50, 5 Star = $19.25, 6 Star = $21.00, 7 Star = $22.75.</li>
+          <li>Example: 5 cycles at 5 Star = $19.25 × 5 = <strong>$96.25</strong>.</li>
+          <li>This table is cycle matching. Global leadership shares are a separate layer and covered in the section below.</li>
+        </ul>
+        <p class="muted">
+          L1 can increase to 30% only if matching qualification condition is met (see table below).
+        </p>
+      </div>
+    </div>
+
+    <h2>What counts as matching (the “leadership” story)</h2>
+    <div class="split">
+      <div class="card">
+        <span class="eyebrow">Your own cycles + your downline cycles</span>
+        <p class="muted">
+          Matching is team-development pay in practice.
+        </p>
+        <ul>
+          <li class="muted"><strong>Your BA’s paid rank</strong> sets your matching %.</li>
+          <li class="muted">You match on <strong>team commission cycles</strong> for that bonus week.</li>
+          <li class="muted">If your team members build enough on their side and produce cycles, your team development is paying you.</li>
+          <li class="muted">This is why helping people in your team grow matters — more healthy legs means more volume flow and cycles.</li>
+        </ul>
+        <p class="muted">
+          Think of it as: “I build people, people build people, and when the whole tree cycles I participate through matching.”
+        </p>
+      </div>
+      <div class="card">
+        <span class="eyebrow">L1 bonus upgrade</span>
+        <h3>L1 can move from 20% to 30%</h3>
+        <p class="muted">Requirement: in a 4-week rolling period you have 10+ active Customers/Brand Ambassadors and 1,000 CV from those people (including up to 200 personal CV).</p>
+        <p class="muted">
+          Matching amount is <strong>calculated on $35 per cycle</strong>.  
+          Example if this upgrade applies: 30% × $35 = <strong>$10.50 per cycle</strong>.
+        </p>
+      </div>
+    </div>
+
+    <h2>PIB (Product Introduction Bonus) from new BA packs</h2>
+    <div class="split">
+      <div class="card">
+        <p class="muted">
+          PIB is earned when you sponsor a new Brand Ambassador to start.
+          Formula from official chart:
+          <strong>20–199 CV = 25%</strong>, <strong>200–299 CV = 28%</strong>, <strong>300+ CV = 33%</strong>.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Pack</th>
+              <th class="num">CV</th>
+              <th class="center">PIB %</th>
+              <th class="num">PIB $</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>GLP THREE 4 Pack</td><td class="num">130</td><td class="center">25%</td><td class="num">$32.50</td></tr>
+            <tr><td>GLP THREE 8 Pack</td><td class="num">250</td><td class="center">28%</td><td class="num">$70.00</td></tr>
+            <tr><td>GLP THREE 12 Pack</td><td class="num">380</td><td class="center">33%</td><td class="num">$125.40</td></tr>
+            <tr><td>GLP THREE 16 Pack</td><td class="num">500</td><td class="center">33%</td><td class="num">$165.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>What to check before calculating PIB</h3>
+        <ul>
+          <li class="muted">Use the pack CV from sponsor order data.</li>
+          <li class="muted">PIB is a one-time check for that enrollee, not a cycle check.</li>
+          <li class="muted">CV percentages come from pack size, not personal discount or membership tier.</li>
+          <li class="muted">Product catalog prices from screenshot capture are training support inputs, not replacement policy text.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Ranks — from starter to top</h2>
+    <p class="muted">Use this as your coaching ladder. “Paid-as rank” and “active status” are period-based and affect payout qualification.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Main volume targets</th>
+          <th>Cycle / window check</th>
+          <th>Tree-leadership condition</th>
+          <th class="num">Approx $60 BA count*</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Brand Ambassador</td><td>100 PV in last 52 weeks</td><td>none</td><td>-</td><td>-</td></tr>
+        <tr><td>Qualified BA</td><td>Enroll 1 Left + 1 Right</td><td>-</td><td>-</td><td>-</td></tr>
+        <tr><td>1 Star</td><td>800 PGV + min 300 PGV each side (52 weeks)</td><td>-</td><td>-</td><td>~14</td></tr>
+        <tr><td>2 Star</td><td>1,200 PGV + min 400 each side (52 weeks)</td><td>-</td><td>-</td><td>~20</td></tr>
+        <tr><td>3 Star</td><td>3,600 PGV + min 900 each side (52 weeks)</td><td>-</td><td>-</td><td>~60</td></tr>
+        <tr><td>3 Star Pro</td><td>PGV and side requirements above</td><td>50 binary cycles in 4 weeks</td><td>-</td><td>-</td></tr>
+        <tr><td>3 Star Elite</td><td>PGV and side requirements above</td><td>100 binary cycles in 4 weeks</td><td>-</td><td>-</td></tr>
+        <tr><td>4 Star Director</td><td>Active @120 PV + 200 cycles in 4 weeks</td><td>as noted</td><td>Two 3 Star legs (1 per enroller-tree leg) in last 52 weeks</td><td>-</td></tr>
+        <tr><td>5 Star Director</td><td>Active @120 PV + 500 cycles in 4 weeks</td><td>as noted</td><td>Four 3 Star legs (1 per enroller-tree leg) in last 52 weeks</td><td>-</td></tr>
+        <tr><td>6 Star Director</td><td>Active @120 PV + 1,000 cycles in 4 weeks</td><td>as noted</td><td>Six 3 Star legs (1 per enroller-tree leg) in last 52 weeks</td><td>-</td></tr>
+        <tr><td>7 Star Director</td><td>Active @120 PV + 1,500 cycles in 4 weeks</td><td>as noted</td><td>Two 6 Star legs (1 per enroller-tree leg) in 4 weeks</td><td>-</td></tr>
+        <tr><td>Gold Diamond</td><td>Active @120 PV + 4,000,000 PGV in 4 weeks</td><td>as noted</td><td>Four 6 Star legs (1 per leg) in 4 weeks</td><td>~66,667</td></tr>
+        <tr><td>Crown Diamond</td><td>Active @120 PV + 6,000,000 PGV in 4 weeks</td><td>as noted</td><td>Six 6 Star legs (1 per leg) in 4 weeks</td><td>100,000</td></tr>
+        <tr><td>Royal Crown Diamond</td><td>Active @120 PV + 8,000,000 PGV in 4 weeks</td><td>as noted</td><td>Eight 6 Star legs (1 per leg) in 4 weeks</td><td>~133,334</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">
+      *Approximate counts use 60 PV as training shorthand only. Official advancement checks use official rank rules.
+    </p>
+
+    <h2>Global Leadership Bonus pool (the second leadership layer)</h2>
+    <div class="split">
+      <div class="card">
+        <p class="muted">
+          Eligibility starts at 4 Star Director and 120 PV active.
+          This pool uses shares from your own rank, enroller-tree ranks, and qualifying PGV.
+        </p>
+        <ul>
+          <li class="muted">Must have 5 active people and 300 PGV from them in 4 weeks (plus 120 PV active status).</li>
+          <li class="muted">1 share for each rank level you personally qualify for (4, 5, 6, 7+).</li>
+          <li class="muted">Shares also come from your enroller-tree legs (one highest paid rank of 4+ per leg).</li>
+          <li class="muted">Additional shares from PGV: +1 share per 1,000 PGV (up to your paid Matching level).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="muted">
+          This can be explained to beginners as: “bigger leaders in your tree can unlock extra checks when the team is doing serious consistent 4-week volume.”
+        </p>
+        <p class="muted">
+          The official plan calls this a 3% global bonus pool; share math is layered from rank and tree strength.
+        </p>
+      </div>
+    </div>
+
+    <h2>Bonus period timeline</h2>
+    <div class="timeline">
+      <div class="step"><strong>Bonus period starts</strong> Monday 12:00 AM MT</div>
+      <div class="step"><strong>Weeks are evaluated</strong> for cycle count, activity PV/PGV, cycle-based matching, and share conditions</div>
+      <div class="step"><strong>Weekly close</strong> Sunday 11:59 PM MT</div>
+      <div class="step"><strong>Paid values</strong> are paid weekly as official payout processing; this guide avoids schedule claims and focuses on formulas</div>
+    </div>
+
+    <h2>Starter 90-second teaching script</h2>
+    <div class="script">
+      “You are a Brand Ambassador, not a salesperson only. You are a team builder.
+      Put real people on both sides of your binary.
+      A cycle is just when one side has 300 CV and the other has 600 CV in the same week.
+      Every cycle is $35.
+      If you are paid as 1 Star, you keep 20% of each cycle = $7.
+      When your rank grows, your matching % grows up to 65% at 7 Star.
+      Your leadership bonus is extra pay from team development — if your downline grows strong, you get paid through matching and leadership shares too.
+      PIB happens when you sponsor a new BA: more CV on their pack means bigger PIB from that first order.
+      So your job is simple: keep both sides alive, stay active, and help people grow.”
+    </div>
+
+    <h2>Common questions from new BAs</h2>
+    <ul class="qna">
+      <li><strong>“Are cycles weekly or monthly?”</strong> Weekly: Monday-Sunday in the bonus period.</li>
+      <li><strong>“What is the max weekly cycles?”</strong> Base 500, increased to 600 if 4 conditions are met.</li>
+      <li><strong>“What is matching?”</strong> Your paid rank % of cycle value and leadership structure of the tree.</li>
+      <li><strong>“What is PIB?”</strong> A one-time enrollment bonus on a sponsored BA’s first pack CV using 25% / 28% / 33% tiers.</li>
+      <li><strong>“Where does the leadership story come in?”</strong> Matching + Global Leadership pool are exactly your team-development rewards when your tree runs correctly.</li>
+    </ul>
+
+    <h2>Glossary</h2>
+    <div class="glossary">
+      <div class="g">
+        <dt>Binary</dt>
+        <dd>Two-side commission structure with left and right legs.</dd>
+      </div>
+      <div class="g">
+        <dt>CV</dt>
+        <dd>Commissionable Volume used directly in cycle and PIB calculations.</dd>
+      </div>
+      <div class="g">
+        <dt>PV</dt>
+        <dd>Personal Volume from personal purchases, used for active rules.</dd>
+      </div>
+      <div class="g">
+        <dt>PGV</dt>
+        <dd>Personal Group Volume from your team and sponsorship lines.</dd>
+      </div>
+      <div class="g">
+        <dt>Cycle</dt>
+        <dd>One payout event at 300/600 (LLV/GLV) in one bonus week.</dd>
+      </div>
+      <div class="g">
+        <dt>LLV / GLV</dt>
+        <dd>Lesser Leg Volume and Greater Leg Volume at cycle time.</dd>
+      </div>
+      <div class="g">
+        <dt>PIB</dt>
+        <dd>Product Introduction Bonus paid when a new BA enrolls with a pack.</dd>
+      </div>
+      <div class="g">
+        <dt>Matching</dt>
+        <dd>Bonus percentage of cycle value paid by your paid-as rank; includes team leadership structure.</dd>
+      </div>
+      <div class="g">
+        <dt>Carry Forward</dt>
+        <dd>Rule that applies when one leg exceeds large volume limits (official policy and example says 10+ million CV note).</dd>
+      </div>
+      <div class="g">
+        <dt>Qualified BA</dt>
+        <dd>Has one enrollment on each binary side.</dd>
+      </div>
+      <div class="g">
+        <dt>Paid-as Rank</dt>
+        <dd>The rank the system pays you at for a specific bonus period.</dd>
+      </div>
+      <div class="g">
+        <dt>Highest Achieved Rank</dt>
+        <dd>Top rank reached historically before any rollbacks.</dd>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div><strong>Version:</strong> III-Comp-Visual-Cheat-v1.2 (2026-07-30)</div>
+      This sheet is a training handout. Final plan mechanics should match the current official PDF/rank plan, pack catalog, and active policy documents.
+    </div>
+  </div>
+</body>
+</html>

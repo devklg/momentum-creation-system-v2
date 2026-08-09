@@ -75,3 +75,5 @@ tmp-*.ps1
 server/tmp-*.ts
 KONGA_CHAT_GENESIS_FULL.txt
 KONGA_CHAT_GENESIS_READABLE.md
+.vscode/
+III_International_Product_Price_PV_List.docx

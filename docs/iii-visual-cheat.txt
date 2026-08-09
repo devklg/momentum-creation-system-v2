@@ -1,0 +1,200 @@
+# III Compensation Visual Cheat Sheet — Total Guide (Beginner Version)
+
+Version: III-Comp-Visual-Cheat-v1.2 (2026-07-30)
+
+Reference file:
+`D:\momentum-creation-system-v2\docs\iii-visual-cheat-2026-07-30.html`
+
+## 1) The idea in one sentence
+
+Think like a seesaw with two sides (Left and Right).
+
+- Every order from your downline goes into one side.
+- The team gets paid by cycles.
+- A paid cycle starts when the weaker side reaches **300 CV** and the stronger side reaches **600 CV** in the same bonus week.
+- Weekly cycle value baseline is **$35**.
+
+Bonus period:
+
+- starts Monday 12:00 AM MT
+- ends Sunday 11:59 PM MT
+
+So cycles are **weekly**, not monthly.
+
+## 2) Easy definitions (12-year-old language)
+
+- **Binary**: two sides: Left and Right.
+- **CV**: Commissionable Volume used for cycle + PIB math.
+- **PV**: Personal Volume from your own and customer orders.
+- **PGV**: Personal Group Volume from your team.
+- **LLV / GLV**: Lesser Leg Volume / Greater Leg Volume.
+- **Qualified BA**: Enrolled + one sponsor on each side.
+- **Paid-as rank**: The rank you are paid at for a bonus week.
+- **Active**: PV status rule used in rank + payout logic.
+- **Matching**: Your paid rank gives a percentage of cycle value (including leadership structure and tree context).
+- **PIB**: Product Introduction Bonus paid from a sponsored BA’s first eligible pack.
+
+## 3) Weekly cycles, maximums, and timing
+
+What matters for new BAs:
+
+- **Base cap**: 500 cycles/week.
+- **Qualified cap**: 600 cycles/week if all of this happens:
+  1) Paid as 3 Star or above.
+  2) Have 3 legs of 3 Star Elite in the prior 4 rolling weeks.
+  3) Reached 500 cycles in a prior week.
+  4) Have 10+ active people and 1,000 CV in 4 weeks (including up to 200 personal CV).
+
+Cycle payout examples:
+
+- 500 cycles → $17,500 cycle pool.
+- 600 cycles → $21,000 cycle pool.
+
+## 4) Matching = leadership pay
+
+This is the part that unlocks your excitement: when people on your team grow and cycle, you get paid in addition to your own work.
+
+This is not “placement”; it is rank-based team leadership reward on qualifying cycle commission flow.
+
+### Matching table
+
+| Paid-as Rank | Match % | $ on 1 cycle ($35) |
+|---|---:|---:|
+| 1 Star | 20% | $7.00 |
+| 2 Star | 35% | $12.25 |
+| 3 Star | 45% | $15.75 |
+| 4 Star Director | 50% | $17.50 |
+| 5 Star Director | 55% | $19.25 |
+| 6 Star Director | 60% | $21.00 |
+| 7 Star Director | 65% | $22.75 |
+
+### Multi-level example (same team flow, different paid-as levels)
+
+If you have 1 cycle in the week:
+
+- 1 Star earns $7.00
+- 2 Star earns $12.25
+- 3 Star earns $15.75
+- 4 Star earns $17.50
+- 5 Star earns $19.25
+- 6 Star earns $21.00
+- 7 Star earns $22.75
+
+So matching is **one paid-as level only** each payout week — the rank you are paid as.  
+Global Leadership is a separate bonus layer and is covered in Section 8 (do not add it to this table).
+
+For several cycles in a week, multiply by cycles (for example, 5 cycles at 5 Star = $96.25).
+
+### L1 upgrade
+
+L1 can move from 20% to **30%** if in a 4-week rolling period:
+
+- 10+ active personally enrolled customers/Brand Ambassadors
+- 1,000 CV from those people (including personal orders up to 200 CV).
+
+If L1 is upgraded, $35 × 30% = $10.50 per cycle.
+
+## 5) PIB from packages (capture-based example)
+
+PIB formula:
+
+- 20–199 CV = 25%
+- 200–299 CV = 28%
+- 300+ CV = 33%
+
+Using captured GLP pack CVs:
+
+| Pack | CV | PIB % | PIB |
+|---|---:|---:|---:|
+| GLP THREE 4 Pack | 130 | 25% | $32.50 |
+| GLP THREE 8 Pack | 250 | 28% | $70.00 |
+| GLP THREE 12 Pack | 380 | 33% | $125.40 |
+| GLP THREE 16 Pack | 500 | 33% | $165.00 |
+
+Use these as teaching examples with clear source notes and update as catalog is verified.
+
+## 6) $60 BA examples
+
+If one BA contributes about 60 CV:
+
+- weak side: 5 people × 60 = 300 CV  
+- strong side: 10 people × 60 = 600 CV  
+- total = 15 people for one cycle.
+
+Cycle value remains $35 then rank match applies.
+
+## 7) Rank ladder (from starter to top)
+
+Values below are sourced from the current plan chart.
+
+### Lower-to-mid ranks
+
+- Brand Ambassador: 100 PV in last 52 weeks.
+- Qualified BA: 1 Left + 1 Right.
+- 1 Star: 800 PGV, min 300 each side (52 weeks).
+- 2 Star: 1,200 PGV, min 400 each side.
+- 3 Star: 3,600 PGV, min 900 each side.
+- 3 Star Pro: 50 cycles in 4 weeks.
+- 3 Star Elite: 100 cycles in 4 weeks.
+- 4 Star Director: active 120 PV + 200 cycles in 4 weeks + 2 x 3 Star legs (one per enroller tree leg, 52 weeks).
+- 5 Star Director: active 120 PV + 500 cycles in 4 weeks + 4 x 3 Star legs.
+- 6 Star Director: active 120 PV + 1,000 cycles in 4 weeks + 6 x 3 Star legs.
+- 7 Star Director: active 120 PV + 1,500 cycles in 4 weeks + 2 x 6 Star legs (4-week period).
+
+### Diamond ranks
+
+- Gold Diamond: active 120 PV + 4,000,000 PGV in 4 weeks + 4 x 6 Star legs.
+- Crown Diamond: active 120 PV + 6,000,000 PGV in 4 weeks + 6 x 6 Star legs.
+- Royal Crown Diamond: active 120 PV + 8,000,000 PGV in 4 weeks + 8 x 6 Star legs.
+
+Approximate $60-only person counts:
+
+- 1 Star: 14
+- 2 Star: 20
+- 3 Star: 60
+- Gold Diamond: 66,667
+- Crown Diamond: 100,000
+- Royal Crown Diamond: 133,334
+
+These are training scale estimates; actual paid rank uses period windows and active/volume rules.
+
+## 8) Global Leadership Bonus (advanced, leadership team bonus layer)
+
+This is the “second layer” beyond cycle matching.
+
+Requirements (from plan):
+
+- Paid at 4 Star Director or above.
+- Active at 120 PV.
+- 5 active Customers/BAs and 300 CV from them in a 4-week period.
+
+Pool shares can stack:
+
+- By paid rank (4, 5, 6, 7+ each add share levels as cumulative in the plan logic).
+- By enroller-tree rank per leg.
+- By PGV bands: +1 share per 1,000 PGV up to paid Matching level.
+
+## 9) Rank advancement rewards (overview)
+
+- Rank-up rewards are one-time and listed in the plan chart (cash, token, certificate variants depending on rank).
+- This handout teaches mechanics first; keep reward details as a separate section when discussing milestones.
+
+## 10) Glossary
+
+- **Cycle**: cycle trigger at 300/600 CV in one bonus week.
+- **Carry forward**: special balancing rule at very high lesser-leg volume events.
+- **Enroller tree**: where your sponsorship chain is traced for rank and share logic.
+- **Tree leg**: one branch on your downline leadership structure.
+- **Bonus period**: one week (Mon-Sun MT).
+- **Active status**: PV-based status used in many rank and payout thresholds.
+
+## 11) Script to read as training coach
+
+“This is built for team growth, not perfection:
+build both sides, keep customers and team active, and never stop teaching people to place on both legs.
+When weak side has 300 and strong side has 600 CV in the same week, your team hits a cycle.
+Each cycle is $35, and your rank decides your matching.
+The bigger your team leadership, the bigger your matching upside when those cycles repeat.
+PIB is your one-time bonus when you sponsor the next BA, based on their pack CV.”
+
+Version discipline: updated on 2026-07-30 to Version 1.2.
