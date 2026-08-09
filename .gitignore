@@ -68,3 +68,10 @@ docs/_team-design-extract.txt
 TASK-*.md
 claude-notes-*.md
 graphify-out/cache/ 
+
+# Generated / scratch (added 2026-08-08)
+repo-structure.txt
+tmp-*.ps1
+server/tmp-*.ts
+KONGA_CHAT_GENESIS_FULL.txt
+KONGA_CHAT_GENESIS_READABLE.md
