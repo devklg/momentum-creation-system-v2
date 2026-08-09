@@ -6475,3 +6475,34 @@ export interface McsSteveDiscoveryView {
 export interface McsKongaInviteTokenRecord extends McsInviteTokenRecord {
   invitationRecordId?: string;
 }
+
+/* ─── Operating context (the boot sector) ─────────────────────────────────
+ * The context an agent loads BEFORE any topical retrieval. Operating context
+ * first, topical second — never the reverse. Appended per the append-only
+ * rule on this file.
+ */
+
+/** Status of an operating-context load. `degraded` means the boot record could
+ *  not be retrieved; consumers must still function, with an empty context. */
+export type McsOperatingContextStatus = 'loaded' | 'degraded';
+
+/** One retrieved operating-context document. */
+export interface McsOperatingContextLoad {
+  /** Call phrase or handle used to retrieve it. */
+  handle: string;
+  /** Canonical record id, when the retrieval resolved one. */
+  recordId: string | null;
+  title: string;
+  /** Full body text. Never truncated by the loader. */
+  content: string;
+}
+
+/** The operating context an agent boots into before any topical retrieval. */
+export interface McsOperatingContext {
+  schemaVersion: 'operating_context.v1';
+  status: McsOperatingContextStatus;
+  /** Populated only when status is 'degraded'. Machine-readable cause. */
+  degradedReason: string | null;
+  loads: McsOperatingContextLoad[];
+  loadedAt: McsIsoTimestamp;
+}
