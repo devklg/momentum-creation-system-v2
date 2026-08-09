@@ -159,24 +159,37 @@ export function TmProspectDashboard({
         <p className="konga-stack-intro">Three of these you have already seen. Two you can only see here.</p>
         <div className="konga-reason-stack" aria-label="Five reasons to examine">
           <Reason number="01" title="Product">
-            Rewatch the presentation, then ask {baFirstName} what they use and what
-            they have personally observed.
+            The patented MBC-267 complex — 267 all-natural peptides from wild-caught
+            salmon and plants — drops, not needles; gentle, natural ingredients; highest
+            quality, clinically tested, and listed in the PDR. Rewatch the presentation,
+            then ask {baFirstName} what they use and what they&rsquo;ve seen.
           </Reason>
           <Reason number="02" title="Timing">
-            Ask why {baFirstName} chose to share this with you now.
+            GLP-THREE launched in January 2026. You&rsquo;re seeing it at a moment when many
+            people are only just hearing about it.
           </Reason>
           <Reason number="03" title="Market">
-            Bring the category questions and source questions to the conversation.
+            GLP-1 is a $54–63B category today, projected to more than $200B by 2030.
+            About 1 in 8 U.S. adults already use a GLP-1 product, Ozempic and Mounjaro
+            made this category familiar, but 74% won&rsquo;t use injectables. Synthetic options
+            run about $969–$1,349 per month; GLP-THREE is $76.50–$85.
           </Reason>
           <Reason number="04" title="Method">
-            The working method is visible here: share, real response, live placement,
-            and human follow-up.
+            The marketing system here is unique to Team Magnificent: MCS v2, the AI-and-technology
+            stack this page runs on, built with one intention — to aid your success.
           </Reason>
           <Reason number="05" title="Team & training">
-            You are not being asked to evaluate a business without the people and
-            support around it.
+            Team Magnificent gives you leadership and real training from people who have
+            done this work in public, so you are never asked to figure it out alone.
           </Reason>
         </div>
+        <p className="konga-stack-intro">WHY PEOPLE WANT ANOTHER WAY</p>
+        <p>
+          About half of people using GLP-1 drugs report nausea; 20–30% of weight loss in
+          those groups can be lean mass; 1 in 4 adults avoids needles; and 50–75% stop
+          within a year. GLP-THREE is a gentle, natural dropper option that supports healthy
+          weight management.
+        </p>
         <div className="konga-pmv" aria-label="People Momentum Volume Checks">
           <span>People</span><span>Momentum</span><span>Volume</span><span>Checks</span>
         </div>

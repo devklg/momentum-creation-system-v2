@@ -115,6 +115,109 @@ export const HANDLE_MANIFEST: readonly HandleManifestEntry[] = [
     weight: 8,
     namedBy: 'Kevin L. Gardner',
   },
+
+  // ---------------------------------------------------------------------
+  // BACKFILL 2026-08-02 - handles Kevin named AFTER this manifest was last
+  // written (2026-07-13). Every one was unguarded: named, weighted, and
+  // invisible to the CI gate, because nothing links minting a handle to
+  // appending here. Canonical legs were reconstructed the same day into
+  // universal_gateway.memory_decisions.
+  // ---------------------------------------------------------------------
+  {
+    // Named 2026-07-16 - the holding tank IS the Konga Line. Locked v3,
+    // palette D-23, vertical ticker. Postdates this file's last edit, so it
+    // could never have been covered.
+    recordId: 'konga_holding_tank_design_20260716',
+    humanHandle: 'konga and holding tank design',
+    callPhrase: 'konga and holding tank design',
+    aliases: ['konga line design', 'holding tank design', 'kevins konga line', 'konga line north star'],
+    useWhen:
+      'Use when Kevin says konga and holding tank design, or when work touches the holding tank, the Konga Line, the prospect position surface, or the D-23 vertical ticker. Canonical: universal_gateway.memory_decisions/konga_holding_tank_design_20260716.',
+    memoryId: 'konga_holding_tank_design_20260716',
+    audience: 'dev_agents',
+    weight: 10,
+    namedBy: 'Kevin L. Gardner',
+  },
+  {
+    recordId: 'voice_mailer_full_development_track_20260711',
+    humanHandle: 'voice mailer full development track',
+    callPhrase: 'voice mailer full development track',
+    aliases: [],
+    useWhen:
+      'Use when Kevin says voice mailer full development track. Distinct from the handle voice mailer reality (voicemail-dialer-reality-2026-07-11), which is the constraints note. Canonical: universal_gateway.memory_decisions/voice_mailer_full_development_track_20260711.',
+    memoryId: 'voice_mailer_full_development_track_20260711',
+    audience: 'dev_agents',
+    weight: 10,
+    namedBy: 'Kevin L. Gardner',
+  },
+  {
+    recordId: 'tm_identity_and_first_run_20260713',
+    humanHandle: 'team magnificent identity and first run',
+    callPhrase: 'team magnificent identity and first run',
+    aliases: ['tm identity', 'first run', 'welcome page'],
+    useWhen:
+      'Use when Kevin says team magnificent identity and first run, or when work touches brand identity direction (cinematic and bold, Higgsfield reference), the welcome page, the first-run punch list, or scroll-world. Boundary on record: .com is cinematic; .team cockpit takes the look but stays calm and instant. Canonical: universal_gateway.memory_decisions/tm_identity_and_first_run_20260713.',
+    memoryId: 'tm_identity_and_first_run_20260713',
+    audience: 'dev_agents',
+    weight: 9,
+    namedBy: 'Kevin L. Gardner',
+  },
+  {
+    recordId: 'deployment_and_maintenance_agent_20260713',
+    humanHandle: 'deployment and maintenance agent',
+    callPhrase: 'deployment and maintenance agent',
+    aliases: ['deployment agent', 'ops agent'],
+    useWhen:
+      'Use when Kevin says deployment and maintenance agent, or before any deploy, backup, reprojection, or triple-stack health question. Carries the two-Neo4j-instance warning and the verify-before/verify-after rule. Canonical: universal_gateway.memory_decisions/deployment_and_maintenance_agent_20260713.',
+    memoryId: 'deployment_and_maintenance_agent_20260713',
+    audience: 'dev_agents',
+    weight: 10,
+    namedBy: 'Kevin L. Gardner',
+  },
+  {
+    recordId: 'kevins_library_20260713',
+    humanHandle: 'kevins library',
+    callPhrase: 'kevins library',
+    aliases: [],
+    useWhen:
+      'Use when Kevin says kevins library. Canonical: universal_gateway.memory_decisions/kevins_library_20260713.',
+    memoryId: 'kevins_library_20260713',
+    audience: 'dev_agents',
+    weight: 10,
+    namedBy: 'Kevin L. Gardner',
+  },
+  {
+    recordId: 'kevins_vision_20260713',
+    humanHandle: 'kevins vision',
+    callPhrase: 'kevins vision',
+    aliases: [],
+    useWhen:
+      'Use when Kevin says kevins vision. Canonical: universal_gateway.memory_decisions/kevins_vision_20260713.',
+    memoryId: 'kevins_vision_20260713',
+    audience: 'dev_agents',
+    weight: 10,
+    namedBy: 'Kevin L. Gardner',
+  },
+  {
+    // Named 2026-08-02. Weight ratified by Kevin at 12 - deliberately above
+    // the ACR-0012 1-10 gradient; the ceiling question remains open.
+    recordId: 'knowledge_base_operating_system_establishment_20260802',
+    humanHandle: 'knowledge base operating system establishment',
+    callPhrase: 'knowledge base operating system establishment',
+    aliases: [
+      'knowledge base as an operating system',
+      'KB as OS',
+      'knowledge OS',
+      'kernel syscall userland formulation',
+      'KBOS',
+    ],
+    useWhen:
+      'Use when asked what Momentum fundamentally IS, where agents sit relative to knowledge, whether an agent may hold its own memory or query a store, or where a new capability belongs in the stack. Formulation: Knowledge Core is the kernel, Runtime Layer is the operating system, Context Manager is the system call, agents are userland. Canonical: universal_gateway.memory_decisions/knowledge_base_operating_system_establishment_20260802.',
+    memoryId: 'knowledge_base_operating_system_establishment_20260802',
+    audience: 'both',
+    weight: 12,
+    namedBy: 'Kevin L. Gardner',
+  },
 ] as const;
 
 /**

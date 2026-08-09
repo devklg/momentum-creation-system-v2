@@ -48,8 +48,9 @@ export function ComHomepagePage() {
           <h2 className='font-display text-2xl'>About</h2>
           <p className='mt-4 text-cream-mute'>
             We believe the best businesses are built person to person. Our team supports
-            people who want to build with honest effort, real products, and a team that shows
-            up. Building a business takes consistent effort.
+            people who want to earn from real work with honest effort, real products,
+            and a team that shows up. Building a business takes consistent effort;
+            no income or outcome is guaranteed.
           </p>
         </section>
 

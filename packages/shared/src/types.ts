@@ -6475,3 +6475,86 @@ export interface McsSteveDiscoveryView {
 export interface McsKongaInviteTokenRecord extends McsInviteTokenRecord {
   invitationRecordId?: string;
 }
+
+/* ─── P2-151 — Admin chat transcript indexing for cross-tool conversation memory ─────── */
+/* Declaration merge keeps the high-traffic shared type file append-only. */
+
+/** Model/provider buckets used by the chat transcript index.
+ * `other` is the explicit fallback when the source cannot be mapped.
+ */
+export type McsAdminChatTranscriptModel =
+  | 'codex'
+  | 'claude_desktop'
+  | 'claude_code'
+  | 'codex_cli'
+  | 'other';
+
+export interface McsAdminChatTranscriptTurn {
+  sequence: number;
+  role: string;
+  speaker: string;
+  text: string;
+  timestamp: McsIsoTimestamp | null;
+}
+
+export interface McsAdminChatTranscriptSummary {
+  transcriptId: string;
+  chatIndex: string;
+  title: string;
+  model: McsAdminChatTranscriptModel | string;
+  semanticKeyword: string;
+  capturedAt: McsIsoTimestamp;
+  createdAt: McsIsoTimestamp;
+  chatNumber: number | null;
+  chatRegistryId: string | null;
+  source: string;
+  sourceSessionId: string | null;
+  sourceExternalId: string | null;
+  turnCount: number;
+  wordCount: number;
+}
+
+export interface McsAdminChatTranscriptDetail extends McsAdminChatTranscriptSummary {
+  modelPrefix: string;
+  indexSequence: number;
+  transcript: McsAdminChatTranscriptTurn[];
+  rawTranscript: string;
+}
+
+export interface McsAdminChatTranscriptsResponse {
+  ok: true;
+  generatedAt: McsIsoTimestamp;
+  transcripts: McsAdminChatTranscriptSummary[];
+  total: number;
+  nextCursor: string | null;
+}
+
+export interface McsAdminChatTranscriptResponse {
+  ok: true;
+  transcript: McsAdminChatTranscriptDetail;
+}
+
+export interface McsAdminChatTranscriptHarvestInput {
+  source: string;
+  transcripts: Array<{
+    sourceSessionId?: string | null;
+    sourceExternalId?: string | null;
+    chatNumber?: number | null;
+    chatRegistryId?: string | null;
+    model?: string | null;
+    semanticKeyword?: string | null;
+    title?: string | null;
+    capturedAt?: McsIsoTimestamp | null;
+    endedAt?: McsIsoTimestamp | null;
+    transcript?: Array<Record<string, unknown>> | string[];
+  }>;
+}
+
+export interface McsAdminChatTranscriptHarvestResponse {
+  ok: true;
+  source: string;
+  requested: number;
+  written: number;
+  skipped: number;
+  errors: string[];
+}

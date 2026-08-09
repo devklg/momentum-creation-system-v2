@@ -1,5 +1,7 @@
 # Agent Brief: Knowledge Base, Context Manager, and VoiceBox Work
 
+**Canonical Storage Standard Version:** `KB-CANON-v1.0` (2026-07-30)
+
 **Created:** 2026-07-04  
 **Audience:** Codex, Claude, and future MCS v2 implementation agents  
 **Purpose:** Preserve the current chat context so future agents know what Kevin asked for, what was built, what is still missing, and where to continue.
@@ -32,6 +34,21 @@ Do not use this work to implement:
 - Income claims, placement promises, current team-count display, or THREE branding on prospect pages.
 
 The relevant constitutional boundary remains: AI assists humans and never replaces human judgment or relationship.
+
+## Canonical Storage Boundary (Non-Negotiable)
+
+The live MCS v2 Knowledge Base is the **only authoritative storage layer** for knowledge retrieval and context.
+
+- Canonical collections:  
+  - `mcs_knowledge_sources`
+  - `mcs_knowledge_chunks`
+  - `mcs_knowledge_documents`
+  - `mcs_knowledge_corrections`
+  - `runtime_knowledge_sources` (legacy/system-projected runtime support only; do not treat as a separate authority)
+- Canonical version history and active state are determined in `mcs_knowledge_sources` (`sourceId`, `sourceVersionId`, `version`, `status`) and `mcs_knowledge_corrections`.
+- `sourceRef` (`file:`, `url:`, `github:`, etc.) is an input pointer; it is **not** a second knowledge store.
+- Ingestion/updates do not create alternate authoritative repositories. They only create/advance KB versions.
+- Updates to an existing source must be done through the governed correction path so the old version remains auditable (`superseded`), and new content becomes active by version increment.
 
 ## What Was Added
 

@@ -1,0 +1,424 @@
+{
+  "capture": {
+    "source": "screencapture-office-threeinternational-shopping-products-2026-07-30-07_26_46.pdf",
+    "capturedAt": "2026-07-30T07:26:46-07:00",
+    "pages": 4,
+    "ocrEngine": "easyocr (manual parse)",
+    "note": "Values are from the captured storefront image. OCR confidence is intentionally preserved per field. Validate against live THREE cart for final pricing before publishing any agent-facing compensation examples."
+  },
+  "products": [
+    {
+      "section": "GLP Specials",
+      "name": "GLP THREE 16 Pack",
+      "rawPrice": "$999.00",
+      "priceUsd": 999,
+      "rawPV": "PV 500",
+      "pv": 500,
+      "confidence": "high",
+      "source": {
+        "page": 1,
+        "row": "GLP pack row",
+        "column": "1"
+      },
+      "notes": "OCR captured as s999.00 in one pass and as 5999.00 in another; normalized to $999 with high confidence from multiple reads."
+    },
+    {
+      "section": "GLP Specials",
+      "name": "GLP THRE E 12 Pack",
+      "rawPrice": "$759.00",
+      "priceUsd": 759,
+      "rawPV": "PV 380",
+      "pv": 380,
+      "confidence": "medium",
+      "source": {
+        "page": 1,
+        "row": "GLP pack row",
+        "column": "2"
+      },
+      "notes": "Name/price/PV grouped by y/x alignment with column 2."
+    },
+    {
+      "section": "GLP Specials",
+      "name": "GLP THRE E 8 Pack",
+      "rawPrice": "$509.00",
+      "priceUsd": 509,
+      "rawPV": "PV 250",
+      "pv": 250,
+      "confidence": "high",
+      "source": {
+        "page": 1,
+        "row": "GLP pack row",
+        "column": "3"
+      }
+    },
+    {
+      "section": "GLP Specials",
+      "name": "GLP THR E 4 Pack",
+      "rawPrice": "$259.00",
+      "priceUsd": 259,
+      "rawPV": "PV 130",
+      "pv": 130,
+      "confidence": "medium",
+      "source": {
+        "page": 1,
+        "row": "GLP pack row",
+        "column": "4"
+      },
+      "notes": "Captured as S259.00; keep as low/medium confidence because storefront snapshots showed another value variant in earlier manual checks."
+    },
+    {
+      "section": "The Simple 6",
+      "name": "Simple Six Ultimate Pack",
+      "rawPrice": null,
+      "priceUsd": null,
+      "rawPV": null,
+      "pv": null,
+      "confidence": "low",
+      "source": {
+        "page": 1,
+        "row": "Simple 6 row",
+        "column": "1"
+      },
+      "notes": "OCR captured nearby values 5649/51,799 style text, but card pricing/PV could not be confidently mapped to this exact pack."
+    },
+    {
+      "section": "The Simple 6",
+      "name": "Simple Six Elite Pack",
+      "rawPrice": null,
+      "priceUsd": null,
+      "rawPV": null,
+      "pv": null,
+      "confidence": "low",
+      "source": {
+        "page": 1,
+        "row": "Simple 6 row",
+        "column": "2"
+      },
+      "notes": "Value tokens around this row were ambiguous across OCR passes."
+    },
+    {
+      "section": "The Simple 6",
+      "name": "Simple Six Boost Pack",
+      "rawPrice": null,
+      "priceUsd": null,
+      "rawPV": null,
+      "pv": null,
+      "confidence": "low",
+      "source": {
+        "page": 1,
+        "row": "Simple 6 row",
+        "column": "3"
+      },
+      "notes": "Value tokens around this row were ambiguous across OCR passes."
+    },
+    {
+      "section": "The Simple 6",
+      "name": "Simple Six Starter Pack",
+      "rawPrice": null,
+      "priceUsd": null,
+      "rawPV": null,
+      "pv": null,
+      "confidence": "low",
+      "source": {
+        "page": 1,
+        "row": "Simple 6 row",
+        "column": "4"
+      },
+      "notes": "Value tokens around this row were ambiguous across OCR passes."
+    },
+    {
+      "section": "Essential Items",
+      "name": "Kynetik Premium",
+      "rawPrice": "$999.00",
+      "priceUsd": 999,
+      "rawPV": "PV 500",
+      "pv": 500,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "1"
+      }
+    },
+    {
+      "section": "Essential Items",
+      "name": "Kynetik Starter",
+      "rawPrice": "$200.00",
+      "priceUsd": 200,
+      "rawPV": "PV 100",
+      "pv": 100,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "1b"
+      },
+      "notes": "OCR aligned to a lower row likely tied to this item and therefore marked low confidence."
+    },
+    {
+      "section": "Essential Items",
+      "name": "Kynetik Clean Caffeine Berry",
+      "rawPrice": "$139.00",
+      "priceUsd": 139,
+      "rawPV": "PV 70",
+      "pv": 70,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "2/3"
+      }
+    },
+    {
+      "section": "Essential Items",
+      "name": "Complete Wellness Pack",
+      "rawPrice": "$759.00",
+      "priceUsd": 759,
+      "rawPV": "PV 500",
+      "pv": 500,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "2"
+      },
+      "notes": "Name is clearer than this field; price/PV are mixed OCR candidates and need final confirmation."
+    },
+    {
+      "section": "Essential Items",
+      "name": "Visage The Collection",
+      "rawPrice": "$6699.00",
+      "priceUsd": null,
+      "rawPV": "PV 350",
+      "pv": 350,
+      "confidence": "very_low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "3"
+      },
+      "notes": "Price captured as 6699.00, but this is likely OCR noise. Verify before use."
+    },
+    {
+      "section": "Essential Items",
+      "name": "Visage Super Serum",
+      "rawPrice": "$120.00",
+      "priceUsd": 120,
+      "rawPV": "PV 60",
+      "pv": 60,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "3b"
+      },
+      "notes": "Likely tied to lower row under Visage products."
+    },
+    {
+      "section": "Essential Items",
+      "name": "Visage Creme Caviar",
+      "rawPrice": "$110.00",
+      "priceUsd": 110,
+      "rawPV": "PV 60",
+      "pv": 60,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "4"
+      }
+    },
+    {
+      "section": "Essential Items",
+      "name": "THREE Intro Pack",
+      "rawPrice": "$5399.00",
+      "priceUsd": null,
+      "rawPV": "PV 200",
+      "pv": 200,
+      "confidence": "very_low",
+      "source": {
+        "page": 2,
+        "row": "essential row",
+        "column": "4b"
+      },
+      "notes": "OCR misread risk is high; use as a capture artifact."
+    },
+    {
+      "section": "Essential Items",
+      "name": "Eternel",
+      "rawPrice": null,
+      "priceUsd": null,
+      "rawPV": null,
+      "pv": null,
+      "confidence": "very_low",
+      "source": {
+        "page": 2,
+        "row": "footer under Visage",
+        "column": "4"
+      },
+      "notes": "Name present on capture, but pricing block not uniquely captured in OCR output."
+    },
+    {
+      "section": "Product Extras",
+      "name": "Vitalité",
+      "rawPrice": "$340.00",
+      "priceUsd": 340,
+      "rawPV": "PV 60",
+      "pv": 60,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "vitality row",
+        "column": "3"
+      },
+      "notes": "Mapped from nearby OCR row containing Vitalité text; verify."
+    },
+    {
+      "section": "Product Extras",
+      "name": "Collagène",
+      "rawPrice": "$170.00",
+      "priceUsd": 170,
+      "rawPV": "PV 200",
+      "pv": 200,
+      "confidence": "low",
+      "source": {
+        "page": 2,
+        "row": "vitality row",
+        "column": "1"
+      },
+      "notes": "Cross-reference row values were noisy; mark for validation."
+    },
+    {
+      "section": "Product Extras",
+      "name": "Pure Cleanse",
+      "rawPrice": "$575.00",
+      "priceUsd": 575,
+      "rawPV": "PV 35",
+      "pv": 35,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "top row",
+        "column": "1"
+      }
+    },
+    {
+      "section": "Product Extras",
+      "name": "Revive",
+      "rawPrice": "$70.00",
+      "priceUsd": 70,
+      "rawPV": "PV 35",
+      "pv": 35,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "top row",
+        "column": "2"
+      },
+      "notes": "Revive appears with price/PV values in OCR set; kept as capture artifact."
+    },
+    {
+      "section": "Product Extras",
+      "name": "Purifi",
+      "rawPrice": "$70.00",
+      "priceUsd": 70,
+      "rawPV": "PV 35",
+      "pv": 35,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "top row",
+        "column": "3"
+      }
+    },
+    {
+      "section": "Product Extras",
+      "name": "Imune",
+      "rawPrice": "$55.00",
+      "priceUsd": 55,
+      "rawPV": "PV 30",
+      "pv": 30,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "top row",
+        "column": "4"
+      }
+    },
+    {
+      "section": "Product Extras",
+      "name": "Radiant Toner",
+      "rawPrice": "$45.00",
+      "priceUsd": 45,
+      "rawPV": "PV 20",
+      "pv": 20,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "radiant toner row",
+        "column": "1"
+      }
+    },
+    {
+      "section": "Product Extras",
+      "name": "Love Three Donation",
+      "rawPrice": "$100.00",
+      "priceUsd": 100,
+      "rawPV": "PV 0",
+      "pv": 0,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "donation row",
+        "column": "1"
+      },
+      "notes": "Donation item appears multiple times on page as a repeated UI card."
+    },
+    {
+      "section": "Product Extras",
+      "name": "Love Three Donation (copy 2)",
+      "rawPrice": "$50.00",
+      "priceUsd": 50,
+      "rawPV": "PV 0",
+      "pv": 0,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "donation row",
+        "column": "2"
+      }
+    },
+    {
+      "section": "Product Extras",
+      "name": "Love Three Donation (copy 3)",
+      "rawPrice": "$55.00",
+      "priceUsd": 55,
+      "rawPV": "PV 0",
+      "pv": 0,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "donation row",
+        "column": "3"
+      }
+    },
+    {
+      "section": "Product Extras",
+      "name": "Love Three Donation (copy 4)",
+      "rawPrice": "$55.00",
+      "priceUsd": 55,
+      "rawPV": "PV 0",
+      "pv": 0,
+      "confidence": "low",
+      "source": {
+        "page": 3,
+        "row": "donation row",
+        "column": "4"
+      }
+    }
+  ],
+  "lookupHint": {
+    "glp12PvAt600Payout": 125.4,
+    "glp8PvAt2826Payout": 82.5
+  }
+}

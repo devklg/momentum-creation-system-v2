@@ -24,11 +24,10 @@
 
 import {
   getTenantTemplate,
+  DEFAULT_TENANT_ID,
   TENANT_TEMPLATE_DEFINITIONS,
 } from '../domain/adminTenantArchitecture.js';
 import type { McsTenantTemplateKey, McsTenantTemplateVersion } from '@momentum/shared';
-
-const TENANT_ID = 'team-magnificent';
 
 /**
  * The code-default version for a template — the safe baseline shipped with the
@@ -36,12 +35,15 @@ const TENANT_ID = 'team-magnificent';
  * fails. Mirrors the shape of a persisted TenantTemplateVersion so consumers
  * can treat both paths uniformly.
  */
-function codeDefaultVersion(templateKey: McsTenantTemplateKey): McsTenantTemplateVersion {
+function codeDefaultVersion(
+  templateKey: McsTenantTemplateKey,
+  tenantId: string,
+): McsTenantTemplateVersion {
   const def = TENANT_TEMPLATE_DEFINITIONS.find((t) => t.templateKey === templateKey);
   if (!def) throw new Error(`unknown_template_key: ${templateKey}`);
   return {
     templateVersionId: `code_default_${templateKey}`,
-    tenantId: TENANT_ID,
+    tenantId,
     templateKey,
     surface: def.surface,
     label: def.label,
@@ -62,11 +64,12 @@ function codeDefaultVersion(templateKey: McsTenantTemplateKey): McsTenantTemplat
  */
 export async function readMasterTemplate(
   templateKey: McsTenantTemplateKey,
+  tenantId: string = DEFAULT_TENANT_ID,
 ): Promise<McsTenantTemplateVersion> {
   try {
-    return await getTenantTemplate(templateKey);
+    return await getTenantTemplate(templateKey, tenantId);
   } catch {
-    return codeDefaultVersion(templateKey);
+    return codeDefaultVersion(templateKey, tenantId);
   }
 }
 
@@ -77,8 +80,9 @@ export async function readMasterTemplate(
  */
 export async function readMasterContent(
   templateKey: McsTenantTemplateKey,
+  tenantId: string = DEFAULT_TENANT_ID,
 ): Promise<string> {
-  return (await readMasterTemplate(templateKey)).content;
+  return (await readMasterTemplate(templateKey, tenantId)).content;
 }
 
 /**

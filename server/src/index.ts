@@ -34,6 +34,10 @@ import { startBroadcastWorker, stopBroadcastWorker } from './services/broadcastQ
 import { startVmDeliveryWorker, stopVmDeliveryWorker } from './workers/vmDeliveryWorker.js';
 import { startVmImportWorker, stopVmImportWorker } from './workers/vmImportWorker.js';
 import { startVmWebhookWorker, stopVmWebhookWorker } from './workers/vmWebhookWorker.js';
+import {
+  startAutoTranscriptHarvesterWorker,
+  stopAutoTranscriptHarvesterWorker,
+} from './workers/autoTranscriptHarvester.js';
 import { startProjectionOutboxWorker, stopProjectionOutboxWorker } from './services/projectionOutbox.js';
 import { ensureChromaCollections } from './services/chromaCollections.js';
 import {
@@ -299,6 +303,7 @@ const httpServer = app.listen(env.SERVER_PORT, () => {
 // Idempotent: safe even if invoked outside the listen callback (start order
 // doesn't matter — the worker queries the stores directly, not the listening port).
 void startBroadcastWorker();
+void startAutoTranscriptHarvesterWorker();
 void startVmImportWorker();
 void startVmDeliveryWorker();
 void startVmWebhookWorker();
@@ -330,6 +335,7 @@ async function gracefulShutdown(signal: string): Promise<void> {
   try {
     // 1) stop workers before anything touches the DB connections
     stopBroadcastWorker();
+    stopAutoTranscriptHarvesterWorker();
     stopVmImportWorker();
     stopVmDeliveryWorker();
     stopVmWebhookWorker();

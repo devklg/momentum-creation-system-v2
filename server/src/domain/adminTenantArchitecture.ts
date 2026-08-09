@@ -30,10 +30,12 @@ const SETTINGS_COLLECTION = 'tenant_settings_versions';
 const TEMPLATE_COLLECTION = 'tmag_content_templates';
 const SETTINGS_CHROMA = 'mcs_tenant_settings';
 const TEMPLATE_CHROMA = 'mcs_content_templates';
-const TENANT_ID = 'team-magnificent';
+const DEFAULT_TENANT_ID = 'team-magnificent';
+
+export { DEFAULT_TENANT_ID };
 
 const DEFAULT_SETTINGS: McsTenantSettings = {
-  tenantId: TENANT_ID,
+  tenantId: DEFAULT_TENANT_ID,
   tenantName: 'Team Magnificent',
   publicComDomain: 'teammagnificent.com',
   teamDomain: 'teammagnificent.team',
@@ -310,7 +312,7 @@ export async function getTenantSettings(): Promise<McsTenantSettings> {
     {
       database: MONGO_DB,
       collection: SETTINGS_COLLECTION,
-      filter: { tenantId: TENANT_ID },
+      filter: { tenantId: DEFAULT_TENANT_ID },
       sort: { version: -1, createdAt: -1 },
       limit: 1,
     },
@@ -384,7 +386,7 @@ export async function saveTenantSettings(input: {
       collection: SETTINGS_CHROMA,
       document: `Tenant settings v${version.version}: ${after.tenantName} domains ${after.publicComDomain}, ${after.teamDomain}, ${after.adminDomain}. Reason: ${input.reason}`,
       metadata: {
-        tenantId: TENANT_ID,
+        tenantId: DEFAULT_TENANT_ID,
         version: version.version,
         updatedBy: input.actor.tmagId,
       },
@@ -404,6 +406,7 @@ export async function listTenantTemplates(): Promise<McsTenantTemplateVersion[]>
 
 export async function getTenantTemplate(
   templateKey: McsTenantTemplateKey,
+  tenantId: string = DEFAULT_TENANT_ID,
 ): Promise<McsTenantTemplateVersion> {
   const def = findTemplateDefinition(templateKey);
   const result = await persistenceCall<{ documents: McsTenantTemplateVersion[] }>(
@@ -412,7 +415,7 @@ export async function getTenantTemplate(
     {
       database: MONGO_DB,
       collection: TEMPLATE_COLLECTION,
-      filter: { tenantId: TENANT_ID, templateKey },
+      filter: { tenantId, templateKey },
       sort: { version: -1, createdAt: -1 },
       limit: 1,
     },
@@ -446,7 +449,7 @@ export async function saveTenantTemplate(input: {
   const now = new Date().toISOString();
   const after: McsTenantTemplateVersion = {
     templateVersionId: `master_content_${sanitizeKey(input.templateKey)}_${toIdPart(now)}_${randomBytes(3).toString('hex')}`,
-    tenantId: TENANT_ID,
+    tenantId: DEFAULT_TENANT_ID,
     templateKey: input.templateKey,
     surface: def.surface,
     label: def.label,
@@ -483,7 +486,7 @@ export async function saveTenantTemplate(input: {
       collection: TEMPLATE_CHROMA,
       document: `${after.label} (${after.surface}) v${after.version}: ${after.content}`,
       metadata: {
-        tenantId: TENANT_ID,
+        tenantId: DEFAULT_TENANT_ID,
         templateKey: after.templateKey,
         surface: after.surface,
         version: after.version,
@@ -571,6 +574,38 @@ export function validateMasterContent(
   };
 }
 
+export async function resolveTenantIdForComHost(rawHost: string | null | undefined): Promise<string> {
+  const host = normalizeTenantHost(rawHost);
+  if (!host) return DEFAULT_TENANT_ID;
+
+  try {
+    const result = await persistenceCall<{ documents: McsTenantSettingsVersion[] }>(
+      'mongodb',
+      'query',
+      {
+        database: MONGO_DB,
+        collection: SETTINGS_COLLECTION,
+        filter: { publicComDomain: host },
+        sort: { updatedAt: -1, createdAt: -1, version: -1 },
+        limit: 1,
+      },
+    );
+    const match = result.documents[0];
+    if (match?.tenantId) return match.tenantId;
+  } catch {
+    // Non-critical fallback: keep /p rendering alive if tenant settings reads fail.
+  }
+
+  return DEFAULT_TENANT_ID;
+}
+
+export function normalizeTenantHost(rawHost: string | null | undefined): string {
+  if (!rawHost) return '';
+  const base = (rawHost.includes(',') ? (rawHost.split(',')[0] ?? '') : rawHost).trim().toLowerCase();
+  if (!base) return '';
+  return base.replace(/:\d+$/, '').replace(/^www\./, '');
+}
+
 function findTemplateDefinition(templateKey: McsTenantTemplateKey): McsTenantTemplateDefinition {
   const def = TENANT_TEMPLATE_DEFINITIONS.find((t) => t.templateKey === templateKey);
   if (!def) throw new Error(`unknown_template_key: ${templateKey}`);
@@ -584,7 +619,7 @@ async function getLatestSettingsVersionNumber(): Promise<number> {
     {
       database: MONGO_DB,
       collection: SETTINGS_COLLECTION,
-      filter: { tenantId: TENANT_ID },
+      filter: { tenantId: DEFAULT_TENANT_ID },
       sort: { version: -1, createdAt: -1 },
       limit: 1,
     },
@@ -595,7 +630,7 @@ async function getLatestSettingsVersionNumber(): Promise<number> {
 function defaultTemplateVersion(def: McsTenantTemplateDefinition): McsTenantTemplateVersion {
   return {
     templateVersionId: `code_default_${def.templateKey}`,
-    tenantId: TENANT_ID,
+    tenantId: DEFAULT_TENANT_ID,
     templateKey: def.templateKey,
     surface: def.surface,
     label: def.label,

@@ -46,7 +46,7 @@ import { TrackRecordCard } from '@/components/cockpit/TrackRecordCard';
 import { FollowUpQueue } from '@/components/cockpit/FollowUpQueue';
 import { PmvDashboard } from '@/components/cockpit/PmvDashboard';
 import { OrientationCard } from '@/components/cockpit/OrientationCard';
-import { MichaelRuntimeSupportCard } from '@/components/cockpit/MichaelRuntimeSupportCard';
+import { AgentRuntimeSupportCard } from '@/components/cockpit/AgentRuntimeSupportCard';
 import { ThreeWayCallWorkspace } from '@/components/cockpit/ThreeWayCallWorkspace';
 import {
   SponsorQuickCard,
@@ -868,9 +868,10 @@ export function CockpitPage() {
             onOpenCrm={() => navigate('/crm')}
             onOpenIvory={() => navigate('/ivory')}
             onOpenTraining={() => navigate('/training/fast-start')}
+            onOpenSteve={() => navigate('/steve/discovery')}
           />
           <div id="michael" className="scroll-mt-8">
-            <MichaelRuntimeSupportCard />
+            <AgentRuntimeSupportCard />
           </div>
           <div id="sponsor" className="scroll-mt-8">
             <SectionLabel>My Sponsor</SectionLabel>
@@ -996,26 +997,33 @@ function AgentSupportPanel({
   onOpenCrm,
   onOpenIvory,
   onOpenTraining,
+  onOpenSteve,
 }: {
   onOpenCrm: () => void;
   onOpenIvory: () => void;
   onOpenTraining: () => void;
+  onOpenSteve: () => void;
 }) {
   const actions = [
     {
-      label: 'Follow up with the warmest prospect in your CRM.',
-      cta: 'Open CRM',
+      label: 'Start your day with Michael: pick your next training action.',
+      cta: 'Open training',
       onClick: onOpenCrm,
     },
     {
-      label: 'Prepare one personal invitation with Ivory.',
+      label: 'Ivory: build your invite list and generate who-to-invite prompts.',
       cta: 'Open Ivory',
       onClick: onOpenIvory,
     },
     {
-      label: 'Keep your Fast Start path moving.',
+      label: 'Steve: run your success interview and progress check.',
       cta: 'Open training',
       onClick: onOpenTraining,
+    },
+    {
+      label: 'Steve discovery and momentum support.',
+      cta: 'Open Steve',
+      onClick: onOpenSteve,
     },
   ];
 
@@ -1027,15 +1035,18 @@ function AgentSupportPanel({
           <span className="inline-flex h-9 w-9 items-center justify-center rounded border border-gold/30 bg-gold/[0.06] text-gold">
             <Bot className="h-4 w-4" aria-hidden="true" />
           </span>
-          <div>
-            <p className="font-display text-[24px] leading-none text-cream">
-              What should I do next?
-            </p>
+        <div>
+          <p className="font-display text-[24px] leading-none text-cream">
+            What should I do next?
+          </p>
             <p className="font-mono tracking-[0.08em] text-[10px] text-cream-faint uppercase mt-1">
-              Steve + Ivory + Michael
-            </p>
-          </div>
+            Michael · Ivory · Steve
+          </p>
         </div>
+      </div>
+      <p className="text-cream-mute text-[12px] leading-[1.45] mb-2">
+        Quick guide: Michael trains, Ivory drives invites, Steve keeps momentum.
+      </p>
         <ul className="space-y-3">
           {actions.map((action, index) => (
             <li key={action.cta} className="border-t border-cream/10 pt-3 first:border-0 first:pt-0">

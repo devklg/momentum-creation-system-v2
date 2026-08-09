@@ -2,11 +2,10 @@
  * Section 2 — Opportunity. The market the prospect just stepped into.
  *
  * Four-tile stat grid, each with a real public source citation
- * (locked-spec 1.6). No income claims; market figures are public
+ * (locked-spec 1.7). No income claims; market figures are public
  * facts about the GLP-1 alternatives category.
  *
- * Copy and stat sources are locked Chat #82. Sources match those
- * cited in locked-spec 1.6 verbatim.
+ * Copy and stat sources follow locked-spec v1.7 language authority.
  */
 
 export interface OpportunitySectionProps {
@@ -26,18 +25,18 @@ export function OpportunitySection({ copy }: OpportunitySectionProps) {
         <p className="tmpd-opportunity-lead">
           {copy ?? (
             <>
-              GLP-THREE is a natural alternative in one of the fastest-expanding
-              wellness categories on the planet. The numbers aren&rsquo;t ours —
-              they&rsquo;re public. We&rsquo;re just standing where they point.
+              GLP-THREE is part of one of the fastest-expanding wellness categories
+              on the planet. The numbers aren&rsquo;t ours — they&rsquo;re public. We&rsquo;re
+              here to show what they mean.
             </>
           )}
         </p>
 
         <div className="tmpd-market-grid">
-          <MarketCell value="$6.8" suffix="T" label="Global wellness market" source="GWI · 2025" />
-          <MarketCell value="$200" suffix="B" label="GLP-1 alternatives by 2033" source="Industry projection" />
-          <MarketCell value="72" suffix="%" label="Americans overweight" source="CDC · 2024" />
-          <MarketCell value="$1,200" suffix="/mo" label="Cost of synthetic alternatives" source="Average retail · 2025" />
+          <MarketCell value="54–63" suffix="B" label="GLP-1 category (2024)" source="Industry research" />
+          <MarketCell value="200+" suffix="B" label="Projected GLP-1 alternatives by 2030" source="Industry projection" />
+          <MarketCell value="1 in 8" suffix="" label="U.S. adults already using GLP-1" source="KFF · RAND" />
+          <MarketCell value="74" suffix="%" label="Adults say they won&rsquo;t use injectables" source="Health survey" />
         </div>
       </section>
       <style>{opportunityCss}</style>
