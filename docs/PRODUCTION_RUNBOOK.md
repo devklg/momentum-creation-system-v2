@@ -27,13 +27,27 @@
 
 Health: `curl https://teammagnificent.com/api/health` → `{"ok":true,...}` (also `.team` and `admin.` hostnames answer).
 
-## 3. Cloud stack (the triple-stack in production)
+## 3. Production data stack
+
+> **Updated 2026-08-13.** Mongo and Neo4j now run **on the VPS itself**. The cloud legs they replaced (MongoDB Atlas, Neo4j Aura) are no longer in the production path. Chroma Cloud is the only remaining cloud dependency.
 
 | Leg | Where | Identity notes |
 |---|---|---|
-| MongoDB | Atlas Flex `cluster0.bj1cyea.mongodb.net`, db `momentum` | user `devkev202_db_user` |
-| Neo4j | Aura Free `423f5b69.databases.neo4j.io` (instance `mcs-v2-pro`) | **username = instance id `423f5b69`**, NOT `neo4j` — this bites everyone |
+| MongoDB | **On the box** — `mongodb://127.0.0.1:27017/momentum` | Local `mongod` (service `mongod`), bound to 127.0.0.1, standalone (no replica set → no multi-document transactions). Moved off Atlas 2026-08-12; the Atlas cluster was terminated 2026-08-13. |
+| Neo4j | **On the box** — `bolt://127.0.0.1:7687` | Neo4j Community 5, bound to 127.0.0.1, username `neo4j`. Moved off Aura Free 2026-07-13 after Aura auto-paused and took production down (see §9). |
 | Chroma | Chroma Cloud, tenant `3164b531-611e-481c-91be-28c7b2705380`, database `MOMENTUM-CREATION-SYSTEM-V2` | 43 collections, reconciled with runtime write-guard registry (PR #118) |
+
+**Both on-box legs are localhost-bound and therefore unreachable from the Universal Gateway connectors.** `mongodb2` / `neo4j2` / `chromadb2` point at Kevin's LOCAL DEV stack, not production — they return real, populated, plausible data from the wrong machine and never error. To inspect production, go through the box:
+
+```
+C:\Python313\python.exe D:\vps-run.py  "<command>" <timeout>
+C:\Python313\python.exe D:\vps-task.py D:\<script>.sh <timeout>
+C:\Python313\python.exe D:\vps-get.py  <remote> <local>
+```
+
+Raw `ssh`/`scp` from Kevin's workstation exit 255 with no output (a capture failure, not a down host). Use the paramiko helpers above.
+
+**Never `source` `/opt/mcs-v2/.env` to read a connection string** — values contain `&`, which bash mangles; `mongosh` then silently falls back to `127.0.0.1:27017` and reports an empty database that looks like data loss. Extract with `grep -m1 '^MONGODB_URI=' /opt/mcs-v2/.env | cut -d= -f2-` and pass it quoted.
 
 Embeddings in production go through the box's own CPU embedder (`GPU_EMBEDDER_URL=http://127.0.0.1:8300`). Kevin's home GPU is never a production dependency.
 
@@ -135,7 +149,7 @@ Founders TMAG-01 (Kevin) / TMAG-02 (Paul); access codes TMAG-KEVN / TMAG-PAUB / 
 1. **CORS 500 on login** — browser sends Origin, curl doesn't; production must set CORS_ORIGINS with all 5 https origins. Symptom: "could not reach the server" in UI while curl works.
 2. **localhost invite links** — PROSPECT_BASE_URL unset → tokens minted `localhost:7701` URLs. Env, not code.
 3. **PR #125 crash-loop** — new npm deps + no install step. Hence the frozen-lockfile line in §5.
-4. **Aura auth** — username is the instance id, not `neo4j`.
+4. **Aura auth (HISTORICAL)** — username was the instance id, not `neo4j`. No longer applies: Neo4j moved onto the box 2026-07-13 and uses `neo4j`.
 5. **Seed scripts hang after success** — open Mongoose handles; `timeout 90` wrapper, work completes in seconds.
 6. **Restart 502 window** — tsx boot 10–15s; verify AFTER `sleep 12`, and re-check before declaring an outage.
 7. **Windows console vs emoji** — helpers encode ascii-backslashreplace; a "crash" printing Steve's 👋 was display-only.
@@ -148,4 +162,4 @@ systemctl status mcs-api          # or: journalctl -u mcs-api -n 50 --no-pager
 systemctl restart mcs-api && sleep 12 && curl -s https://teammagnificent.com/api/health
 systemctl status mcs-embedder nginx   # the other two legs on the box
 ```
-Certs renew themselves (`certbot renew --dry-run` to verify). DNS is at Namecheap. Cloud stores are managed services — check their consoles (Atlas / Neo4j Aura / Chroma Cloud) before suspecting the box.
+Certs renew themselves (`certbot renew --dry-run` to verify). DNS is at Namecheap. **Mongo and Neo4j run ON THE BOX** — `systemctl status mongod neo4j` — so an outage in either is a local service problem, not a cloud console problem. Chroma Cloud is the only managed store left; check its console before suspecting the box. (Atlas and Aura are no longer in the production path.)
