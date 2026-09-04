@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-08-14T13:55:48.080Z
+- Generated: 2026-09-04T13:07:55.454Z
 - Mounted routers: 50
 - Route files: 50
 - Static route rows: 265
@@ -247,13 +247,13 @@
 | POST | `/api/p/login/redeem` | pre_gate | prospect_token | none | `server/src/routes/p-login.ts:202` |
 | POST | `/api/p/login/code` | pre_gate | prospect_token | none | `server/src/routes/p-login.ts:264` |
 | POST | `/api/p/login/logout` | pre_gate | prospect_token | none | `server/src/routes/p-login.ts:312` |
-| GET | `/api/p/:token` | pre_gate | prospect_token | none | `server/src/routes/p.ts:245` |
-| POST | `/api/p/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/p.ts:427` |
-| POST | `/api/p/:token/callback-request` | pre_gate | prospect_token | none | `server/src/routes/p.ts:635` |
-| GET | `/api/p/:token/replay` | pre_gate | prospect_token | none | `server/src/routes/p.ts:728` |
-| GET | `/api/p/:token/stream` | pre_gate | prospect_token | none | `server/src/routes/p.ts:798` |
-| POST | `/api/p/:token/webinar-reserve` | pre_gate | prospect_token | none | `server/src/routes/p.ts:948` |
-| GET | `/api/p/:token/team-stats` | pre_gate | prospect_token | none | `server/src/routes/p.ts:1048` |
+| GET | `/api/p/:token` | pre_gate | prospect_token | none | `server/src/routes/p.ts:246` |
+| POST | `/api/p/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/p.ts:428` |
+| POST | `/api/p/:token/callback-request` | pre_gate | prospect_token | none | `server/src/routes/p.ts:636` |
+| GET | `/api/p/:token/replay` | pre_gate | prospect_token | none | `server/src/routes/p.ts:729` |
+| GET | `/api/p/:token/stream` | pre_gate | prospect_token | none | `server/src/routes/p.ts:801` |
+| POST | `/api/p/:token/webinar-reserve` | pre_gate | prospect_token | none | `server/src/routes/p.ts:951` |
+| GET | `/api/p/:token/team-stats` | pre_gate | prospect_token | none | `server/src/routes/p.ts:1051` |
 | GET | `/api/rvm/:token` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:117` |
 | POST | `/api/rvm/:token/activate` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:128` |
 | POST | `/api/rvm/:token/video-event` | pre_gate | prospect_token | none | `server/src/routes/rvm.ts:139` |

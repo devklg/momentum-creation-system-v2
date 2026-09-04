@@ -5,14 +5,14 @@
 
 ## Summary
 
-- Generated: 2026-08-14T13:55:53.359Z
+- Generated: 2026-09-04T13:08:00.858Z
 - Mongo collections: 76
 - Neo4j labels: 90
 - Neo4j relationships: 71
 - Chroma collections: 59
 - Route modules: 49
 - Route handlers: 303
-- Shared exports: 1237
+- Shared exports: 1239
 
 ## Mongo Collections
 
@@ -66,7 +66,7 @@
 | `tmag_prospect_crm_notes` | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_crm_records` | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | permissive_mongoose_schema | yes | 8 |
-| `tmag_prospect_htank_counters` | permissive_mongoose_schema | yes | 8 |
+| `tmag_prospect_htank_counters` | permissive_mongoose_schema | yes | 7 |
 | `tmag_prospect_htank_placements` | permissive_mongoose_schema | yes | 24 |
 | `tmag_prospect_invitation_activity` | permissive_mongoose_schema | yes | 7 |
 | `tmag_prospect_invite_tokens` | permissive_mongoose_schema | yes | 10 |
@@ -75,7 +75,7 @@
 | `tmag_prospect_timeline_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_reservations` | permissive_mongoose_schema | yes | 6 |
-| `tmag_prospects` | permissive_mongoose_schema | yes | 38 |
+| `tmag_prospects` | permissive_mongoose_schema | yes | 37 |
 | `tmag_questionnaires` | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | permissive_mongoose_schema | yes | 4 |
 | `tmag_sponsor_availability` | permissive_mongoose_schema | yes | 5 |
@@ -368,7 +368,7 @@
 | `(unmounted)` | `server/src/routes/michael.ts` | GET /training-support/:downlineTmagId | none |
 | `(unmounted)` | `server/src/routes/orientation.ts` | GET /state<br>GET /sessions<br>POST /sessions/:sessionId/reserve<br>DELETE /sessions/:sessionId/reserve | `McsOrientationCancelResponse`, `McsOrientationReserveResponse`, `McsOrientationSessionsResponse`, `McsOrientationStateResponse` |
 | `(unmounted)` | `server/src/routes/p-login.ts` | GET x-forwarded-for<br>GET origin<br>POST /start<br>POST /redeem<br>POST /code<br>POST /logout | `McsProspectLoginRedeemError`, `McsProspectLoginRedeemResponse`, `McsProspectLoginStartResponse` |
-| `(unmounted)` | `server/src/routes/p.ts` | GET /:token<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/replay<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats | `McsCallbackIntent`, `McsCallbackRequestPayload`, `McsCallbackRequestResponse`, `McsComProspectCopy`, `McsEnrolledResponse`, `McsExpiredResponse`, `McsHoldingTankSnapshot`, `McsJoinEvent`, `McsKongaPlacementEvent`, `McsKongaVideoEventPayload`, `McsKongaVideoEventResponse`, `McsPlacementEvent`, `McsResolvedTokenPayload`, `McsTeamStatsResponse`, `McsTokenState`, `McsVideoEventKind`, `McsWebinarReservationPayload`, `McsWebinarReservationResponse` |
+| `(unmounted)` | `server/src/routes/p.ts` | GET /:token<br>POST /:token/video-event<br>POST /:token/callback-request<br>GET /:token/replay<br>GET /:token/stream<br>POST /:token/webinar-reserve<br>GET /:token/team-stats | `MCS_KONGA_TICKER_WINDOW`, `McsCallbackIntent`, `McsCallbackRequestPayload`, `McsCallbackRequestResponse`, `McsComProspectCopy`, `McsEnrolledResponse`, `McsExpiredResponse`, `McsHoldingTankSnapshot`, `McsJoinEvent`, `McsKongaPlacementEvent`, `McsKongaVideoEventPayload`, `McsKongaVideoEventResponse`, `McsPlacementEvent`, `McsResolvedTokenPayload`, `McsTeamStatsResponse`, `McsTokenState`, `McsVideoEventKind`, `McsWebinarReservationPayload`, `McsWebinarReservationResponse` |
 | `(unmounted)` | `server/src/routes/preview.ts` | GET / | none |
 | `(unmounted)` | `server/src/routes/profile.ts` | GET /<br>GET /sponsor<br>PATCH /<br>POST /password<br>POST /email/start<br>POST /email/verify<br>POST /phone | `McsProfileGetResponse` |
 | `(unmounted)` | `server/src/routes/questionnaire.ts` | GET /status<br>POST /load<br>POST /submit<br>GET user-agent | none |
@@ -568,6 +568,8 @@
 | `MCS_KONGA_D23_TOKENS` | const | `packages/shared/src/konga-line-tokens.ts` |
 | `McsKongaD23Tokens` | type | `packages/shared/src/konga-line-tokens.ts` |
 | `MCS_KONGA_CONTRACT_VERSION` | const | `packages/shared/src/konga-line.ts` |
+| `MCS_KONGA_LOW_COUNT_THRESHOLD` | const | `packages/shared/src/konga-line.ts` |
+| `MCS_KONGA_TICKER_WINDOW` | const | `packages/shared/src/konga-line.ts` |
 | `McsJoinEvent` | interface | `packages/shared/src/konga-line.ts` |
 | `McsKongaAddedBy` | interface | `packages/shared/src/konga-line.ts` |
 | `McsKongaContractVersion` | type | `packages/shared/src/konga-line.ts` |

@@ -4,7 +4,7 @@
 
 ## Summary
 
-- Generated: 2026-08-14T13:55:35.831Z
+- Generated: 2026-09-04T13:07:42.878Z
 - Labels: 90
 - Relationships: 71
 - Constraints/indexes cataloged: 18

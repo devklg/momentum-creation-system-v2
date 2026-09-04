@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-08-14T13:55:58.745Z",
+  "generatedAt": "2026-09-04T13:08:06.614Z",
   "scope": "apps/com/src visible strings plus shared compliance constants",
   "summary": {
     "filesScanned": 42,
-    "visibleStringsScanned": 606,
+    "visibleStringsScanned": 612,
     "blockingViolations": 0,
-    "allowedSignals": 86,
+    "allowedSignals": 92,
     "status": "pass",
     "allowedSignalsByRule": {
       "glp_three_product_context": 16,
       "public_market_or_cost_context": 7,
       "team_goal_context": 5,
-      "pmv_language_context": 31,
-      "placement_demo_context": 25,
+      "pmv_language_context": 33,
+      "placement_demo_context": 29,
       "canonical_disclaimer": 2
     }
   },
@@ -97,7 +97,7 @@
       "severity": "allowed",
       "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 118,
+      "line": 127,
       "text": "Does GLP-THREE actually work?"
     },
     {
@@ -105,7 +105,7 @@
       "severity": "allowed",
       "description": "GLP-THREE product naming is allowed when it does not name THREE International.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 122,
+      "line": 131,
       "text": "GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible."
     },
     {
@@ -385,7 +385,23 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 104,
+      "line": 24,
+      "text": "So the question is simple. Do you want to be in front of these people as they say yes, with more of them on your team — or wait, and be placed underneath, as part of their team and ours?"
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 28,
+      "text": "Paul Barrios earned millions over seventeen years in his last company. He wasn’t the first to hear about it. The opportunity went first to a big networker, who said no. About ninety days later that man changed his mind and joined — and was placed onto Paul’s team. Paul went on to build 300,000 people. The man who waited was one of them. He did well. And he still said, years later, that those ninety days were very costly and that he should have said yes sooner."
+    },
+    {
+      "ruleId": "pmv_language_context",
+      "severity": "allowed",
+      "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 113,
       "text": "people arrived"
     },
     {
@@ -393,7 +409,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 122,
+      "line": 131,
       "text": "GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible."
     },
     {
@@ -401,7 +417,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 147,
+      "line": 156,
       "text": "Plainly: you&rsquo;re being offered the chance to build a business of your own. As a builder, you&rsquo;d earn from real work: sharing the product with people who want it, and helping people who want to build do the same — with this system working alongside you. It is not a job, an investment, or a lottery ticket. It is a business, with no guarantees and results that follow effort."
     },
     {
@@ -409,7 +425,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 176,
+      "line": 185,
       "text": "You are not being asked to evaluate a business without the people and support around it."
     },
     {
@@ -417,7 +433,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 180,
+      "line": 189,
       "text": "People Momentum Volume Checks"
     },
     {
@@ -425,7 +441,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 190,
       "text": "Checks"
     },
     {
@@ -433,7 +449,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 190,
       "text": "Momentum"
     },
     {
@@ -441,7 +457,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 190,
       "text": "People"
     },
     {
@@ -449,7 +465,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 181,
+      "line": 190,
       "text": "Volume"
     },
     {
@@ -457,7 +473,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 242,
+      "line": 267,
       "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
@@ -465,7 +481,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 250,
+      "line": 275,
       "text": "Building alone is why most people quit. So nobody here builds alone."
     },
     {
@@ -473,7 +489,7 @@
       "severity": "allowed",
       "description": "Prospect-facing PMV language is People, Momentum, Volume, and Checks.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 258,
+      "line": 283,
       "text": "Built by magnificent people. Driven by purpose."
     },
     {
@@ -641,7 +657,47 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 89,
+      "line": 22,
+      "text": "When you join — and when they join — decides your placement, in real time, and whether you’re in front of them or behind them."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 23,
+      "text": "We make no promises about who is placed where. What we know is this: every prospect has to be placed, and once a position is filled, the next one takes the next available spot. That’s it."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 24,
+      "text": "So the question is simple. Do you want to be in front of these people as they say yes, with more of them on your team — or wait, and be placed underneath, as part of their team and ours?"
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 28,
+      "text": "Paul Barrios earned millions over seventeen years in his last company. He wasn’t the first to hear about it. The opportunity went first to a big networker, who said no. About ninety days later that man changed his mind and joined — and was placed onto Paul’s team. Paul went on to build 300,000 people. The man who waited was one of them. He did well. And he still said, years later, that those ninety days were very costly and that he should have said yes sooner."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 29,
+      "text": "That’s not hype. That’s how it went. So investigate this opportunity thoroughly — and do it quickly. Your position in the line is yours to keep the moment you say yes."
+    },
+    {
+      "ruleId": "placement_demo_context",
+      "severity": "allowed",
+      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "line": 103,
       "text": "The presentation told you something unusual: while you watched, you were placed in our team&rsquo;s line so we could show you something real. This is it. Every circle is a real person and every data-bearing movement is a real event. Nothing on this screen is a simulation."
     },
     {
@@ -649,15 +705,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 96,
-      "text": "Position"
-    },
-    {
-      "ruleId": "placement_demo_context",
-      "severity": "allowed",
-      "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 155,
+      "line": 164,
       "text": "Whether it becomes a new financial future depends on the same thing every real business depends on — the work you put in. The line shows team activity; it promises neither placement nor results."
     },
     {
@@ -665,7 +713,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 172,
+      "line": 181,
       "text": "The working method is visible here: share, real response, live placement, and human follow-up."
     },
     {
@@ -673,7 +721,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 197,
+      "line": 206,
       "text": "Completing the presentation created the pinned position you see. It represents a real placement in this shared line."
     },
     {
@@ -681,15 +729,15 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 222,
-      "text": "added since your placement"
+      "line": 232,
+      "text": "Placement, in real life"
     },
     {
       "ruleId": "placement_demo_context",
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 232,
+      "line": 257,
       "text": ". The recording remains a content resource; completing it does not create a placement or promise an outcome."
     },
     {
@@ -697,7 +745,7 @@
       "severity": "allowed",
       "description": "Queue, placement, and beneath-you language is allowed only as team activity demonstration.",
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "line": 242,
+      "line": 267,
       "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
@@ -2796,565 +2844,601 @@
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 49,
+      "lineNumber": 22,
+      "kind": "literal",
+      "text": "When you join — and when they join — decides your placement, in real time, and whether you’re in front of them or behind them."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 23,
+      "kind": "literal",
+      "text": "We make no promises about who is placed where. What we know is this: every prospect has to be placed, and once a position is filled, the next one takes the next available spot. That’s it."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 24,
+      "kind": "literal",
+      "text": "So the question is simple. Do you want to be in front of these people as they say yes, with more of them on your team — or wait, and be placed underneath, as part of their team and ours?"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 28,
+      "kind": "literal",
+      "text": "Paul Barrios earned millions over seventeen years in his last company. He wasn’t the first to hear about it. The opportunity went first to a big networker, who said no. About ninety days later that man changed his mind and joined — and was placed onto Paul’s team. Paul went on to build 300,000 people. The man who waited was one of them. He did well. And he still said, years later, that those ninety days were very costly and that he should have said yes sooner."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 29,
+      "kind": "literal",
+      "text": "That’s not hype. That’s how it went. So investigate this opportunity thoroughly — and do it quickly. Your position in the line is yours to keep the moment you say yes."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 30,
+      "kind": "literal",
+      "text": "We’re at the beginning of building this team, and we’ve committed to a goal of ten thousand-plus members in the coming months. Timing isn’t a sales line here. It’s the structure."
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 66,
       "kind": "literal",
       "text": "your inviter"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 71,
+      "lineNumber": 85,
       "kind": "jsx_attribute:aria-label",
       "text": "Dashboard controls"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 72,
+      "lineNumber": 86,
       "kind": "jsx_attribute:aria-label",
       "text": "Team Magnificent Konga Line"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 73,
+      "lineNumber": 87,
       "kind": "jsx_text",
       "text": "TM · KONGA LINE"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 77,
+      "lineNumber": 91,
       "kind": "jsx_text",
       "text": "Rewatch presentation"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 79,
+      "lineNumber": 93,
       "kind": "jsx_text",
       "text": "Talk with"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 86,
+      "lineNumber": 100,
       "kind": "jsx_text",
       "text": "As promised — the team, forming"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 87,
+      "lineNumber": 101,
       "kind": "jsx_text",
       "text": "This is what"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 87,
+      "lineNumber": 101,
       "kind": "jsx_text",
       "text": "wanted you to see. Live."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 89,
+      "lineNumber": 103,
       "kind": "jsx_text",
       "text": "The presentation told you something unusual: while you watched, you were placed in our team&rsquo;s line so we could show you something real. This is it. Every circle is a real person and every data-bearing movement is a real event. Nothing on this screen is a simulation."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 96,
-      "kind": "jsx_text",
-      "text": "Position"
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 98,
-      "kind": "jsx_text",
-      "text": "is yours while you decide."
-    },
-    {
-      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 103,
+      "lineNumber": 112,
       "kind": "jsx_text",
       "text": "Welcome back — the line kept moving."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 104,
+      "lineNumber": 113,
       "kind": "literal",
       "text": "people arrived"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 104,
+      "lineNumber": 113,
       "kind": "literal",
       "text": "person arrived"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 104,
+      "lineNumber": 113,
       "kind": "jsx_text",
       "text": "since your last visit."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 109,
+      "lineNumber": 118,
       "kind": "jsx_text",
       "text": "This invitation is using the compatible live view. New visit and weekly telemetry will appear when the versioned stream is available."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 118,
+      "lineNumber": 127,
       "kind": "jsx_attribute:title",
       "text": "Does GLP-THREE actually work?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 122,
+      "lineNumber": 131,
       "kind": "jsx_text",
       "text": "GLP-THREE is the product you just saw. Team Magnificent is a team of people building businesses around sharing it — and this page is their work, visible."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 127,
+      "lineNumber": 136,
       "kind": "jsx_text",
       "text": "The presentation is the approved product explanation. Rewatch it as often as you need, then ask"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 128,
+      "lineNumber": 137,
       "kind": "jsx_text",
       "text": "about their own experience and sources. This dashboard adds no unsourced efficacy, market, price, side-effect, or launch-date claim."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 134,
+      "lineNumber": 143,
       "kind": "jsx_text",
       "text": "Rewatch Dr. Dan&rsquo;s presentation"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 143,
+      "lineNumber": 152,
       "kind": "jsx_attribute:title",
       "text": "What exactly is the opportunity here?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 147,
+      "lineNumber": 156,
       "kind": "jsx_text",
       "text": "Plainly: you&rsquo;re being offered the chance to build a business of your own. As a builder, you&rsquo;d earn from real work: sharing the product with people who want it, and helping people who want to build do the same — with this system working alongside you. It is not a job, an investment, or a lottery ticket. It is a business, with no guarantees and results that follow effort."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 155,
+      "lineNumber": 164,
       "kind": "jsx_text",
       "text": "Whether it becomes a new financial future depends on the same thing every real business depends on — the work you put in. The line shows team activity; it promises neither placement nor results."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 159,
+      "lineNumber": 168,
       "kind": "jsx_text",
       "text": "Three of these you have already seen. Two you can only see here."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 160,
+      "lineNumber": 169,
       "kind": "jsx_attribute:aria-label",
       "text": "Five reasons to examine"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 161,
+      "lineNumber": 170,
       "kind": "jsx_attribute:title",
       "text": "Product"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 162,
+      "lineNumber": 171,
       "kind": "jsx_text",
       "text": "Rewatch the presentation, then ask"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 162,
+      "lineNumber": 171,
       "kind": "jsx_text",
       "text": "what they use and what they have personally observed."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 165,
+      "lineNumber": 174,
       "kind": "jsx_attribute:title",
       "text": "Timing"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 166,
+      "lineNumber": 175,
       "kind": "jsx_text",
       "text": "Ask why"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 166,
+      "lineNumber": 175,
       "kind": "jsx_text",
       "text": "chose to share this with you now."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 168,
+      "lineNumber": 177,
       "kind": "jsx_attribute:title",
       "text": "Market"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 169,
+      "lineNumber": 178,
       "kind": "jsx_text",
       "text": "Bring the category questions and source questions to the conversation."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 171,
+      "lineNumber": 180,
       "kind": "jsx_attribute:title",
       "text": "Method"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 172,
+      "lineNumber": 181,
       "kind": "jsx_text",
       "text": "The working method is visible here: share, real response, live placement, and human follow-up."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 175,
+      "lineNumber": 184,
       "kind": "jsx_attribute:title",
       "text": "Team & training"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 176,
+      "lineNumber": 185,
       "kind": "jsx_text",
       "text": "You are not being asked to evaluate a business without the people and support around it."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 180,
+      "lineNumber": 189,
       "kind": "jsx_attribute:aria-label",
       "text": "People Momentum Volume Checks"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 190,
       "kind": "jsx_text",
       "text": "Checks"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 190,
       "kind": "jsx_text",
       "text": "Momentum"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 190,
       "kind": "jsx_text",
       "text": "People"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 181,
+      "lineNumber": 190,
       "kind": "jsx_text",
       "text": "Volume"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 187,
+      "lineNumber": 196,
       "kind": "jsx_attribute:title",
       "text": "Three steps — and two already happened."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 190,
+      "lineNumber": 199,
       "kind": "jsx_text",
       "text": "01"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 191,
+      "lineNumber": 200,
       "kind": "jsx_text",
       "text": "Shared"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 192,
+      "lineNumber": 201,
       "kind": "jsx_text",
       "text": "shared a private presentation with you. That invitation fixed the person connected to your experience."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 195,
+      "lineNumber": 204,
       "kind": "jsx_text",
       "text": "02"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 196,
+      "lineNumber": 205,
       "kind": "jsx_text",
       "text": "Watched"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 197,
+      "lineNumber": 206,
       "kind": "jsx_text",
       "text": "Completing the presentation created the pinned position you see. It represents a real placement in this shared line."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 200,
+      "lineNumber": 209,
       "kind": "jsx_text",
       "text": "03"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 201,
+      "lineNumber": 210,
       "kind": "jsx_text",
       "text": "Deciding"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 202,
+      "lineNumber": 211,
       "kind": "jsx_text",
-      "text": "When a person decides to build, a verified join exits at the front in gold. The system never invents that moment."
+      "text": "When a person decides to build, their real moment shows on the line in gold. The system never invents that moment."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 208,
+      "lineNumber": 217,
       "kind": "jsx_attribute:title",
       "text": "What am I watching?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 210,
+      "lineNumber": 219,
       "kind": "jsx_text",
-      "text": "Each circle is a real person added by someone on the team. New arrivals enter at the bottom. Verified joins leave at the destination above. The marker that stays fixed is you."
+      "text": "Each circle is a real person, added by someone on the team. New arrivals enter at the back of the line. The marker that stays fixed is you."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 222,
-      "kind": "jsx_attribute:label",
-      "text": "added since your placement"
+      "lineNumber": 232,
+      "kind": "jsx_attribute:title",
+      "text": "Placement, in real life"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 223,
+      "lineNumber": 238,
+      "kind": "jsx_text",
+      "text": "The first-mover story"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 246,
+      "kind": "jsx_attribute:title",
+      "text": "How fast the line is moving"
+    },
+    {
+      "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
+      "lineNumber": 248,
       "kind": "jsx_attribute:label",
       "text": "placements this week"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 224,
+      "lineNumber": 249,
       "kind": "jsx_attribute:label",
       "text": "cities & states represented"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 227,
+      "lineNumber": 252,
       "kind": "jsx_text",
       "text": "Every value above comes from the live Konga contract. Empty means the system did not supply a trustworthy number."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 232,
+      "lineNumber": 257,
       "kind": "jsx_text",
       "text": ". The recording remains a content resource; completing it does not create a placement or promise an outcome."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 232,
+      "lineNumber": 257,
       "kind": "jsx_text",
       "text": "Last live conversation: recording dated"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 240,
+      "lineNumber": 265,
       "kind": "jsx_attribute:title",
       "text": "Could someone like me actually do this?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 242,
+      "lineNumber": 267,
       "kind": "jsx_text",
       "text": "THE SYSTEM YOU&apos;VE BEEN PLACED INSIDE — What you&apos;re looking at isn&apos;t a webpage — it&apos;s a live view into a working system built for one thing: helping people build a business without doing it alone. The line you&apos;re watching is real. Every arrival is a real person, added by a real team member, right now. When you join, that same machinery starts working alongside you: an AI-guided onboarding that captures your why and builds your launch plan around it, a daily success coach that keeps you moving, a 72-hour launch mission with the whole system pointed at your first two wins, weekly live webinars — with last week&apos;s always available on replay — and a placement engine that puts the team&apos;s momentum next to your own effort. Most opportunities hand you a starter kit and a phone. This one hands you an operating system. It won&apos;t do the work for you — nothing real does. But you&apos;ll never work without it."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 250,
+      "lineNumber": 275,
       "kind": "jsx_attribute:title",
       "text": "Building alone is why most people quit. So nobody here builds alone."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 254,
+      "lineNumber": 279,
       "kind": "jsx_text",
       "text": "Team Magnificent pairs you with the person who shared this with you — someone who was once exactly where you are — plus a team already in motion. The line on this page is their daily work, made visible."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 258,
+      "lineNumber": 283,
       "kind": "jsx_text",
       "text": "Built by magnificent people. Driven by purpose."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 269,
+      "lineNumber": 294,
       "kind": "jsx_text",
       "text": "Team Magnificent"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 272,
+      "lineNumber": 297,
       "kind": "jsx_attribute:aria-label",
       "text": "Legal links"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 273,
+      "lineNumber": 298,
       "kind": "jsx_text",
       "text": "Privacy Policy"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 274,
+      "lineNumber": 299,
       "kind": "jsx_text",
       "text": "•"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 275,
+      "lineNumber": 300,
       "kind": "jsx_text",
       "text": "Terms of Service"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 302,
+      "lineNumber": 327,
       "kind": "jsx_text",
       "text": "Request a call from"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 308,
+      "lineNumber": 333,
       "kind": "jsx_text",
       "text": "—"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 339,
+      "lineNumber": 364,
       "kind": "literal",
       "text": "This invitation has expired. Ask your inviter for a fresh one."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 340,
+      "lineNumber": 365,
       "kind": "literal",
       "text": "Your request did not land. Please try again."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 346,
+      "lineNumber": 371,
       "kind": "jsx_attribute:title",
       "text": "The next step is a conversation — not a commitment."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 348,
+      "lineNumber": 373,
       "kind": "jsx_text",
       "text": "— the person who thought of you. Ask the money question. Ask the time question. Ask what a bad week looks like. This starts a real conversation with a real person."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 348,
+      "lineNumber": 373,
       "kind": "jsx_text",
       "text": "Talk to"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 355,
+      "lineNumber": 380,
       "kind": "jsx_text",
       "text": "Request received"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 356,
+      "lineNumber": 381,
       "kind": "jsx_text",
       "text": "will reach out."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 357,
+      "lineNumber": 382,
       "kind": "jsx_text",
       "text": "Keep an eye on the number where you received this invitation."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 362,
+      "lineNumber": 387,
       "kind": "jsx_text",
       "text": "What would you like to talk about?"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 364,
+      "lineNumber": 389,
       "kind": "jsx_text",
       "text": "I&rsquo;m interested — help me understand more."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 367,
+      "lineNumber": 392,
       "kind": "jsx_text",
       "text": "I have specific questions."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 370,
+      "lineNumber": 395,
       "kind": "jsx_text",
       "text": "I&rsquo;m ready to discuss joining Team Magnificent."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 377,
+      "lineNumber": 402,
       "kind": "jsx_text",
       "text": "/ Team Magnificent may call or text you about your request. Message &amp; data rates may apply. Message frequency varies. Reply STOP to end texts, HELP for help. Review the"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 377,
+      "lineNumber": 402,
       "kind": "jsx_text",
       "text": "By sharing your number, you agree that"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 405,
       "kind": "jsx_text",
       "text": "."
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 405,
       "kind": "jsx_text",
       "text": "and"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 405,
       "kind": "jsx_text",
       "text": "Privacy Policy"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 380,
+      "lineNumber": 405,
       "kind": "jsx_text",
       "text": "Terms of Service"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 386,
+      "lineNumber": 411,
       "kind": "literal",
       "text": "Request a call from"
     },
     {
       "file": "apps/com/src/routes/tm-prospect-dashboard/tm-prospect-dashboard.tsx",
-      "lineNumber": 386,
+      "lineNumber": 411,
       "kind": "literal",
       "text": "Sending…"
     },

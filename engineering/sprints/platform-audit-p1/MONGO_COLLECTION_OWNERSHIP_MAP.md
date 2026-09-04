@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Generated: 2026-08-14T13:55:34.885Z
+- Generated: 2026-09-04T13:07:41.956Z
 - Collections: 76
 - Unclassified: 0
 
@@ -77,7 +77,7 @@
 | `tmag_prospect_crm_notes` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 6 |
 | `tmag_prospect_crm_records` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 12 |
 | `tmag_prospect_htank_accounts` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 8 |
-| `tmag_prospect_htank_counters` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 8 |
+| `tmag_prospect_htank_counters` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 7 |
 | `tmag_prospect_htank_placements` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 24 |
 | `tmag_prospect_invitation_activity` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 7 |
 | `tmag_prospect_invite_tokens` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 10 |
@@ -86,7 +86,7 @@
 | `tmag_prospect_timeline_events` | Prospect CRM and follow-up trail | CRM domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_events` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_prospect_webinar_reservations` | Holding tank, prospect account, and re-entry | Prospect access / pool placement | com + admin | mixed | permissive_mongoose_schema | yes | 6 |
-| `tmag_prospects` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 38 |
+| `tmag_prospects` | Prospect invitation and PMV flow | Prospect / invitation domain | com + team + admin | mixed | permissive_mongoose_schema | yes | 37 |
 | `tmag_questionnaires` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 2 |
 | `tmag_recruiting_cycles` | BA agents, training, success profile, and commitments | Agent / training domain | team + admin | mixed | permissive_mongoose_schema | yes | 4 |
 | `tmag_sponsor_availability` | Events, orientation, webinars, and three-way calls | Events / orientation domain | team + admin + workers | operational | permissive_mongoose_schema | yes | 5 |
