@@ -76,6 +76,82 @@
   font-size: .72rem;
 }
 
+/* THE CARD — number + count line share the shell with the vertical ticker. */
+.konga-card-summary {
+  display: grid;
+  justify-items: center;
+  gap: .35rem;
+  margin-top: 1rem;
+  padding: 1.35rem 1.25rem;
+  border: 1px solid var(--konga-edge);
+  border-top: 3px solid var(--konga-blue-hi);
+  border-radius: 1rem 1rem 0 0;
+  background: var(--konga-panel-solid);
+  text-align: center;
+}
+
+.konga-card-position {
+  color: var(--konga-blue-hi);
+  font: 700 .72rem 'Spline Sans Mono', ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.konga-card-number {
+  margin: 0;
+  line-height: 1;
+}
+
+.konga-card-number-value {
+  display: inline-block;
+  color: var(--konga-gold);
+  font: 900 clamp(3rem, 12vw, 5.5rem) 'Orbitron', system-ui, sans-serif;
+  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  animation: konga-count-pop .5s ease-out both;
+}
+
+.konga-card-count-line {
+  max-width: 34rem;
+  color: var(--konga-ink);
+  font: 500 clamp(.95rem, 2.4vw, 1.15rem) 'Poppins', system-ui, sans-serif;
+}
+
+.konga-card-count-line.is-pending {
+  color: var(--konga-muted);
+}
+
+/* Low-count: number stays the same size; the surround simply calms down so the
+   ticker rows and the velocity band carry the weight. No filler is rendered. */
+.konga-card-summary.is-low {
+  border-top-color: var(--konga-edge);
+}
+
+.konga-card-summary.is-low .konga-card-number-value {
+  color: var(--konga-ink);
+}
+
+@keyframes konga-count-pop {
+  0% { transform: translateY(.35rem) scale(.96); opacity: .5; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* The living line: the rolling window scrolls internally so 100 rows never
+   blow out the card; newest sits at the back (bottom) and is kept in view. */
+.konga-node-stack--rolling {
+  max-height: 34rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.konga-ticker-list {
+  display: grid;
+  gap: .85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .konga-dock {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(18rem, .85fr);

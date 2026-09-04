@@ -13,6 +13,23 @@ import { usePlacementStream } from '@/lib/usePlacementStream';
 import { KongaLine } from './components/KongaLine';
 import './tm-prospect-dashboard.css';
 
+/**
+ * Approved copy, verbatim (founder-ruled 2026-09-04). Held as string constants
+ * so the exact wording is not touched by JSX entity-escaping. Do not edit,
+ * paraphrase, or add caveats. Em dashes are the ruled dashes.
+ */
+const POSITION_BEAT = [
+  'When you join — and when they join — decides your placement, in real time, and whether you’re in front of them or behind them.',
+  'We make no promises about who is placed where. What we know is this: every prospect has to be placed, and once a position is filled, the next one takes the next available spot. That’s it.',
+  'So the question is simple. Do you want to be in front of these people as they say yes, with more of them on your team — or wait, and be placed underneath, as part of their team and ours?',
+] as const;
+
+const FIRST_MOVER_STORY = [
+  'Paul Barrios earned millions over seventeen years in his last company. He wasn’t the first to hear about it. The opportunity went first to a big networker, who said no. About ninety days later that man changed his mind and joined — and was placed onto Paul’s team. Paul went on to build 300,000 people. The man who waited was one of them. He did well. And he still said, years later, that those ninety days were very costly and that he should have said yes sooner.',
+  'That’s not hype. That’s how it went. So investigate this opportunity thoroughly — and do it quickly. Your position in the line is yours to keep the moment you say yes.',
+  'We’re at the beginning of building this team, and we’ve committed to a goal of ten thousand-plus members in the coming months. Timing isn’t a sales line here. It’s the structure.',
+] as const;
+
 export interface TmProspectDashboardProps {
   token: string;
   prospectFirstName: string;
@@ -59,9 +76,6 @@ export function TmProspectDashboard({
     : nextEvent;
   const isVersioned = contractVersion === MCS_KONGA_CONTRACT_VERSION
     || stream.contractVersion === MCS_KONGA_CONTRACT_VERSION;
-  const addedSincePlacement = stream.connected
-    ? Math.max(0, stream.globalMaxPosition - positionNumber)
-    : null;
 
   return (
     <main
@@ -91,11 +105,6 @@ export function TmProspectDashboard({
               This is it. Every circle is a real person and every data-bearing movement
               is a real event. Nothing on this screen is a simulation.
             </p>
-          </div>
-          <div className="konga-arrival-position" aria-label={`Your position is ${positionNumber}`}>
-            <span>Position</span>
-            <strong>{positionNumber.toLocaleString()}</strong>
-            <small>is yours while you decide.</small>
           </div>
         </div>
         {stream.sinceLastVisit !== null && (
@@ -199,7 +208,7 @@ export function TmProspectDashboard({
           <div className="konga-copy-card">
             <span className="konga-card-index">03</span>
             <h3>Deciding</h3>
-            <p>When a person decides to build, a verified join exits at the front in gold. The system never invents that moment.</p>
+            <p>When a person decides to build, their real moment shows on the line in gold. The system never invents that moment.</p>
           </div>
         </div>
       </section>
@@ -207,9 +216,8 @@ export function TmProspectDashboard({
       <section id="live-place" className="konga-section konga-panel-section" aria-labelledby="live-place-title">
         <SectionHeading eyebrow="Your live place" title="What am I watching?" id="live-place-title" />
         <p className="konga-lead">
-          Each circle is a real person added by someone on the team. New arrivals
-          enter at the bottom. Verified joins leave at the destination above. The
-          marker that stays fixed is you.
+          Each circle is a real person, added by someone on the team. New arrivals
+          enter at the back of the line. The marker that stays fixed is you.
         </p>
         <KongaLine
           lens={{ head: 'sponsor' }}
@@ -218,8 +226,25 @@ export function TmProspectDashboard({
           stream={stream}
           nextWebinar={preferredWebinar}
         />
+      </section>
+
+      <section id="position-beat" className="konga-section" aria-labelledby="position-beat-title">
+        <SectionHeading eyebrow="Why your timing decides your place" title="Placement, in real life" id="position-beat-title" />
+        <p className="konga-lead">{POSITION_BEAT[0]}</p>
+        <p>{POSITION_BEAT[1]}</p>
+        <p>{POSITION_BEAT[2]}</p>
+
+        <div className="konga-first-mover">
+          <h3>The first-mover story</h3>
+          <p>{FIRST_MOVER_STORY[0]}</p>
+          <p>{FIRST_MOVER_STORY[1]}</p>
+          <p>{FIRST_MOVER_STORY[2]}</p>
+        </div>
+      </section>
+
+      <section id="velocity" className="konga-section konga-panel-section" aria-labelledby="velocity-title">
+        <SectionHeading eyebrow="The team, this week" title="How fast the line is moving" id="velocity-title" />
         <div className="konga-telemetry">
-          <Metric value={addedSincePlacement} label="added since your placement" empty="Live total not available yet" />
           <Metric value={stream.placementsThisWeek} label="placements this week" empty="Weekly total not available yet" />
           <Metric value={stream.geoSpreadCount} label="cities & states represented" empty="Geographic total not available yet" />
         </div>

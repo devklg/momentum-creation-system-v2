@@ -35,6 +35,7 @@ import type {
   McsKongaVideoEventPayload,
   McsKongaVideoEventResponse,
 } from '@momentum/shared';
+import { MCS_KONGA_TICKER_WINDOW } from '@momentum/shared';
 import {
   findTokenRecord,
   isTokenExpired,
@@ -779,8 +780,10 @@ prospectTokenRoutes.get('/:token/replay', async (req, res) => {
  *     connections.
  */
 
-/** Number of recent placements to include in the snapshot event. */
-const SSE_SNAPSHOT_RECENT_LIMIT = 40;
+/** Number of recent placements to include in the snapshot event. Single
+ * source of truth is the shared ticker-window constant (founder ruling
+ * 2026-09-04: the vertical ticker rolls the most-recent 100 placements). */
+const SSE_SNAPSHOT_RECENT_LIMIT = MCS_KONGA_TICKER_WINDOW;
 /** Heartbeat interval. Long enough to be cheap, short enough to beat proxies. */
 const SSE_PING_INTERVAL_MS = 30_000;
 
