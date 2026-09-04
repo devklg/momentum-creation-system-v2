@@ -332,9 +332,29 @@
 
 .konga-telemetry {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .85rem;
   margin-top: 2rem;
+}
+
+.konga-first-mover {
+  margin-top: 2rem;
+  padding: 1.5rem clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--konga-edge);
+  border-left: 3px solid var(--konga-gold);
+  border-radius: .9rem;
+  background: var(--konga-ground);
+}
+
+.konga-first-mover h3 {
+  margin-bottom: .9rem;
+  color: var(--konga-gold);
+  font: 800 clamp(1.15rem, 3vw, 1.6rem) 'Orbitron', system-ui, sans-serif;
+  letter-spacing: .02em;
+}
+
+.konga-first-mover p + p {
+  margin-top: 1rem;
 }
 
 .konga-telemetry article {

@@ -22,6 +22,22 @@ export const MCS_KONGA_CONTRACT_VERSION = 'konga-v1' as const;
 
 export type McsKongaContractVersion = typeof MCS_KONGA_CONTRACT_VERSION;
 
+/**
+ * Rolling window depth for the vertical ticker (founder ruling 2026-09-04:
+ * 50–100 real arrivals as it rolls). The feed carries at most the most-recent
+ * this-many placements; below that it renders whatever real arrivals exist and
+ * stops — never padded, never looped (honesty rule). Single source of truth for
+ * the server snapshot limit and the client trim so the two never drift.
+ */
+export const MCS_KONGA_TICKER_WINDOW = 100;
+
+/**
+ * Below this many arrived-after-you placements (or ticker rows), the card is in
+ * its low-count state: the number stays the same size, visual weight shifts to
+ * the rows that exist and the velocity band. No "be the first" filler.
+ */
+export const MCS_KONGA_LOW_COUNT_THRESHOLD = 10;
+
 export interface McsKongaAddedBy {
   firstName: string;
   lastInitial: string;

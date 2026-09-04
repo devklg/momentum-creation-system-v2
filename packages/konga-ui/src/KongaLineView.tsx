@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   MCS_KONGA_D23_CSS_VARIABLES,
+  MCS_KONGA_LOW_COUNT_THRESHOLD,
+  MCS_KONGA_TICKER_WINDOW,
   type McsJoinEvent,
   type McsKongaLineLens,
   type McsKongaPlacementEvent,
@@ -16,6 +18,12 @@ export interface KongaLineConnectionState {
   ticker: McsKongaPlacementTickerEntry[];
   latestArrival: McsKongaPlacementEvent | null;
   latestJoin: McsJoinEvent | null;
+  /**
+   * Monotonic team-wide max position. Present on the prospect stream; the
+   * prospect card derives its arrived-after-you number from it. The team lens
+   * omits it (the team surface renders the line, not the card).
+   */
+  globalMaxPosition?: number;
 }
 
 export interface KongaLineProspectViewer {
@@ -56,13 +64,45 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
   const [audioReady, setAudioReady] = useState(false);
   const audioRef = useRef<AudioContext | null>(null);
   const lastSignalAt = useRef<Record<SignalKind, number>>({ arrival: 0, join: 0 });
+  const stackRef = useRef<HTMLDivElement | null>(null);
   const sponsorIdentity = formatPersonIdentity(sponsorFullName);
   const headLabel = lens.head === 'sponsor' ? sponsorIdentity : viewer.firstName;
   const isTeamViewer = viewer.positionNumber === null;
+  // The rolling window: your own position is never a row in your own line, and
+  // the view renders at most one window's worth (defensive — the stream already
+  // trims to MCS_KONGA_TICKER_WINDOW). ticker is newest-first, so this keeps the
+  // most-recent window.
   const visiblePlacements = useMemo(
-    () => stream.ticker.filter((entry) => viewer.positionNumber === null || entry.positionNumber !== viewer.positionNumber).slice(0, 6),
+    () => stream.ticker
+      .filter((entry) => viewer.positionNumber === null || entry.positionNumber !== viewer.positionNumber)
+      .slice(0, MCS_KONGA_TICKER_WINDOW),
     [stream.ticker, viewer.positionNumber],
   );
+  // Prospect line flows upward: newest enters at the back (bottom). ticker is
+  // newest-first, so reverse for render. Team lens keeps its existing order.
+  const renderedPlacements = useMemo(
+    () => (isTeamViewer ? visiblePlacements : [...visiblePlacements].reverse()),
+    [visiblePlacements, isTeamViewer],
+  );
+
+  // Arrived-after-you: the one number that matters (switch A). Only trustworthy
+  // once connected and the counter is known; otherwise the card shows pending.
+  const arrivedAfterYou = !isTeamViewer
+    && stream.connected
+    && typeof stream.globalMaxPosition === 'number'
+    ? Math.max(0, stream.globalMaxPosition - viewer.positionNumber)
+    : null;
+  const isLowCount = !isTeamViewer
+    && ((arrivedAfterYou ?? 0) < MCS_KONGA_LOW_COUNT_THRESHOLD
+      || visiblePlacements.length < MCS_KONGA_LOW_COUNT_THRESHOLD);
+
+  // Keep the newest arrival (bottom) in view as the line rolls. scrollTop is an
+  // instant assignment, so reduced-motion users are unaffected.
+  useEffect(() => {
+    if (isTeamViewer) return;
+    const el = stackRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [isTeamViewer, stream.latestArrival?.eventId, renderedPlacements.length]);
 
   useEffect(() => {
     const arm = () => {
@@ -133,13 +173,31 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
         <p className="konga-audio-note">Sound is on and activates safely after your first interaction.</p>
       )}
 
+      {!isTeamViewer && (
+        <div className={'konga-card-summary' + (isLowCount ? ' is-low' : '')} aria-label="Your live standing in the line">
+          <p className="konga-card-position">YOU · #{viewer.positionNumber.toLocaleString()}</p>
+          <p className="konga-card-number" aria-live="polite">
+            <span key={arrivedAfterYou ?? 'pending'} className="konga-card-number-value">
+              {arrivedAfterYou === null ? '—' : arrivedAfterYou.toLocaleString()}
+            </span>
+          </p>
+          {arrivedAfterYou === null ? (
+            <p className="konga-card-count-line is-pending">Connecting to the live line…</p>
+          ) : (
+            <p className="konga-card-count-line">{countLine(arrivedAfterYou)}</p>
+          )}
+        </div>
+      )}
+
       <div className="konga-dock" id="konga-webinar">
         <div className="konga-dock-copy">
           <span className="konga-mono">Destination dock</span>
           <strong>The next Team Magnificent live conversation</strong>
           <span>Hosted by {nextWebinar?.hosts?.length ? nextWebinar.hosts.join(' & ') : 'the Team Magnificent hosts'}.</span>
         </div>
-        <WebinarCountdown scheduledFor={nextWebinar?.scheduledFor ?? null} />
+        {nextWebinar?.scheduledFor
+          ? <WebinarCountdown scheduledFor={nextWebinar.scheduledFor} />
+          : null}
       </div>
 
       {stream.latestJoin && (
@@ -159,7 +217,10 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
 
         <div className="konga-rail" aria-label="Vertical upward live placement line">
           <div className="konga-belt" aria-hidden="true" />
-          <div className="konga-node-stack">
+          <div
+            ref={stackRef}
+            className={'konga-node-stack' + (isTeamViewer ? '' : ' konga-node-stack--rolling')}
+          >
             {isTeamViewer && (
               <article className="konga-genesis" aria-label={`Your line began with your first invite, ${viewer.genesis.firstName} ${viewer.genesis.lastInitial}.`}>
                 <span className="konga-mono">Your first invite · genesis</span>
@@ -169,21 +230,6 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
               </article>
             )}
 
-            {visiblePlacements.map((entry) => (
-              <article
-                key={`${entry.positionNumber}-${entry.placedAt ?? ''}`}
-                className={'konga-node ' + (stream.latestArrival?.positionNumber === entry.positionNumber ? 'is-arriving' : '')}
-              >
-                <span className="konga-node-marker" aria-hidden="true" />
-                <div>
-                  <strong>{entry.firstName} {entry.lastInitial}.</strong>
-                  <span>{formatLocation(entry.city, entry.stateOrRegion)}</span>
-                  {entry.addedBy && <small>added by {entry.addedBy.firstName} {entry.addedBy.lastInitial}.</small>}
-                </div>
-                <time dateTime={entry.placedAt ?? ''}>{formatClock(entry.placedAt ?? '')}</time>
-              </article>
-            ))}
-
             {!isTeamViewer && (
               <article className="konga-you" aria-label={'Your pinned position is ' + viewer.positionNumber}>
                 <span className="konga-mono">Pinned in your view</span>
@@ -192,14 +238,28 @@ export function KongaLineView({ lens, sponsorFullName, viewer, stream, nextWebin
               </article>
             )}
 
+            <ul className="konga-ticker-list" aria-label="Real arrivals, newest at the back of the line">
+              {renderedPlacements.map((entry) => (
+                <li
+                  key={`${entry.positionNumber}-${entry.placedAt ?? ''}`}
+                  className={'konga-node ' + (stream.latestArrival?.positionNumber === entry.positionNumber ? 'is-arriving' : '')}
+                >
+                  <span className="konga-node-marker" aria-hidden="true" />
+                  <div>
+                    <strong>{entry.firstName} {entry.lastInitial}.</strong>
+                    <span>{formatLocation(entry.city, entry.stateOrRegion)}</span>
+                    {entry.addedBy && <small>added by {entry.addedBy.firstName} {entry.addedBy.lastInitial}.</small>}
+                  </div>
+                  <time dateTime={entry.placedAt ?? ''}>{formatClock(entry.placedAt ?? '')}</time>
+                </li>
+              ))}
+            </ul>
+
             {visiblePlacements.length === 0 && (
               <p className="konga-honest-empty">
                 {stream.connecting ? 'Connecting to the real placement stream.' : 'No newer real placements are available on this connection yet.'}
               </p>
             )}
-
-            <div className="konga-open-slot"><span>Open arrival space</span></div>
-            <div className="konga-open-slot"><span>Open arrival space</span></div>
           </div>
           <div className="konga-arrivals">
             <span className="konga-mono">Real arrivals enter here</span>
@@ -253,6 +313,16 @@ function WebinarCountdown({ scheduledFor }: { scheduledFor: string | null }) {
       <time dateTime={scheduledFor}>{remaining === 0 ? 'Happening now' : formatEventDate(scheduledFor)}</time>
     </div>
   );
+}
+
+/**
+ * Approved count line (verbatim, founder-ruled 2026-09-04). The only permitted
+ * variation is the 1-person singular. Do not edit, paraphrase, or add caveats.
+ */
+export function countLine(n: number): string {
+  return n === 1
+    ? '1 person like you has been exposed to this opportunity since you arrived.'
+    : `${n.toLocaleString()} people like you have been exposed to this opportunity since you arrived.`;
 }
 
 function formatLocation(city: string, stateOrRegion: string): string {

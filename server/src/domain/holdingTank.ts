@@ -316,10 +316,11 @@ export async function placeProspect(input: PlaceProspectInput): Promise<McsPlace
  */
 export async function buildHoldingTankSnapshot(
   recentLimit: number,
+  persistence: typeof persistenceCall = persistenceCall,
 ): Promise<McsHoldingTankSnapshot> {
   const [globalMaxPosition, recent] = await Promise.all([
-    readPoolCounter(),
-    listRecentPlacements(recentLimit),
+    readPoolCounter(persistence),
+    listRecentPlacements(recentLimit, persistence),
   ]);
   return { globalMaxPosition, recent };
 }
@@ -329,8 +330,10 @@ export async function buildHoldingTankSnapshot(
  * Returns 0 if the counter doc has not been seeded yet (no placements
  * have happened ever).
  */
-export async function readPoolCounter(): Promise<number> {
-  const result = await persistenceCall<{ documents: Array<{ current: number }> }>(
+export async function readPoolCounter(
+  persistence: typeof persistenceCall = persistenceCall,
+): Promise<number> {
+  const result = await persistence<{ documents: Array<{ current: number }> }>(
     'mongodb',
     'query',
     {
@@ -351,6 +354,7 @@ export async function readPoolCounter(): Promise<number> {
  */
 async function listRecentPlacements(
   limit: number,
+  persistence: typeof persistenceCall = persistenceCall,
 ): Promise<McsPlacementTickerEntry[]> {
   // We need first name + last initial + city/state for ticker render, but
   // those live on the prospect record, not the placement record. The most
@@ -358,7 +362,7 @@ async function listRecentPlacements(
   // filtered to state=video_complete with the right projection + sort.
   // When pool_placements is large enough to dominate, this becomes a
   // single $lookup aggregation or a denormalized field on placement.
-  const result = await persistenceCall<{
+  const result = await persistence<{
     documents: Array<{
       firstName: string;
       lastInitial?: string;

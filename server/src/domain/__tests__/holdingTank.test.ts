@@ -175,3 +175,25 @@ describe('holding tank re-entry attempt selection', () => {
     expect(datastoreRows.get('stale-attempt')).toMatchObject(stale);
   });
 });
+
+describe('holding tank snapshot ticker window', () => {
+  it('threads MCS_KONGA_TICKER_WINDOW through the snapshot into the recent-placements query', async () => {
+    const seen: Array<{ collection?: string; limit?: number }> = [];
+    const fake = (async (_tool: string, _action: string, params: { collection?: string; limit?: number }) => {
+      seen.push(params);
+      if (params.collection === 'tmag_prospect_htank_counters') {
+        return { documents: [{ current: 5 }] };
+      }
+      return { documents: [] };
+    }) as unknown as typeof import('../../services/persistence/dispatch.js').persistenceCall;
+
+    const { buildHoldingTankSnapshot } = await import('../holdingTank.js');
+    const { MCS_KONGA_TICKER_WINDOW } = await import('@momentum/shared');
+    const snapshot = await buildHoldingTankSnapshot(MCS_KONGA_TICKER_WINDOW, fake);
+
+    expect(snapshot.globalMaxPosition).toBe(5);
+    const placementsQuery = seen.find((p) => p.collection === 'tmag_prospects');
+    expect(placementsQuery?.limit).toBe(MCS_KONGA_TICKER_WINDOW);
+    expect(MCS_KONGA_TICKER_WINDOW).toBe(100);
+  });
+});

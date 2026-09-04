@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   MCS_KONGA_CONTRACT_VERSION,
+  MCS_KONGA_TICKER_WINDOW,
   type McsHoldingTankSnapshot,
   type McsJoinEvent,
   type McsKongaContractVersion,
@@ -11,7 +12,9 @@ import {
   type McsWebinarEvent,
 } from '@momentum/shared';
 
-const MAX_TICKER_ENTRIES = 80;
+// Bounded so live prepends never grow memory without limit; matches the
+// server snapshot depth so the client never trims below what it was sent.
+const MAX_TICKER_ENTRIES = MCS_KONGA_TICKER_WINDOW;
 
 export interface PlacementStreamState {
   connecting: boolean;
