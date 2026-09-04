@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-14T13:55:34.885Z",
+  "generatedAt": "2026-09-04T13:07:41.956Z",
   "source": "engineering/sprints/platform-audit-p1/schema-catalog.json",
   "collectionCount": 76,
   "unclassifiedCount": 0,
@@ -770,7 +770,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 8,
+      "sourceCount": 7,
       "sourceFiles": [
         "server/src/domain/adminQueueOversight.ts",
         "server/src/domain/holdingTank.ts",
@@ -922,7 +922,7 @@
       "persistenceTier": "mixed",
       "schemaMode": "permissive_mongoose_schema",
       "resolved": true,
-      "sourceCount": 38,
+      "sourceCount": 37,
       "sourceFiles": [
         "server/scripts/smoke-holding-tank.ts",
         "server/src/domain/adminMetrics.ts",
